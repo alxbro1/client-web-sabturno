@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="isotype.svg" />
+    <title>Política de Privacidad - Sabturno</title>
+    <meta
+      name="description"
+      content="Política de privacidad de Sabturno. Información sobre cómo recopilamos, usamos y protegemos sus datos personales."
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #0f172a;
+        --card: #ffffff;
+        --accent: #feea3b;
+        --muted: #6b7280;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background:
+          radial-gradient(circle at 0 0, rgba(254, 234, 59, 0.4), transparent 55%),
+          radial-gradient(circle at 100% 0, rgba(124, 245, 195, 0.35), transparent 55%),
+          linear-gradient(180deg, #020617 0%, #0f172a 60%, #020617 100%);
+        color: #f9fafb;
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+      main {
+        max-width: 900px;
+        width: 100%;
+        background: var(--card);
+        color: #020617;
+        border-radius: 32px;
+        padding: 48px 40px;
+        box-shadow: 0 26px 80px rgba(15, 23, 42, 0.38);
+        margin: 0 auto;
+      }
+      header {
+        margin-bottom: 32px;
+      }
+      header h1 {
+        font-size: 2rem;
+        margin: 16px 0 8px;
+        font-weight: 700;
+      }
+      header p.date {
+        margin: 0 0 16px;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        border: 1px solid rgba(254, 234, 59, 0.5);
+        background: rgba(254, 234, 59, 0.12);
+        padding: 6px 12px;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: #0f172a;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+      .intro {
+        background: rgba(254, 234, 59, 0.08);
+        border-left: 4px solid var(--accent);
+        padding: 20px;
+        margin: 24px 0;
+        border-radius: 8px;
+      }
+      .intro p {
+        margin: 8px 0;
+        line-height: 1.7;
+      }
+      .intro h3 {
+        margin-top: 0;
+        font-size: 1.15rem;
+      }
+      .contact-info {
+        background: #f9fafb;
+        padding: 16px;
+        border-radius: 8px;
+        margin: 16px 0;
+      }
+      .warning-box {
+        background: #fef3c7;
+        border: 2px solid #fbbf24;
+        padding: 20px;
+        border-radius: 12px;
+        margin: 24px 0;
+      }
+      .warning-box h4 {
+        margin-top: 0;
+        color: #92400e;
+      }
+      .warning-box p {
+        color: #78350f;
+      }
+      .warning-box ul {
+        color: #78350f;
+      }
+      .info-box {
+        background: #e0f2fe;
+        border: 2px solid #38bdf8;
+        padding: 20px;
+        border-radius: 12px;
+        margin: 24px 0;
+      }
+      .info-box h4 {
+        margin-top: 0;
+        color: #075985;
+      }
+      .info-box p {
+        color: #0c4a6e;
+      }
+      .success-box {
+        background: #dcfce7;
+        border: 2px solid #4ade80;
+        padding: 20px;
+        border-radius: 12px;
+        margin: 24px 0;
+      }
+      .success-box h4 {
+        margin-top: 0;
+        color: #15803d;
+      }
+      .success-box p {
+        color: #166534;
+      }
+      .section-index {
+        background: #f9fafb;
+        padding: 24px;
+        border-radius: 12px;
+        margin: 24px 0;
+      }
+      .section-index h3 {
+        margin-top: 0;
+        font-size: 1.1rem;
+      }
+      .section-index ol {
+        margin: 8px 0;
+        padding-left: 24px;
+      }
+      .section-index li {
+        font-size: 0.9rem;
+        margin: 6px 0;
+      }
+      h2 {
+        font-size: 1.5rem;
+        margin: 40px 0 16px;
+        padding-top: 24px;
+        border-top: 2px solid #e5e7eb;
+        font-weight: 700;
+        color: #0f172a;
+      }
+      h2:first-of-type {
+        border-top: none;
+        margin-top: 24px;
+      }
+      h3 {
+        font-size: 1.15rem;
+        margin: 24px 0 12px;
+        font-weight: 600;
+        color: #111827;
+      }
+      h4 {
+        font-size: 1rem;
+        margin: 16px 0 8px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+      p,
+      li {
+        font-size: 0.95rem;
+        line-height: 1.7;
+        color: #111827;
+        margin: 12px 0;
+      }
+      ul, ol {
+        padding-left: 28px;
+        margin: 12px 0;
+      }
+      li {
+        margin: 8px 0;
+      }
+      strong {
+        font-weight: 600;
+        color: #0f172a;
+      }
+      small {
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      a {
+        color: #111827;
+        text-decoration: underline;
+      }
+      a:hover {
+        color: #0f172a;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        font-size: 0.9rem;
+      }
+      th {
+        background: #f9fafb;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        border: 1px solid #e5e7eb;
+      }
+      td {
+        padding: 10px 12px;
+        border: 1px solid #e5e7eb;
+      }
+      footer {
+        margin-top: 48px;
+        padding-top: 24px;
+        border-top: 2px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      footer small {
+        display: block;
+      }
+      @media (max-width: 768px) {
+        main {
+          padding: 32px 24px;
+        }
+        header h1 {
+          font-size: 1.6rem;
+        }
+        h2 {
+          font-size: 1.3rem;
+        }
+        table {
+          font-size: 0.8rem;
+        }
+        th, td {
+          padding: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="pill">Sabturno · Política de Privacidad</div>
+        <h1>Política de Privacidad</h1>
+        <p class="date">Última actualización: 13 de diciembre de 2025 · Versión 1.1</p>
+      </header>
+
+      <div class="intro">
+        <h3>INTRODUCCIÓN</h3>
+        <p>
+          <strong>Alexander Sauro</strong> ("nosotros", "nuestro" o "nos") opera la aplicación móvil Sabturno (la "Aplicación"). Esta página le informa sobre nuestras políticas con respecto a la recopilación, uso y divulgación de datos personales cuando utiliza nuestra Aplicación y las opciones que tiene asociadas con esos datos.
+        </p>
+        <p>
+          Utilizamos sus datos para proporcionar y mejorar la Aplicación. Al utilizar la Aplicación, usted acepta la recopilación y el uso de información de acuerdo con esta política.
+        </p>
+      </div>
+
+      <section>
+        <h2>INFORMACIÓN QUE RECOPILAMOS</h2>
+
+        <h3>1. INFORMACIÓN PROPORCIONADA POR USTED</h3>
+
+        <h4>1.1 Información de Registro</h4>
+        <p>Cuando crea una cuenta en Sabturno, recopilamos:</p>
+        <ul>
+          <li><strong>Nombre completo</strong></li>
+          <li><strong>Dirección de correo electrónico</strong></li>
+          <li><strong>Número de teléfono</strong></li>
+          <li><strong>Edad</strong> (para verificar que tiene 13+ años)</li>
+          <li><strong>Tipo de cuenta</strong> (Cliente o Negocio)</li>
+          <li><strong>Contraseña</strong> (almacenada de forma cifrada)</li>
+        </ul>
+
+        <h4>1.2 Información Adicional para Negocios</h4>
+        <p>Los negocios deben proporcionar:</p>
+        <ul>
+          <li>Nombre legal del negocio</li>
+          <li>Dirección física del establecimiento</li>
+          <li>Certificado de monotributo (en fase de lanzamiento público)</li>
+          <li>Fotografías del local y trabajos realizados</li>
+          <li>Servicios ofrecidos y precios</li>
+          <li>Horarios de atención</li>
+        </ul>
+
+        <h4>1.5 Reseñas y Calificaciones (Cuando se Implemente)</h4>
+        <ul>
+          <li>Texto de reseñas escritas</li>
+          <li>Calificaciones en estrellas</li>
+          <li>Fecha de la reseña</li>
+        </ul>
+        <div class="warning-box">
+          <p><strong>IMPORTANTE:</strong> Los clientes <strong>NO pueden subir fotografías</strong> en las reseñas. Solo texto y calificaciones.</p>
+        </div>
+
+        <h3>2. INFORMACIÓN RECOPILADA AUTOMÁTICAMENTE</h3>
+
+        <h4>2.1 Datos de Uso de la Aplicación</h4>
+        <ul>
+          <li>Fecha y hora de acceso</li>
+          <li>Funcionalidades utilizadas</li>
+          <li>Tiempo de uso de la aplicación</li>
+          <li>Páginas visualizadas</li>
+          <li>Acciones realizadas (búsquedas, reservas, etc.)</li>
+        </ul>
+
+        <h4>2.2 Información del Dispositivo</h4>
+        <ul>
+          <li>Modelo del dispositivo</li>
+          <li>Sistema operativo y versión</li>
+          <li>Identificador único del dispositivo</li>
+          <li>Versión de la aplicación</li>
+          <li>Idioma del dispositivo</li>
+          <li>Zona horaria</li>
+        </ul>
+
+        <h3>3. INFORMACIÓN QUE NO RECOPILAMOS</h3>
+
+        <div class="success-box">
+          <h4>✓ En la versión de prueba actual:</h4>
+          <ul>
+            <li><strong>NO recopilamos datos de ubicación GPS</strong> (se implementará en futuras versiones)</li>
+            <li><strong>NO rastreamos su ubicación</strong></li>
+            <li><strong>NO accedemos a su ubicación en segundo plano</strong></li>
+            <li><strong>NO recopilamos contactos de su teléfono</strong></li>
+            <li><strong>NO accedemos a sus mensajes o llamadas</strong></li>
+            <li><strong>NO recopilamos datos de otras aplicaciones</strong></li>
+            <li><strong>NO usamos tecnologías de fingerprinting del dispositivo</strong></li>
+            <li><strong>NO instalamos cookies de terceros</strong></li>
+            <li><strong>NO compartimos datos con redes publicitarias</strong></li>
+          </ul>
+        </div>
+
+        <div class="info-box">
+          <h4>📍 En futuras versiones:</h4>
+          <ul>
+            <li>Podremos solicitar permiso de ubicación SOLO cuando use la función de búsqueda</li>
+            <li>El permiso será completamente opcional</li>
+            <li>Solo usaremos ubicación para calcular distancias (procesamiento local)</li>
+            <li>NO almacenaremos historial de ubicaciones</li>
+            <li>NO rastrearemos sus movimientos</li>
+            <li>NO usaremos ubicación en segundo plano</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2>PERMISOS DE LA APLICACIÓN</h2>
+
+        <h3>PERMISOS ACTUALES (Fase de Prueba)</h3>
+
+        <h4>📷 Cámara</h4>
+        <ul>
+          <li><strong>Por qué lo necesitamos:</strong> Para tomar fotos de perfil o galería del negocio</li>
+          <li><strong>Cuándo se solicita:</strong> Solo cuando el usuario elige tomar una foto</li>
+          <li><strong>Se puede denegar:</strong> Sí, puede usar fotos existentes de la galería</li>
+          <li><strong>Acceso en segundo plano:</strong> NO</li>
+          <li><strong>Datos que se guardan:</strong> Solo las fotos que usted toma y decide subir</li>
+        </ul>
+
+        <h4>🖼️ Galería de Fotos / Almacenamiento</h4>
+        <ul>
+          <li><strong>Por qué lo necesitamos:</strong> Para seleccionar fotos existentes para perfil o galería del negocio</li>
+          <li><strong>Acceso:</strong> Solo a las fotos que usted selecciona específicamente (no accedemos a toda la galería)</li>
+          <li><strong>Tipos de archivo aceptados:</strong> JPEG, JPG, PNG, WebP, GIF</li>
+          <li><strong>Tamaño máximo:</strong> 10MB por imagen</li>
+        </ul>
+
+        <h4>🔔 Notificaciones Push</h4>
+        <ul>
+          <li><strong>Por qué lo necesitamos:</strong> Para enviar confirmaciones de citas y recordatorios</li>
+          <li><strong>Tipos de notificaciones:</strong>
+            <ul>
+              <li>Confirmación de cita reservada</li>
+              <li>Recordatorio 24 horas antes de la cita</li>
+              <li>Notificación de cancelación</li>
+              <li>Cambios en la cita por parte del negocio</li>
+              <li>Actualizaciones importantes de la aplicación</li>
+            </ul>
+          </li>
+          <li><strong>Frecuencia:</strong> Solo para eventos importantes (no spam)</li>
+          <li><strong>Se puede denegar:</strong> Sí, pero no recibirá recordatorios importantes</li>
+        </ul>
+
+        <h4>🌐 Internet (Conexión de Red)</h4>
+        <ul>
+          <li><strong>Por qué lo necesitamos:</strong> Para comunicarse con nuestros servidores</li>
+          <li><strong>Obligatorio:</strong> Sí, la aplicación NO funciona offline</li>
+          <li><strong>Cifrado:</strong> Todas las comunicaciones usan HTTPS/TLS</li>
+        </ul>
+
+        <h3>TABLA RESUMEN DE PERMISOS</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Permiso</th>
+              <th>Estado Actual</th>
+              <th>¿Obligatorio?</th>
+              <th>¿Segundo Plano?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cámara</td>
+              <td>Activo</td>
+              <td>No</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Galería</td>
+              <td>Activo</td>
+              <td>No</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Notificaciones</td>
+              <td>Activo</td>
+              <td>No*</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Almacenamiento</td>
+              <td>Activo</td>
+              <td>Sí</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Internet</td>
+              <td>Activo</td>
+              <td>Sí</td>
+              <td>Sí**</td>
+            </tr>
+            <tr>
+              <td>Ubicación</td>
+              <td>Futuro</td>
+              <td>No</td>
+              <td>No</td>
+            </tr>
+          </tbody>
+        </table>
+        <p><small>*Recomendado para recibir recordatorios</small><br>
+        <small>**Solo cuando la app está abierta o sincronizando</small></p>
+      </section>
+
+      <section>
+        <h2>CÓMO USAMOS SU INFORMACIÓN</h2>
+
+        <p>Utilizamos la información recopilada para:</p>
+
+        <h3>1. PROPORCIONAR EL SERVICIO</h3>
+        <ul>
+          <li>Crear y gestionar su cuenta</li>
+          <li>Facilitar la reserva de citas</li>
+          <li>Conectar clientes con negocios de belleza</li>
+          <li>Mostrar información de negocios y servicios</li>
+          <li>Enviar confirmaciones y recordatorios de citas</li>
+          <li>Gestionar el historial de servicios</li>
+        </ul>
+
+        <h3>2. MEJORAR LA APLICACIÓN</h3>
+        <ul>
+          <li>Analizar patrones de uso</li>
+          <li>Identificar y corregir errores</li>
+          <li>Optimizar la experiencia del usuario</li>
+          <li>Desarrollar nuevas funcionalidades</li>
+        </ul>
+
+        <h3>3. SEGURIDAD Y PREVENCIÓN DE FRAUDE</h3>
+        <ul>
+          <li>Detectar y prevenir actividades fraudulentas</li>
+          <li>Proteger contra usos no autorizados</li>
+          <li>Hacer cumplir nuestros Términos y Condiciones</li>
+          <li>Verificar la identidad de usuarios y negocios</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>COMPARTIR SU INFORMACIÓN</h2>
+
+        <h3>CON QUIÉN COMPARTIMOS</h3>
+
+        <h4>1. Negocios Asociados</h4>
+        <p><strong>Qué compartimos:</strong></p>
+        <ul>
+          <li>Nombre del cliente</li>
+          <li>Número de teléfono</li>
+          <li>Servicio solicitado</li>
+          <li>Fecha y hora de la cita</li>
+        </ul>
+        <p><strong>Por qué:</strong> Para que puedan cumplir con la reserva</p>
+
+        <h4>2. Procesadores de Pago (Mercado Pago - Futuro)</h4>
+        <p><strong>Qué compartimos:</strong> Información necesaria para procesar el pago</p>
+        <p><strong>IMPORTANTE:</strong> <strong>NO almacenamos datos de tarjetas en nuestros servidores</strong></p>
+
+        <h4>3. Proveedores de Servicios</h4>
+        <p><strong>Quiénes:</strong></p>
+        <ul>
+          <li>Servicios de hosting de servidores</li>
+          <li>Servicios de almacenamiento en la nube (AWS S3)</li>
+          <li>Herramientas de análisis de errores</li>
+        </ul>
+        <p><strong>Obligación:</strong> Todos nuestros proveedores están obligados contractualmente a proteger su información</p>
+
+        <h3>CON QUIÉN NO COMPARTIMOS</h3>
+        <div class="success-box">
+          <ul>
+            <li><strong>NO vendemos sus datos personales a terceros</strong></li>
+            <li><strong>NO compartimos datos con anunciantes</strong></li>
+            <li><strong>NO alquilamos listas de correo o teléfono</strong></li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2>ALMACENAMIENTO Y SEGURIDAD DE DATOS</h2>
+
+        <h3>1. UBICACIÓN DE LOS SERVIDORES</h3>
+
+        <h4>Servidores Principales</h4>
+        <ul>
+          <li><strong>Ubicación:</strong> Argentina</li>
+          <li><strong>Tipo de datos:</strong> Información de cuenta, reservas, base de datos principal</li>
+        </ul>
+
+        <h4>Almacenamiento en la Nube (AWS S3)</h4>
+        <ul>
+          <li><strong>Ubicación:</strong> Estados Unidos</li>
+          <li><strong>Tipo de datos:</strong> Imágenes de perfil y galería de negocios</li>
+          <li><strong>Seguridad:</strong> Acceso controlado, URLs firmadas temporales (válidas 5 minutos)</li>
+        </ul>
+
+        <h3>2. MEDIDAS DE SEGURIDAD TÉCNICAS</h3>
+
+        <h4>Cifrado de Datos</h4>
+        <ul>
+          <li><strong>Contraseñas:</strong> Cifradas usando bcrypt con 10 salt rounds</li>
+          <li><strong>Comunicaciones:</strong> HTTPS/TLS 1.2 o superior</li>
+          <li><strong>Tokens de sesión:</strong> JWT firmados y cifrados</li>
+          <li><strong>Datos en reposo:</strong> Base de datos con cifrado a nivel de disco</li>
+        </ul>
+
+        <h4>Protección de Imágenes</h4>
+        <ul>
+          <li><strong>URLs firmadas:</strong> Acceso temporal a imágenes (expiración de 5 minutos)</li>
+          <li><strong>Validación de archivos:</strong> Verificación de tipo y tamaño</li>
+          <li><strong>Escaneo de malware:</strong> Imágenes escaneadas antes de almacenar</li>
+          <li><strong>Límite de tamaño:</strong> Máximo 10MB por imagen</li>
+        </ul>
+
+        <h3>3. RETENCIÓN DE DATOS</h3>
+
+        <h4>Mientras su cuenta esté activa</h4>
+        <ul>
+          <li><strong>Datos de perfil:</strong> Conservados indefinidamente</li>
+          <li><strong>Historial de citas:</strong> Últimos 3 años visible, histórico archivado</li>
+          <li><strong>Imágenes:</strong> Mientras no sean eliminadas manualmente</li>
+          <li><strong>Logs de actividad:</strong> 90 días</li>
+        </ul>
+
+        <h4>Después de eliminar su cuenta</h4>
+        <p><strong>Eliminación inmediata (dentro de 24 horas):</strong></p>
+        <ul>
+          <li>Contraseña</li>
+          <li>Email (parcialmente hasheado para prevenir recreación)</li>
+          <li>Teléfono</li>
+          <li>Foto de perfil</li>
+          <li>Preferencias y configuraciones</li>
+        </ul>
+
+        <p><strong>Eliminación gradual (30 días):</strong></p>
+        <ul>
+          <li>Historial de citas detallado</li>
+          <li>Datos de uso de la aplicación</li>
+          <li>Cachés y datos temporales</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>SUS DERECHOS Y OPCIONES</h2>
+
+        <h3>1. ACCESO Y ACTUALIZACIÓN</h3>
+        <ul>
+          <li>Puede ver y actualizar su información desde la configuración de la app</li>
+          <li>Puede solicitar una copia de sus datos contactándonos</li>
+        </ul>
+
+        <h3>2. ELIMINACIÓN DE CUENTA</h3>
+        <ul>
+          <li>Puede eliminar su cuenta desde la configuración (función en desarrollo)</li>
+          <li>También puede solicitar eliminación contactando a: <a href="mailto:alesauro30@gmail.com">alesauro30@gmail.com</a></li>
+          <li>La eliminación es permanente y no reversible</li>
+        </ul>
+
+        <h3>3. RETIRO DE CONSENTIMIENTO</h3>
+        <ul>
+          <li>Puede retirar el consentimiento para notificaciones en cualquier momento</li>
+          <li>Puede revocar permisos desde la configuración de su dispositivo</li>
+        </ul>
+
+        <h3>4. PORTABILIDAD</h3>
+        <ul>
+          <li>Puede solicitar recibir sus datos en formato legible por máquina</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>PRIVACIDAD DE MENORES</h2>
+
+        <div class="warning-box">
+          <ul>
+            <li>La aplicación NO está diseñada para menores de 13 años</li>
+            <li>Verificamos la edad durante el registro</li>
+            <li><strong>Si descubrimos que un menor de 13 años creó una cuenta, la eliminaremos inmediatamente</strong></li>
+            <li>Los padres/tutores pueden contactarnos si sospechan uso no autorizado</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2>COOKIES Y TECNOLOGÍAS SIMILARES</h2>
+
+        <h3>QUÉ UTILIZAMOS</h3>
+
+        <h4>Tokens de Autenticación (JWT)</h4>
+        <ul>
+          <li><strong>Qué son:</strong> JSON Web Tokens para mantener su sesión</li>
+          <li><strong>Duración:</strong> 30 días o hasta cerrar sesión</li>
+          <li><strong>Propósito:</strong> Evitar que tenga que iniciar sesión constantemente</li>
+        </ul>
+
+        <h4>Caché Local de Aplicación</h4>
+        <ul>
+          <li><strong>Datos almacenados:</strong> Información de perfil, últimas búsquedas, preferencias</li>
+          <li><strong>Tamaño máximo:</strong> 5MB</li>
+          <li><strong>Eliminación:</strong> Al cerrar sesión o desinstalar la app</li>
+        </ul>
+
+        <h3>QUÉ NO UTILIZAMOS</h3>
+
+        <div class="success-box">
+          <h4>✗ Tecnologías de Rastreo Prohibidas</h4>
+          <ul>
+            <li>Cookies de terceros (Google Analytics, Facebook Pixel, etc.)</li>
+            <li>Píxeles de seguimiento o web beacons</li>
+            <li>Fingerprinting del navegador/dispositivo</li>
+            <li>Scripts de rastreo entre aplicaciones</li>
+            <li>SDKs de publicidad (AdMob, Facebook Ads, etc.)</li>
+            <li>Herramientas de mapeo de sesión (Hotjar, FullStory, etc.)</li>
+            <li>Identificadores de publicidad para targeting</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2>CONTACTO Y RECLAMOS</h2>
+
+        <h3>CONTÁCTENOS SOBRE PRIVACIDAD</h3>
+
+        <div class="contact-info">
+          <p><strong>Responsable de Protección de Datos</strong><br>
+          Alexander Sauro - Sabturno</p>
+          <p>
+            <strong>📧 Correo electrónico:</strong> <a href="mailto:alesauro30@gmail.com">alesauro30@gmail.com</a><br>
+            <strong>📞 Teléfono:</strong> <a href="tel:+543434624196">+54 343 462 4196</a><br>
+            <strong>📍 Dirección postal:</strong> Misiones 559, Paraná, E3100AXK, Entre Ríos, Argentina<br>
+            <strong>🕒 Horario de atención:</strong> Lunes a Viernes, 9:00 - 18:00 (hora de Argentina)
+          </p>
+        </div>
+
+        <h3>SOLICITUDES ESPECÍFICAS DE PRIVACIDAD</h3>
+
+        <h4>1. Acceso a Datos Personales</h4>
+        <ul>
+          <li><strong>Asunto:</strong> "Solicitud de Acceso a Datos - [Su Nombre]"</li>
+          <li><strong>Plazo de respuesta:</strong> 10-15 días hábiles</li>
+          <li><strong>Qué recibirá:</strong> Copia de todos sus datos personales en formato PDF o JSON</li>
+        </ul>
+
+        <h4>2. Eliminación de Cuenta y Datos</h4>
+        <ul>
+          <li><strong>Asunto:</strong> "Solicitud de Eliminación de Cuenta - DEFINITIVA"</li>
+          <li><strong>Plazo de procesamiento:</strong> 5-10 días hábiles</li>
+          <li><strong>Irreversible:</strong> La eliminación es permanente</li>
+        </ul>
+
+        <h4>3. Exportación de Datos (Portabilidad)</h4>
+        <ul>
+          <li><strong>Asunto:</strong> "Solicitud de Exportación de Datos"</li>
+          <li><strong>Formato disponible:</strong> JSON, CSV o PDF</li>
+          <li><strong>Plazo de respuesta:</strong> 10-15 días hábiles</li>
+        </ul>
+
+        <h3>TIEMPO DE RESPUESTA GARANTIZADO</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo de Solicitud</th>
+              <th>Tiempo de Respuesta</th>
+              <th>Tiempo de Procesamiento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Consulta general</td>
+              <td>72 horas</td>
+              <td>N/A</td>
+            </tr>
+            <tr>
+              <td>Acceso a datos</td>
+              <td>3-5 días</td>
+              <td>10-15 días</td>
+            </tr>
+            <tr>
+              <td>Corrección</td>
+              <td>24-48 horas</td>
+              <td>5-7 días</td>
+            </tr>
+            <tr>
+              <td>Eliminación</td>
+              <td>48 horas</td>
+              <td>5-10 días</td>
+            </tr>
+            <tr>
+              <td>Exportación</td>
+              <td>3-5 días</td>
+              <td>10-15 días</td>
+            </tr>
+            <tr>
+              <td>Brecha de seguridad</td>
+              <td>24 horas</td>
+              <td>Inmediato</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>PRESENTAR UN RECLAMO</h3>
+
+        <h4>Paso 1: Contacto Directo</h4>
+        <p>Le recomendamos contactarnos primero:</p>
+        <ul>
+          <li>Responderemos dentro de 72 horas</li>
+          <li>Trabajaremos para resolver su preocupación</li>
+          <li>La mayoría de problemas se resuelven en 7-10 días</li>
+        </ul>
+
+        <h4>Paso 3: Autoridad de Protección de Datos</h4>
+        <div class="contact-info">
+          <p><strong>Argentina: Agencia de Acceso a la Información Pública (AAIP)</strong></p>
+          <ul>
+            <li><strong>Sitio web:</strong> <a href="https://www.argentina.gob.ar/aaip" target="_blank">https://www.argentina.gob.ar/aaip</a></li>
+            <li><strong>Correo:</strong> <a href="mailto:datospersonales@aaip.gob.ar">datospersonales@aaip.gob.ar</a></li>
+            <li><strong>Teléfono:</strong> 0800-222-DATOS (3286)</li>
+            <li><strong>Dirección:</strong> Av. Pte. Gral. Julio A. Roca 710, Piso 3°, CABA</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2>RESUMEN DE PRÁCTICAS DE DATOS</h2>
+
+        <div class="success-box">
+          <h4>✓ DATOS QUE RECOPILAMOS</h4>
+          <ul>
+            <li>Información de cuenta (nombre, email, teléfono)</li>
+            <li>Reservas y citas</li>
+            <li>Reseñas escritas</li>
+            <li>Datos de uso de la app</li>
+            <li>Información del dispositivo</li>
+          </ul>
+        </div>
+
+        <div class="warning-box">
+          <h4>✗ DATOS QUE NO RECOPILAMOS</h4>
+          <ul>
+            <li>Ubicación GPS (versión actual)</li>
+            <li>Mensajes privados (no hay chat)</li>
+            <li>Contactos del teléfono</li>
+            <li>Fotografías en reseñas</li>
+            <li>Datos de tarjetas (manejado por Mercado Pago)</li>
+          </ul>
+        </div>
+
+        <div class="info-box">
+          <h4>🔒 CÓMO PROTEGEMOS SUS DATOS</h4>
+          <ul>
+            <li>Cifrado de contraseñas con bcrypt</li>
+            <li>Conexiones HTTPS/TLS</li>
+            <li>Acceso limitado a datos</li>
+            <li>No vendemos datos</li>
+            <li>Eliminación permanente cuando solicita</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2>HISTORIAL DE VERSIONES</h2>
+
+        <p><strong>Versión 1.1</strong> (13 de diciembre de 2025)</p>
+        <ul>
+          <li>Mejoras en descripción de permisos de la aplicación</li>
+          <li>Detalles técnicos de seguridad expandidos (bcrypt, HTTPS, AWS S3)</li>
+          <li>Clarificación de retención de datos por tipo de usuario</li>
+          <li>Proveedores terceros específicos agregados</li>
+          <li>Mejoras en procedimientos de contacto y solicitudes</li>
+        </ul>
+
+        <p><strong>Versión 1.0</strong> (10 de diciembre de 2025)</p>
+        <ul>
+          <li>Versión inicial de la Política de Privacidad</li>
+        </ul>
+      </section>
+
+      <footer>
+        <div>
+          <small><strong>VERSIÓN:</strong> 1.1</small><br>
+          <small><strong>FECHA DE ÚLTIMA ACTUALIZACIÓN:</strong> 13 de diciembre de 2025</small><br>
+          <small><strong>Próxima revisión programada:</strong> Junio de 2026</small><br>
+          <small>© Sabturno. Al utilizar Sabturno, usted reconoce que ha leído, comprendido y aceptado esta Política de Privacidad en su totalidad.</small>
+        </div>
+        <small><a href="/">← Volver a la página principal</a></small>
+      </footer>
+    </main>
+  </body>
+</html>

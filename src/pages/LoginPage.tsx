@@ -1,0 +1,89 @@
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/Button";
+import { InputField } from "@/components/Field";
+import { validateLoginForm } from "@/lib/utils/validation";
+import { authService } from "@/services/auth";
+import { useAuthStore } from "@/stores/auth";
+
+export function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuthStore();
+
+  const validation = useMemo(() => validateLoginForm(email, password), [email, password]);
+  const isFormValid = validation.email.length === 0 && validation.password.length === 0 && email.trim() && password;
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!isFormValid) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await authService.login({ email: email.trim(), password });
+      if (response.user.isLocal) {
+        setError("Esta web esta preparada solo para clientes.");
+        return;
+      }
+      login(response.user, response.token);
+      navigate((location.state as { from?: string } | null)?.from || "/home", { replace: true });
+    } catch (caughtError: any) {
+      setError(caughtError?.response?.data?.message || "No se pudo iniciar sesion");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section className="p-8 rounded-3xl bg-[rgba(7,16,26,0.92)] flex flex-col gap-5 min-w-0">
+      <p className="eyebrow">Acceso cliente</p>
+      <h2>Inicia sesion</h2>
+      <p>Usa las mismas credenciales de la app para gestionar turnos y pagos desde la web.</p>
+
+      <form className="grid gap-[1.1rem]" onSubmit={handleSubmit}>
+        <InputField
+          label="Correo electronico"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          errors={validation.email}
+          placeholder="tu@email.com"
+        />
+        <InputField
+          label="Contrasena"
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          errors={validation.password}
+          placeholder="Tu contrasena"
+        />
+
+        {error ? <div className="rounded-2xl px-4 py-[0.95rem] border border-white/[0.18] bg-red-950/40 text-red-200">{error}</div> : null}
+
+        <Button type="submit" disabled={!isFormValid || loading} fullWidth>
+          {loading ? "Ingresando..." : "Iniciar sesion"}
+        </Button>
+      </form>
+
+      <div className="flex flex-wrap gap-4">
+        <Link className="text-sky-300" to="/register">
+          No tienes cuenta? Registrate
+        </Link>
+        <Link className="text-sky-300" to="/forgot-password">
+          Olvidaste tu contrasena?
+        </Link>
+        <a className="text-sky-300" href="https://sabturno.com/politica-de-privacidad.html" target="_blank" rel="noreferrer">
+          Politica de privacidad
+        </a>
+      </div>
+    </section>
+  );
+}
