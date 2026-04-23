@@ -52,7 +52,7 @@ export function ProtectedShell() {
 
   return (
     <div className="grid grid-cols-[300px_1fr] gap-5 min-h-screen p-5 max-lg:grid-cols-1 max-sm:gap-3 max-sm:p-3">
-      <aside className="p-6 flex flex-col gap-8 justify-between border border-[#00f068]/18 bg-[rgba(10,10,10,0.92)] rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.38)] max-sm:hidden">
+      <aside className="self-start sticky top-5 h-[calc(100vh-2.5rem)] overflow-y-auto p-6 flex flex-col gap-8 justify-between border border-[#00f068]/18 bg-[rgba(10,10,10,0.92)] rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.38)] max-sm:hidden">
         <div>
           <div className="flex items-center gap-2 mb-4">
             <LogoMark />
