@@ -23,37 +23,42 @@ function withSuspense(element: React.ReactNode) {
   return <Suspense fallback={<div className="centered-loader">Cargando...</div>}>{element}</Suspense>;
 }
 
-export const router = createBrowserRouter([
+export const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <RootRedirect />,
+    },
+    {
+      element: <AuthLayout />,
+      children: [
+        { path: "/login", element: withSuspense(<LoginPage />) },
+        { path: "/register", element: withSuspense(<RegisterPage />) },
+        { path: "/forgot-password", element: withSuspense(<ForgotPasswordPage />) },
+      ],
+    },
+    {
+      element: <ProtectedShell />,
+      children: [
+        { path: "/home", element: withSuspense(<HomePage />) },
+        { path: "/booking", element: <Navigate to="/booking/select-local" replace /> },
+        { path: "/booking/select-local", element: withSuspense(<SelectLocalPage />) },
+        { path: "/booking/select-service", element: withSuspense(<SelectServicePage />) },
+        { path: "/booking/appointment", element: withSuspense(<SelectSlotPage />) },
+        { path: "/booking/payment", element: withSuspense(<SelectPaymentPage />) },
+        { path: "/booking/payment-status", element: withSuspense(<PaymentStatusPage />) },
+        { path: "/appointments", element: withSuspense(<AppointmentsPage />) },
+        { path: "/profile", element: withSuspense(<ProfilePage />) },
+        { path: "/payments", element: withSuspense(<ProfilePaymentsPage />) },
+        { path: "/profile/edit", element: withSuspense(<EditProfilePage />) },
+      ],
+    },
+    {
+      path: "*",
+      element: withSuspense(<NotFoundPage />),
+    },
+  ],
   {
-    path: "/",
-    element: <RootRedirect />,
+    basename: import.meta.env.BASE_URL,
   },
-  {
-    element: <AuthLayout />,
-    children: [
-      { path: "/login", element: withSuspense(<LoginPage />) },
-      { path: "/register", element: withSuspense(<RegisterPage />) },
-      { path: "/forgot-password", element: withSuspense(<ForgotPasswordPage />) },
-    ],
-  },
-  {
-    element: <ProtectedShell />,
-    children: [
-      { path: "/home", element: withSuspense(<HomePage />) },
-      { path: "/booking", element: <Navigate to="/booking/select-local" replace /> },
-      { path: "/booking/select-local", element: withSuspense(<SelectLocalPage />) },
-      { path: "/booking/select-service", element: withSuspense(<SelectServicePage />) },
-      { path: "/booking/appointment", element: withSuspense(<SelectSlotPage />) },
-      { path: "/booking/payment", element: withSuspense(<SelectPaymentPage />) },
-      { path: "/booking/payment-status", element: withSuspense(<PaymentStatusPage />) },
-      { path: "/appointments", element: withSuspense(<AppointmentsPage />) },
-      { path: "/profile", element: withSuspense(<ProfilePage />) },
-      { path: "/payments", element: withSuspense(<ProfilePaymentsPage />) },
-      { path: "/profile/edit", element: withSuspense(<EditProfilePage />) },
-    ],
-  },
-  {
-    path: "*",
-    element: withSuspense(<NotFoundPage />),
-  },
-]);
+);
