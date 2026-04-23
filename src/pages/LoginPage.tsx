@@ -6,6 +6,12 @@ import { validateEmail } from "@/lib/utils/validation";
 import { authService } from "@/services/auth";
 import { useAuthStore } from "@/stores/auth";
 
+type LoginLocationState = {
+  from?: string;
+  emailVerificationPending?: boolean;
+  registeredEmail?: string;
+};
+
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,6 +21,7 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { login } = useAuthStore();
+  const locationState = location.state as LoginLocationState | null;
 
   const emailValidation = useMemo(() => validateEmail(email), [email]);
   const isFormValid =
@@ -38,7 +45,7 @@ export function LoginPage() {
         return;
       }
       login(response.user, response.token);
-      navigate((location.state as { from?: string } | null)?.from || "/home", { replace: true });
+      navigate(locationState?.from || "/home", { replace: true });
     } catch (caughtError: any) {
       setError(caughtError?.response?.data?.message || "No se pudo iniciar sesion");
     } finally {
@@ -51,6 +58,12 @@ export function LoginPage() {
       <p className="eyebrow">Acceso cliente</p>
       <h2>Inicia sesion</h2>
       <p>Usa las mismas credenciales de la app para gestionar turnos y pagos desde la web.</p>
+
+      {locationState?.emailVerificationPending ? (
+        <div className="rounded-2xl px-4 py-[0.95rem] border border-emerald-300/35 bg-emerald-950/30 text-emerald-100">
+          Revisa tu correo{locationState.registeredEmail ? ` (${locationState.registeredEmail})` : ""} y verifica tu cuenta antes de iniciar sesion.
+        </div>
+      ) : null}
 
       <form className="grid gap-[1.1rem]" onSubmit={handleSubmit}>
         <InputField

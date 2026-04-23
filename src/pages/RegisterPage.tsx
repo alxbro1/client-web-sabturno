@@ -102,7 +102,13 @@ export function RegisterPage() {
         countryCode: formData.countryCode,
         timezone: formData.timezone,
       });
-      navigate("/login", { replace: true });
+      navigate("/login", {
+        replace: true,
+        state: {
+          emailVerificationPending: true,
+          registeredEmail: formData.email.trim(),
+        },
+      });
     } catch (caughtError: any) {
       setError(caughtError?.response?.data?.message || "No se pudo crear la cuenta");
     } finally {
@@ -150,7 +156,7 @@ export function RegisterPage() {
 
         <label className="flex gap-[0.8rem] items-start">
           <input type="checkbox" checked={formData.acceptTerms} onChange={(event) => updateField("acceptTerms", event.target.checked)} />
-          <span>Acepto los terminos y condiciones y la politica de privacidad.</span>
+          <span>Acepto los <a href="https://sabturno.com/terminos-y-condiciones.html" target="_blank" rel="noopener noreferrer" className="text-sky-300">terminos y condiciones</a> y la <a href="https://sabturno.com/politica-de-privacidad.html" target="_blank" rel="noopener noreferrer" className="text-sky-300">politica de privacidad</a>.</span>
         </label>
         {(touched.acceptTerms ? validation.acceptTerms : []).map((errorText) => (
           <span key={errorText} className="text-rose-300 text-[0.84rem]">{errorText}</span>
