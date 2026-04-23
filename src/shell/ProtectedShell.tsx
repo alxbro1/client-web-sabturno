@@ -103,9 +103,6 @@ export function ProtectedShell() {
         <div className="hidden max-sm:flex items-center justify-between gap-3 pb-4">
           <div className="flex items-center gap-2">
             <LogoMark />
-            <div>
-              <p className="text-xs text-white/54">Panel cliente</p>
-            </div>
           </div>
           <button
             type="button"

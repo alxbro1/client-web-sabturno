@@ -36,7 +36,7 @@ export function useUserHome(): UserHomeData {
         userService.getDashboardStats(user.id),
       ]);
 
-      if (nextAppt.status === "fulfilled" && nextAppt.value) {
+      if (nextAppt.status === "fulfilled" && nextAppt.value.id) {
         setNextAppointment(nextAppt.value);
       } else {
         setNextAppointment(null);

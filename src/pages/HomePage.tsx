@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { AppointmentCard } from "@/components/AppointmentCard";
+import { AppointmentCard, AppointmentsEmptyState } from "@/components/AppointmentCard";
 import { Button } from "@/components/Button";
 import { StatCard } from "@/components/StatCard";
 import { formatCurrency } from "@/lib/utils/date";
@@ -9,6 +9,7 @@ import { useAuthStore } from "@/stores/auth";
 export function HomePage() {
   const { user } = useAuthStore();
   const { nextAppointment, dashboardStats, isLoading, error, refreshData } = useUserHome();
+  console.log(nextAppointment);
 
   return (
     <section className="grid gap-6">

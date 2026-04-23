@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/Button";
 import { InputField, SelectField } from "@/components/Field";
 import {
+  type CountryCode,
   DEFAULT_COUNTRY_CODE,
   getDeviceTimezone,
   getTimezonesForCountry,
@@ -23,30 +24,60 @@ const INITIAL_FORM: RegisterFormData = {
   acceptTerms: false,
 };
 
+const INITIAL_TOUCHED: Record<keyof RegisterFormData, boolean> = {
+  name: false,
+  email: false,
+  password: false,
+  confirmPassword: false,
+  phone: false,
+  birthDate: false,
+  countryCode: false,
+  timezone: false,
+  acceptTerms: false,
+};
+
+const ALL_TOUCHED: Record<keyof RegisterFormData, boolean> = {
+  name: true,
+  email: true,
+  password: true,
+  confirmPassword: true,
+  phone: true,
+  birthDate: true,
+  countryCode: true,
+  timezone: true,
+  acceptTerms: true,
+};
+
 export function RegisterPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState(INITIAL_FORM);
+  const [touched, setTouched] = useState<Record<keyof RegisterFormData, boolean>>(INITIAL_TOUCHED);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const validation = useMemo(() => validateRegisterForm(formData), [formData]);
   const isFormValid =
     Object.values(validation).every((errors) => errors.length === 0) &&
-    formData.name.trim() &&
-    formData.email.trim() &&
-    formData.password &&
-    formData.phone.trim() &&
-    formData.birthDate.trim() &&
+    formData.name.trim().length > 0 &&
+    formData.email.trim().length > 0 &&
+    formData.password.length > 0 &&
+    formData.phone.trim().length > 0 &&
+    formData.birthDate.trim().length > 0 &&
     formData.acceptTerms;
 
-  const timezones = getTimezonesForCountry(formData.countryCode as any);
+  const timezones = getTimezonesForCountry(formData.countryCode);
 
   function updateField<Key extends keyof RegisterFormData>(field: Key, value: RegisterFormData[Key]) {
+    setTouched((current) => ({
+      ...current,
+      [field]: true,
+    }));
+
     setFormData((current) => ({
       ...current,
       [field]: value,
       ...(field === "countryCode"
-        ? { timezone: getTimezonesForCountry(value as any)[0]?.value || current.timezone }
+        ? { timezone: getTimezonesForCountry(value as CountryCode)[0]?.value || current.timezone }
         : {}),
     }));
   }
@@ -54,6 +85,7 @@ export function RegisterPage() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!isFormValid) {
+      setTouched(ALL_TOUCHED);
       return;
     }
 
@@ -86,20 +118,20 @@ export function RegisterPage() {
 
       <form className="grid gap-[1.1rem]" onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-          <InputField label="Nombre" value={formData.name} onChange={(event) => updateField("name", event.target.value)} errors={validation.name} />
-          <InputField label="Telefono" value={formData.phone} onChange={(event) => updateField("phone", event.target.value)} errors={validation.phone} />
+          <InputField label="Nombre" value={formData.name} onChange={(event) => updateField("name", event.target.value)} errors={touched.name ? validation.name : undefined} />
+          <InputField label="Telefono" value={formData.phone} onChange={(event) => updateField("phone", event.target.value)} errors={touched.phone ? validation.phone : undefined} />
         </div>
 
-        <InputField label="Correo electronico" type="email" value={formData.email} onChange={(event) => updateField("email", event.target.value)} errors={validation.email} />
+        <InputField label="Correo electronico" type="email" value={formData.email} onChange={(event) => updateField("email", event.target.value)} errors={touched.email ? validation.email : undefined} />
 
         <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-          <InputField label="Contrasena" type="password" value={formData.password} onChange={(event) => updateField("password", event.target.value)} errors={validation.password} />
-          <InputField label="Confirmar contrasena" type="password" value={formData.confirmPassword} onChange={(event) => updateField("confirmPassword", event.target.value)} errors={validation.confirmPassword} />
+          <InputField label="Contraseña" type="password" value={formData.password} onChange={(event) => updateField("password", event.target.value)} errors={touched.password ? validation.password : undefined} />
+          <InputField label="Confirmar Contraseña" type="password" value={formData.confirmPassword} onChange={(event) => updateField("confirmPassword", event.target.value)} errors={touched.confirmPassword ? validation.confirmPassword : undefined} />
         </div>
 
         <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-          <InputField label="Fecha de nacimiento" type="date" value={formData.birthDate} onChange={(event) => updateField("birthDate", event.target.value)} errors={validation.birthDate} />
-          <SelectField label="Pais" value={formData.countryCode} onChange={(event) => updateField("countryCode", event.target.value)}>
+          <InputField label="Fecha de nacimiento" type="date" value={formData.birthDate} onChange={(event) => updateField("birthDate", event.target.value)} errors={touched.birthDate ? validation.birthDate : undefined} />
+          <SelectField label="Pais" value={formData.countryCode} onChange={(event) => updateField("countryCode", event.target.value as CountryCode)}>
             {VALID_COUNTRY_CODES.map((country) => (
               <option key={country.code} value={country.code}>
                 {country.name}
@@ -120,7 +152,7 @@ export function RegisterPage() {
           <input type="checkbox" checked={formData.acceptTerms} onChange={(event) => updateField("acceptTerms", event.target.checked)} />
           <span>Acepto los terminos y condiciones y la politica de privacidad.</span>
         </label>
-        {validation.acceptTerms.map((errorText) => (
+        {(touched.acceptTerms ? validation.acceptTerms : []).map((errorText) => (
           <span key={errorText} className="text-rose-300 text-[0.84rem]">{errorText}</span>
         ))}
 

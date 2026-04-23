@@ -1,3 +1,5 @@
+import type { CountryCode } from "@/lib/constants/countries";
+
 export type LoginValidation = {
   email: string[];
   password: string[];
@@ -10,7 +12,7 @@ export type RegisterFormData = {
   confirmPassword: string;
   phone: string;
   birthDate: string;
-  countryCode: string;
+  countryCode: CountryCode;
   timezone: string;
   acceptTerms: boolean;
 };

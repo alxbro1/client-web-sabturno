@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { AppointmentCard } from "@/components/AppointmentCard";
+import { AppointmentCard, AppointmentsEmptyState } from "@/components/AppointmentCard";
 import { Button } from "@/components/Button";
 import { useUserAppointments } from "@/hooks/useUserAppointments";
 
@@ -66,9 +66,15 @@ export function AppointmentsPage() {
 
       <div className="grid gap-[0.85rem]">
         {!isLoading && appointments.length === 0 ? (
-          <div className="surface min-h-[140px] grid place-items-center text-center text-[#aab8c9]">
-            <p>{activeFilter === "upcoming" ? "No tienes turnos proximos." : "No tienes historial de turnos."}</p>
-          </div>
+          <AppointmentsEmptyState
+            title={activeFilter === "upcoming" ? "No tienes turnos reservados" : "Todavia no tienes historial"}
+            description={
+              activeFilter === "upcoming"
+                ? "Cuando reserves un nuevo turno, lo vas a ver aca con fecha, precio y datos del local."
+                : "Todavia no registras turnos completados o anteriores en tu cuenta."
+            }
+            ctaLabel="Reservar nuevo turno"
+          />
         ) : null}
         {appointments.map((appointment) => (
           <AppointmentCard

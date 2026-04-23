@@ -10,12 +10,13 @@ export function LogoFull() {
   );
 }
 
-export function LogoMark() {
+export function LogoMark({ className }: { className?: string }) {
   return (
     <img
       src={whiteLogotype}
       alt="SabTurno"
-      className="h-8 w-auto"
+      className={`h-8 w-auto ${className} object-contain`}
+
     />
   );
 }

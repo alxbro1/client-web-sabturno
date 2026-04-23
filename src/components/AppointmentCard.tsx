@@ -10,6 +10,12 @@ type AppointmentCardProps = {
   onCancel?: (appointmentId: number) => void | Promise<void>;
 };
 
+type AppointmentsEmptyStateProps = {
+  title: string;
+  description: string;
+  ctaLabel?: string;
+};
+
 const STATUS_LABELS: Record<Appointment["status"], string> = {
   confirmed: "Confirmado",
   pending: "Pendiente",
@@ -23,14 +29,14 @@ function AppointmentCardComponent({ appointment, showCancel, onCancel }: Appoint
     () => getFriendlyDateTime(appointment.startDateTime, timezone),
     [appointment.startDateTime, timezone],
   );
-  const formattedPrice = useMemo(() => formatCurrency(appointment.service.cost), [appointment.service.cost]);
+  const formattedPrice = useMemo(() => formatCurrency(appointment.service?.cost), [appointment.service?.cost]);
 
   return (
     <article className="surface grid gap-4 [content-visibility:auto] [contain:layout_paint_style] [contain-intrinsic-size:260px]">
       <div className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-start">
         <div>
-          <p className="eyebrow">{appointment.local.name}</p>
-          <h3>{appointment.service.name}</h3>
+          <p className="eyebrow">{appointment.local?.name}</p>
+          <h3>{appointment.service?.name}</h3>
         </div>
       </div>
 
@@ -45,11 +51,11 @@ function AppointmentCardComponent({ appointment, showCancel, onCancel }: Appoint
         </div>
         <div>
           <span className="meta-label">Direccion</span>
-          <strong>{appointment.local.address}</strong>
+          <strong>{appointment.local?.address}</strong>
         </div>
         <div>
           <span className="meta-label">Ciudad</span>
-          <strong>{appointment.local.city}</strong>
+          <strong>{appointment.local?.city}</strong>
         </div>
       </div>
 
@@ -64,6 +70,27 @@ function AppointmentCardComponent({ appointment, showCancel, onCancel }: Appoint
         ) : null}
       </div>
     </article>
+  );
+}
+
+export function AppointmentsEmptyState({ title, description, ctaLabel = "Reservar turno" }: AppointmentsEmptyStateProps) {
+  return (
+    <div className="surface min-h-[220px] grid place-items-center text-center">
+      <div className="grid max-w-[28rem] gap-4 justify-items-center">
+        <div className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#00f068]/20 bg-[#00f068]/10 text-[#00f068]">
+          <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7">
+            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" />
+          </svg>
+        </div>
+        <div className="grid gap-2">
+          <h3>{title}</h3>
+          <p className="text-white/68">{description}</p>
+        </div>
+        <Link to="/booking/select-local">
+          <Button>{ctaLabel}</Button>
+        </Link>
+      </div>
+    </div>
   );
 }
 
