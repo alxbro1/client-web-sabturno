@@ -54,9 +54,9 @@ export function ProtectedShell() {
     <div className="grid grid-cols-[300px_1fr] gap-5 min-h-screen p-5 max-lg:grid-cols-1 max-sm:gap-3 max-sm:p-3">
       <aside className="self-start sticky top-5 h-[calc(100vh-2.5rem)] overflow-y-auto p-6 flex flex-col gap-8 justify-between border border-[#00f068]/18 bg-[rgba(10,10,10,0.92)] rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.38)] max-sm:hidden">
         <div>
-          <div className="flex items-center gap-2 mb-4">
+          <Link to="/home" className="flex items-center gap-2 mb-4">
             <LogoMark />
-          </div>
+          </Link>
           <h3 className="max-w-[20rem] text-white/72">Reservas, pagos y perfil en una sola web.</h3>
         </div>
 
@@ -101,9 +101,9 @@ export function ProtectedShell() {
 
       <main className="p-6 border border-[#00f068]/18 bg-[rgba(10,10,10,0.92)] rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.38)] overflow-y-auto max-sm:order-2 max-sm:p-4 max-sm:rounded-[22px]">
         <div className="hidden max-sm:flex items-center justify-between gap-3 pb-4">
-          <div className="flex items-center gap-2">
+          <Link to="/home" className="flex items-center gap-2">
             <LogoMark />
-          </div>
+          </Link>
           <button
             type="button"
             aria-label={isMobileMenuOpen ? "Cerrar menu" : "Abrir menu"}
@@ -138,6 +138,10 @@ export function ProtectedShell() {
                 <IconUser />
                 <span>Perfil</span>
               </NavLink>
+              <NavLink className="nav-link flex items-center gap-3" to="/payments" onClick={handleMobileNavigation}>
+                <IconPayment />
+                <span>Ver pagos</span>
+              </NavLink>
             </nav>
 
             <div className="grid gap-3 border-t border-[#00f068]/12 pt-3">
@@ -145,10 +149,7 @@ export function ProtectedShell() {
                 <strong>{user?.name}</strong>
                 <p className="text-white/54">{user?.email}</p>
               </div>
-              <Link className="text-[#00f068] text-sm hover:text-[#00f068]/80 transition-colors" to="/profile/payments" onClick={handleMobileNavigation}>
-                Ver pagos
-              </Link>
-              <Button variant="ghost" onClick={handleLogout} className="flex items-center gap-2 justify-center">
+              <Button variant="ghost" onClick={handleLogout} className="nav-link flex items-center gap-3 danger">
                 <IconLogout />
                 <span>Cerrar sesion</span>
               </Button>

@@ -1,11 +1,13 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/Button";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
+import { buildBookingSearch, parseBookingQuery } from "@/lib/utils/bookingQuery";
 import { formatCurrency, formatDateOnlyLocal } from "@/lib/utils/date";
 
 export function SelectSlotPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     local,
     service,
@@ -22,16 +24,31 @@ export function SelectSlotPage() {
     isFormValid,
   } = useBookingFlow();
 
+  const { localId: localIdQuery, serviceId: serviceIdQuery } = parseBookingQuery(searchParams);
+
+  function buildSelectServiceUrl() {
+    const localId = local?.id ? String(local.id) : localIdQuery;
+    const query = buildBookingSearch({
+      localId,
+      serviceId: service?.id ?? serviceIdQuery,
+    });
+    return query ? `/booking/select-service?${query}` : "/booking/select-service";
+  }
+
   useEffect(() => {
     if (!local) {
-      navigate("/booking/select-local", { replace: true });
+      if (localIdQuery || serviceIdQuery) {
+        navigate(buildSelectServiceUrl(), { replace: true });
+      } else {
+        navigate("/booking/select-local", { replace: true });
+      }
       return;
     }
 
     if (!service) {
-      navigate("/booking/select-service", { replace: true });
+      navigate(buildSelectServiceUrl(), { replace: true });
     }
-  }, [local, navigate, service]);
+  }, [local, localIdQuery, navigate, service, serviceIdQuery]);
 
   if (!local || !service) {
     return null;
@@ -47,7 +64,7 @@ export function SelectSlotPage() {
             {service.name} en {local.name} por {formatCurrency(service.cost)}
           </p>
         </div>
-        <Button variant="secondary" onClick={() => navigate("/booking/select-service")}>Cambiar servicio</Button>
+        <Button variant="secondary" onClick={() => navigate(buildSelectServiceUrl())}>Cambiar servicio</Button>
       </header>
 
       <div className="grid grid-cols-2 gap-4 items-start max-lg:grid-cols-1">

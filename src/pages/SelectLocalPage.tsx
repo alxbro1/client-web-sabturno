@@ -1,17 +1,43 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/Button";
 import { useLocalSelection } from "@/hooks/useLocalSelection";
+import { buildBookingSearch, parseBookingQuery } from "@/lib/utils/bookingQuery";
 import { useBookingStore } from "@/stores/booking";
 import type { Local } from "@/lib/types/local";
 
 export function SelectLocalPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { locales, loading, error, loadingMore, hasMore, onRefresh, onEndReached } = useLocalSelection();
   const { setLocal } = useBookingStore();
+  const hasHandledDeepLinkRef = useRef(false);
+
+  const { localId: localIdQuery, serviceId: serviceIdQuery } = parseBookingQuery(searchParams);
+
+  function buildSelectServiceUrl(localId: string) {
+    const query = buildBookingSearch({ localId, serviceId: serviceIdQuery });
+    return query ? `/booking/select-service?${query}` : "/booking/select-service";
+  }
+
+  useEffect(() => {
+    if (!localIdQuery || loading || hasHandledDeepLinkRef.current) {
+      return;
+    }
+
+    const matchedLocal = locales.find((item) => String(item.id) === localIdQuery);
+    if (!matchedLocal) {
+      return;
+    }
+
+    hasHandledDeepLinkRef.current = true;
+    setLocal(matchedLocal);
+    navigate(buildSelectServiceUrl(String(matchedLocal.id)), { replace: true });
+  }, [loading, localIdQuery, locales, navigate, setLocal]);
 
   function handleSelect(local: Local) {
     setLocal(local);
-    navigate("/booking/select-service");
+    navigate(buildSelectServiceUrl(String(local.id)));
   }
 
   return (

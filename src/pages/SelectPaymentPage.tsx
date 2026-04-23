@@ -139,6 +139,18 @@ export function SelectPaymentPage() {
         </div>
       ) : null}
 
+      {paymentMethod === PaymentMethod.MERCADO_PAGO ? (
+        <div className="surface grid gap-[0.85rem]">
+          <h3>Detalle de pago online</h3>
+          <p>
+            Servicio: ${serviceCost.toFixed(2)}. Fee app: ${marketplaceFee.toFixed(2)}.
+          </p>
+          <p className="text-white/68">
+            El fee se informa en el checkout de Mercado Pago al confirmar el pago.
+          </p>
+        </div>
+      ) : null}
+
       {error ? <div className="rounded-2xl px-4 py-[0.95rem] border border-white/[0.18] bg-red-950/40 text-red-200">{error}</div> : null}
 
       <Button onClick={handleConfirm} disabled={!paymentMethod || isLoading}>
