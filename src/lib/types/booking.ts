@@ -63,6 +63,7 @@ export interface Appointment {
   id: number;
   startDateTime: string;
   endDateTime?: string;
+  state: "CONFIRMED" | "PENDING" | "CANCELLED" | "COMPLETED";
   status: "confirmed" | "pending" | "cancelled" | "completed";
   service: Service;
   user?: {

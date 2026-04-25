@@ -15,7 +15,7 @@ const VARIANTS: Record<NonNullable<ButtonProps["variant"]>, string> = {
     "text-[#07150d] border-transparent bg-[linear-gradient(180deg,#6bffb0_0%,#00f068_100%)] hover:shadow-[0_16px_34px_rgba(0,240,104,0.26)]",
   secondary:
     "text-white border-white/15 bg-white/[0.04] hover:border-[#00f068]/35 hover:bg-[#00f068]/8",
-  danger: "text-white border-[#ff5678]/35 bg-[#ff5678]/85 hover:bg-[#ff5678]",
+  danger: "text-white border-[#ff5678]/35 bg-red/85 hover:bg-[#ff5678] rounded-full",
   ghost:
     "text-[#aafad0] border-[#00f068]/30 bg-transparent hover:border-[#00f068]/55 hover:bg-[#00f068]/8",
 };

@@ -21,7 +21,7 @@ export function AppointmentsPage() {
   } = useUserAppointments(activeFilter);
 
   const appointments = activeFilter === "upcoming" ? upcomingAppointments : pastAppointments;
-
+  console.log(appointments);
   async function handleCancel(appointmentId: number) {
     const shouldCancel = window.confirm("Esta accion cancelara el turno. Quieres continuar?");
     if (!shouldCancel) {

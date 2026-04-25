@@ -30,36 +30,42 @@ function normalizeAppointments(items: any[], user: ReturnType<typeof useAuthStor
 
   return items
     .filter((item) => item.service && item.local)
-    .map((item) => ({
-      id: item.id,
-      startDateTime: item.startDateTime,
-      endDateTime: item.endDateTime,
-      status: item.state?.toLowerCase() || item.status || "pending",
-      service: {
-        id: item.service.id,
-        name: item.service.name,
-        description: item.service.description,
-        cost: item.service.cost,
-        duration: item.service.duration,
-        category: item.service.category,
-        isActive: item.service.isActive ?? true,
-        localId: item.service.localId,
-      },
-      user: user
-        ? {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-          }
-        : undefined,
-      localId: item.local.id,
-      local: item.local,
-      price: item.service.cost,
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
-      paymentMethodSelected: item.paymentMethodSelected,
-    }));
+    .map((item) => {
+      const state = String(item.state || item.status || "PENDING").toUpperCase() as Appointment["state"];
+      const status = String(item.status || item.state || "pending").toLowerCase() as Appointment["status"];
+
+      return {
+        state,
+        id: item.id,
+        startDateTime: item.startDateTime,
+        endDateTime: item.endDateTime,
+        status,
+        service: {
+          id: item.service.id,
+          name: item.service.name,
+          description: item.service.description,
+          cost: item.service.cost,
+          duration: item.service.duration,
+          category: item.service.category,
+          isActive: item.service.isActive ?? true,
+          localId: item.service.localId,
+        },
+        user: user
+          ? {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              phone: user.phone,
+            }
+          : undefined,
+        localId: item.local.id,
+        local: item.local,
+        price: item.service.cost,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        paymentMethodSelected: item.paymentMethodSelected,
+      };
+    });
 }
 
 export function useUserAppointments(activeFilter: AppointmentFilter = "upcoming", limit = 6) {
@@ -155,7 +161,7 @@ export function useUserAppointments(activeFilter: AppointmentFilter = "upcoming"
     if (appointment) {
       setPastState((prev) => ({
         ...prev,
-        items: [{ ...appointment, status: "cancelled" }, ...prev.items.filter((item) => item.id !== appointmentId)],
+        items: [{ ...appointment, state: "CANCELLED", status: "cancelled" }, ...prev.items.filter((item) => item.id !== appointmentId)],
       }));
     }
 

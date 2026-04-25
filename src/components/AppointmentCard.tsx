@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { getFriendlyDateTime, formatCurrency } from "@/lib/utils/date";
 import type { Appointment } from "@/lib/types/booking";
 import { Button } from "@/components/Button";
+import { IconClock } from "@/components/Icons";
 
 type AppointmentCardProps = {
   appointment: Appointment;
   showCancel?: boolean;
   onCancel?: (appointmentId: number) => void | Promise<void>;
+  highlightAsPrimary?: boolean;
 };
 
 type AppointmentsEmptyStateProps = {
@@ -16,55 +18,70 @@ type AppointmentsEmptyStateProps = {
   ctaLabel?: string;
 };
 
-const STATUS_LABELS: Record<Appointment["status"], string> = {
-  confirmed: "Confirmado",
-  pending: "Pendiente",
-  cancelled: "Cancelado",
-  completed: "Completado",
+const STATUS_LABELS: Record<Appointment["state"], string> = {
+  CONFIRMED: "Confirmado",
+  PENDING: "Pendiente",
+  CANCELLED: "Cancelado",
+  COMPLETED: "Completado",
 };
 
-function AppointmentCardComponent({ appointment, showCancel, onCancel }: AppointmentCardProps) {
+const STATUS_CLASSES: Record<Appointment["state"], string> = {
+  CONFIRMED: "text-[#00f068] bg-[#00f068]/10 border-[#00f068]/30",
+  PENDING: "text-[#f0c040] bg-[#f0c040]/10 border-[#f0c040]/30",
+  CANCELLED: "text-[#ff5678] bg-[#ff5678]/10 border-[#ff5678]/30",
+  COMPLETED: "text-white/50 bg-white/5 border-white/12",
+};
+
+const STATUS_CLASSES_PRIMARY: Record<Appointment["state"], string> = {
+  CONFIRMED: "text-[#0d2f1b] bg-[#0a0a0a]/8 border-[#0a0a0a]/12",
+  PENDING: "text-[#4c3200] bg-[#0a0a0a]/8 border-[#0a0a0a]/12",
+  CANCELLED: "text-[#4f0e1f] bg-[#0a0a0a]/8 border-[#0a0a0a]/12",
+  COMPLETED: "text-[#0a0a0a]/70 bg-[#0a0a0a]/6 border-[#0a0a0a]/10",
+};
+
+function AppointmentCardComponent({ appointment, showCancel, onCancel, highlightAsPrimary = false }: AppointmentCardProps) {
   const timezone = appointment.timezone || appointment.local?.timezone;
   const formattedDateTime = useMemo(
     () => getFriendlyDateTime(appointment.startDateTime, timezone),
     [appointment.startDateTime, timezone],
   );
   const formattedPrice = useMemo(() => formatCurrency(appointment.service?.cost), [appointment.service?.cost]);
+  const cardClass = highlightAsPrimary
+    ? "border-transparent bg-[linear-gradient(180deg,#6bffb0_0%,#00f068_100%)]"
+    : "border-white/10 bg-[#12141a]";
+  const titleClass = highlightAsPrimary ? "text-[#07150d]" : "text-white";
+  const subtitleClass = highlightAsPrimary ? "!text-[#07150d]/80" : "text-white/60";
+  const dateChipClass = highlightAsPrimary
+    ? "border-[#0a0a0a]/12 bg-[#0a0a0a]/8 text-[#07150d]"
+    : "border-white/12 bg-white/6 text-white/80";
+  const priceChipClass = highlightAsPrimary
+    ? "border-[#0a0a0a]/12 bg-[#0a0a0a]/8 text-[#07150d]"
+    : "border-[#00f068]/30 bg-[#00f068]/10 text-[#00f068]";
+  const statusClass = highlightAsPrimary ? STATUS_CLASSES_PRIMARY[appointment.state] : STATUS_CLASSES[appointment.state];
 
   return (
-    <article className="border border-white/10 bg-[#12141a] rounded-2xl p-5 grid gap-4 [content-visibility:auto] [contain:layout_paint_style] [contain-intrinsic-size:260px]">
-      <div className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-start">
-        <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">{appointment.local?.name}</p>
-          <h3>{appointment.service?.name}</h3>
+    <article className={`flex items-start justify-between gap-4 border rounded-2xl p-4 [content-visibility:auto] [contain:layout_paint_style] [contain-intrinsic-size:120px] max-sm:flex-col ${cardClass}`}>
+      <div className="flex-1 min-w-0">
+        <h3 className={`font-bold truncate mb-0.5 ${titleClass}`}>{appointment.local?.name}</h3>
+        <p className={`text-sm truncate !my-2 ${subtitleClass}`}>{appointment.service?.name}</p>
+
+        <div className="flex flex-wrap gap-2">
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:flex-shrink-0 ${dateChipClass}`}>
+            <IconClock />
+            {formattedDateTime}
+          </span>
+          <span className={`inline-flex items-center px-3 py-1 rounded-full border text-xs font-semibold ${priceChipClass}`}>
+            {formattedPrice}
+          </span>
+          <span className={`inline-flex items-center px-3 py-1 rounded-full border text-xs font-semibold ${statusClass}`}>
+            {STATUS_LABELS[appointment.state]}
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-        <div>
-          <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">Turno</span>
-          <strong>{formattedDateTime}</strong>
-        </div>
-        <div>
-          <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">Precio</span>
-          <strong>{formattedPrice}</strong>
-        </div>
-        <div>
-          <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">Direccion</span>
-          <strong>{appointment.local?.address}</strong>
-        </div>
-        <div>
-          <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">Ciudad</span>
-          <strong>{appointment.local?.city}</strong>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-4 items-center">
-        <Link className="text-[#7bcfff] underline decoration-[#7bcfff]/45 underline-offset-[0.2rem] transition-[color,text-decoration-color] duration-150 hover:text-[#a8dfff] hover:decoration-[#a8dfff]/72" to="/booking/select-local">
-          Reservar otro turno
-        </Link>
+      <div className="flex flex-col items-end gap-2 max-sm:flex-row max-sm:w-full max-sm:justify-between">
         {showCancel ? (
-          <Button variant="danger" onClick={() => onCancel?.(appointment.id)}>
+          <Button className='!py-2 !px-4' variant="danger" onClick={() => onCancel?.(appointment.id)}>
             Cancelar
           </Button>
         ) : null}

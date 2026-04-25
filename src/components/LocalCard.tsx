@@ -38,17 +38,17 @@ export const LocalCard = memo(function LocalCard({ local, onSelect }: LocalCardP
 
         <div className="flex gap-1.5 flex-wrap">
           {local.mercadoPagoLiveMode && (
-            <span className="inline-block px-2 py-0.5 mt-0.5 text-[0.65rem] font-medium text-white/70 bg-white/6 border border-white/10 rounded-full whitespace-nowrap">
+            <span className="inline-block px-2 py-0.5 mt-0.5 text-[0.65rem] font-medium text-white/70 bg-white/6 border border-white/0 rounded-full whitespace-nowrap">
               MP
             </span>
           )}
           {local.payWithCashInFront && (
-            <span className="inline-block px-2 py-0.5 mt-0.5 text-[0.65rem] font-medium text-white/70 bg-white/6 border border-white/10 rounded-full whitespace-nowrap">
+            <span className="inline-block px-2 py-0.5 mt-0.5 text-[0.65rem] font-medium text-white/70 bg-white/6 border border-white/0 rounded-full whitespace-nowrap">
               Efectivo
             </span>
           )}
           {local.payWithReservation && (
-            <span className="inline-block px-2 py-0.5 mt-0.5 text-[0.65rem] font-medium text-white/70 bg-white/6 border border-white/10 rounded-full whitespace-nowrap">
+            <span className="inline-block px-2 py-0.5 mt-0.5 text-[0.65rem] font-medium text-white/70 bg-white/6 border border-white/0 rounded-full whitespace-nowrap">
               Reserva
             </span>
           )}

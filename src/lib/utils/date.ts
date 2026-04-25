@@ -40,7 +40,7 @@ export function formatLocalDate(
 }
 
 export function getFriendlyDateTime(utcDateString: string, timezone = DEFAULT_TIMEZONE) {
-  return formatLocalDate(utcDateString, timezone, "EEEE dd/MM 'a las' HH:mm");
+  return formatLocalDate(utcDateString, timezone, "EEEE HH:mm 'hs'");
 }
 
 export function formatCurrency(amount: number) {
