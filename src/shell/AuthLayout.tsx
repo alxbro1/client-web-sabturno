@@ -7,7 +7,7 @@ export function AuthLayout() {
 
   if (!hasHydrated) {
     return (
-      <div className="min-h-[140px] grid place-items-center text-center text-[#aab8c9]">
+      <div className="min-h-[140px] grid place-items-center text-center text-[#dfe8f4]/70">
         Cargando...
       </div>
     );
@@ -19,14 +19,14 @@ export function AuthLayout() {
 
   return (
     <div className="min-h-screen grid place-items-center p-8 max-sm:p-4">
-      <div className="w-full max-w-[1120px] p-[1.2rem] border border-[#00f068]/18 bg-[rgba(10,10,10,0.9)] rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.38)] grid grid-cols-[1.1fr_0.9fr] gap-[1.2rem] max-lg:grid-cols-1">
-        <section className="flex flex-col justify-between min-h-[620px] p-8 rounded-3xl bg-[radial-gradient(circle_at_top_right,rgba(0,240,104,0.16),transparent_30%),linear-gradient(180deg,rgba(10,10,10,0.94),rgba(5,5,5,0.98))] max-lg:min-h-0 max-sm:p-[1.2rem]">
+      <div className="w-full max-w-[1120px] p-[1.2rem] border border-white/10 bg-[rgba(10,10,10,0.9)] rounded-[28px] shadow-[0_26px_75px_rgba(0,0,0,0.4)] backdrop-blur-md grid grid-cols-[1.1fr_0.9fr] gap-[1.2rem] max-lg:grid-cols-1">
+        <section className="rounded-[28px] border border-white/12 bg-[radial-gradient(circle_at_0%_0%,rgba(0,240,104,0.18),transparent_42%),linear-gradient(180deg,rgba(20,20,20,0.98),rgba(11,11,11,0.96))] shadow-[0_24px_70px_rgba(0,0,0,0.34)] flex flex-col justify-between min-h-[620px] p-8 max-lg:min-h-0 max-sm:p-[1.2rem]">
           <div className="flex items-center w-full h-full">
             <LogoMark className="h-full" />
           </div>
           <div>
-            <p className="eyebrow">Panel Cliente</p>
-            <p>
+            <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Panel Cliente</p>
+            <p className="max-w-[34ch]">
               Reserva turnos, gestiona pagos y consulta tu historial en una sola plataforma.
             </p>
           </div>

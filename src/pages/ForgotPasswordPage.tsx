@@ -34,8 +34,8 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <section className="p-8 rounded-3xl bg-[rgba(7,16,26,0.92)] flex flex-col gap-5 min-w-0">
-      <p className="eyebrow">Recuperacion</p>
+    <section className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,12,12,0.96),rgba(8,8,8,0.94)),radial-gradient(circle_at_top_right,rgba(0,240,104,0.12),transparent_38%)] shadow-[0_22px_56px_rgba(0,0,0,0.36)] backdrop-blur-[14px] p-8 flex flex-col gap-5 min-w-0">
+      <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Recuperacion</p>
       <h2>Olvidaste tu contrasena?</h2>
       <p>Te enviaremos un enlace para restablecerla.</p>
 
@@ -47,14 +47,14 @@ export function ForgotPasswordPage() {
           onChange={(event) => setEmail(event.target.value)}
           errors={errors}
         />
-        {message ? <div className="rounded-2xl px-4 py-[0.95rem] border border-white/[0.18] bg-green-950/40 text-green-200">{message}</div> : null}
-        {error ? <div className="rounded-2xl px-4 py-[0.95rem] border border-white/[0.18] bg-red-950/40 text-red-200">{error}</div> : null}
+        {message ? <div className="rounded-2xl border border-[#00f068]/32 bg-[rgba(3,58,29,0.36)] px-4 py-[0.95rem] text-[#cdfbe1]">{message}</div> : null}
+        {error ? <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">{error}</div> : null}
         <Button type="submit" disabled={!isFormValid || loading} fullWidth>
           {loading ? "Enviando..." : "Enviar enlace"}
         </Button>
       </form>
 
-      <Link className="text-sky-300" to="/login">
+      <Link className="text-[#7bcfff] underline decoration-[#7bcfff]/45 underline-offset-[0.2rem] transition-[color,text-decoration-color] duration-150 hover:text-[#a8dfff] hover:decoration-[#a8dfff]/72" to="/login">
         Volver al login
       </Link>
     </section>

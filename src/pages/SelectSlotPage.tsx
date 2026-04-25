@@ -58,7 +58,7 @@ export function SelectSlotPage() {
     <section className="grid gap-6">
       <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch">
         <div>
-          <p className="eyebrow">Reserva paso 3</p>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Reserva paso 3</p>
           <h2>Fecha y horario</h2>
           <p>
             {service.name} en {local.name} por {formatCurrency(service.cost)}
@@ -68,22 +68,22 @@ export function SelectSlotPage() {
       </header>
 
       <div className="grid grid-cols-2 gap-4 items-start max-lg:grid-cols-1">
-        <section className="surface grid gap-[0.85rem]">
-          <div className="flex justify-between gap-4 items-start">
+        <section className="mt-4">
+          <div className="flex justify-between gap-4 items-start mb-2">
             <div>
-              <p className="eyebrow">Fechas</p>
+              <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Fechas</p>
               <h3>Disponibilidad</h3>
             </div>
-            {datesLoading ? <span className="meta-label">Cargando...</span> : null}
+            {datesLoading ? <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">Cargando...</span> : null}
           </div>
-          {datesError ? <div className="rounded-2xl px-4 py-[0.95rem] border border-white/[0.18] bg-red-950/40 text-red-200">{datesError}</div> : null}
+          {datesError ? <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">{datesError}</div> : null}
           <div className="flex flex-wrap gap-3">
             {availableDates.map((date) => {
               const value = formatDateOnlyLocal(date);
               return (
                 <button
                   key={value}
-                  className={`inline-flex items-center justify-center px-[0.8rem] py-[0.55rem] rounded-full border text-sm cursor-pointer text-white ${selectedDate && formatDateOnlyLocal(selectedDate) === value ? "border-orange-500/65 bg-orange-500/15" : "border-white/[0.18] bg-transparent"}`}
+                  className={`inline-flex items-center justify-center px-[0.95rem] py-[0.58rem] rounded-full border text-[0.9rem] cursor-pointer text-white/88 bg-white/[0.02] transition-[border-color,background-color,transform] duration-150 hover:-translate-y-px hover:border-[#00f068]/35 ${selectedDate && formatDateOnlyLocal(selectedDate) === value ? "border-[#00f068]/56 bg-[#00f068]/16" : "border-white/[0.18]"}`}
                   onClick={() => handleDateSelect(date)}
                   type="button"
                 >
@@ -94,21 +94,21 @@ export function SelectSlotPage() {
           </div>
         </section>
 
-        <section className="surface grid gap-[0.85rem]">
-          <div className="flex justify-between gap-4 items-start">
+        <section className="mt-4">
+          <div className="flex justify-between gap-4 items-start mb-2">
             <div>
-              <p className="eyebrow">Horarios</p>
+              <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Horarios</p>
               <h3>Turnos libres</h3>
             </div>
-            {timeSlotsLoading ? <span className="meta-label">Cargando...</span> : null}
+            {timeSlotsLoading ? <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">Cargando...</span> : null}
           </div>
           {!selectedDate ? <p>Selecciona una fecha para ver horarios.</p> : null}
-          {timeSlotsError ? <div className="rounded-2xl px-4 py-[0.95rem] border border-white/[0.18] bg-red-950/40 text-red-200">{timeSlotsError}</div> : null}
+          {timeSlotsError ? <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">{timeSlotsError}</div> : null}
           <div className="flex flex-wrap gap-3">
             {timeSlots.map((slot) => (
               <button
                 key={slot.time}
-                className={`inline-flex items-center justify-center px-[0.8rem] py-[0.55rem] rounded-full border text-sm cursor-pointer text-white disabled:opacity-35 disabled:cursor-not-allowed ${selectedTime === slot.time ? "border-orange-500/65 bg-orange-500/15" : "border-white/[0.18] bg-transparent"}`}
+                className={`inline-flex items-center justify-center px-[0.95rem] py-[0.58rem] rounded-full border text-[0.9rem] cursor-pointer text-white/88 bg-white/[0.02] transition-[border-color,background-color,transform] duration-150 hover:-translate-y-px hover:border-[#00f068]/35 disabled:opacity-35 disabled:cursor-not-allowed ${selectedTime === slot.time ? "border-[#00f068]/56 bg-[#00f068]/16" : "border-white/[0.18]"}`}
                 onClick={() => handleTimeSelect(slot.time)}
                 type="button"
                 disabled={!slot.available}
@@ -120,31 +120,7 @@ export function SelectSlotPage() {
         </section>
       </div>
 
-      <section className="surface grid gap-4">
-        <div>
-          <p className="eyebrow">Resumen</p>
-          <h3>{service.name}</h3>
-        </div>
-        <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-          <div>
-            <span className="meta-label">Local</span>
-            <strong>{local.name}</strong>
-          </div>
-          <div>
-            <span className="meta-label">Duracion</span>
-            <strong>{service.duration} min</strong>
-          </div>
-          <div>
-            <span className="meta-label">Fecha</span>
-            <strong>{selectedDate ? selectedDate.toLocaleDateString("es-AR") : "Sin definir"}</strong>
-          </div>
-          <div>
-            <span className="meta-label">Hora</span>
-            <strong>{selectedTime || "Sin definir"}</strong>
-          </div>
-        </div>
         <Button disabled={!isFormValid} onClick={() => navigate("/booking/payment")}>Continuar a pago</Button>
-      </section>
     </section>
   );
 }

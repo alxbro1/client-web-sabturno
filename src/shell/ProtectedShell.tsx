@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/Button";
-import { LogoMark, LogoText } from "@/components/Logo";
+import { LogoMark } from "@/components/Logo";
 import { IconHome, IconCalendar, IconUser, IconLogout, IconPayment } from "@/components/Icons";
 import { useAuthStore } from "@/stores/auth";
 
@@ -21,9 +21,12 @@ export function ProtectedShell() {
     setIsMobileMenuOpen(false);
   }
 
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `flex items-center gap-3 whitespace-nowrap rounded-[18px] border px-[1.1rem] py-4 text-white/75 bg-white/[0.02] transition-[background-color,color,border-color,transform] duration-150 hover:-translate-y-px max-sm:rounded-[14px] max-sm:px-[0.95rem] max-sm:py-[0.7rem] max-sm:text-[0.92rem] [&>svg]:h-5 [&>svg]:w-5 max-sm:[&>svg]:h-4 max-sm:[&>svg]:w-4 ${isActive ? "border-[#00f068]/40 bg-[#00f068]/14 text-[#eafff3]" : "border-transparent"}`;
+
   if (!hasHydrated) {
     return (
-      <div className="min-h-[140px] grid place-items-center text-center text-[#aab8c9]">
+      <div className="min-h-[140px] grid place-items-center text-center text-[#dfe8f4]/70">
         Cargando...
       </div>
     );
@@ -36,8 +39,8 @@ export function ProtectedShell() {
   if (user?.isLocal) {
     return (
         <div className="min-h-screen grid place-items-center p-8 max-sm:p-4">
-          <section className="surface grid gap-4">
-          <p className="eyebrow">Acceso restringido</p>
+          <section className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-4">
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Acceso restringido</p>
           <h2>Esta web es solo para clientes</h2>
           <p>Tu cuenta corresponde a un local. Usa la app actual para la administracion del negocio.</p>
           <Button
@@ -52,32 +55,32 @@ export function ProtectedShell() {
 
   return (
     <div className="grid grid-cols-[300px_1fr] gap-5 min-h-screen p-5 max-lg:grid-cols-1 max-sm:gap-3 max-sm:p-3">
-      <aside className="self-start sticky top-5 h-[calc(100vh-2.5rem)] overflow-y-auto p-6 flex flex-col gap-8 justify-between border border-[#00f068]/18 bg-[rgba(10,10,10,0.92)] rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.38)] max-sm:hidden">
+      <aside className="self-start sticky top-5 h-[calc(100vh-2.5rem)] overflow-y-auto p-6 flex flex-col gap-8 justify-between border border-white/10 bg-[rgba(10,10,10,0.9)] rounded-[28px] shadow-[0_24px_65px_rgba(0,0,0,0.38)] backdrop-blur-md max-sm:hidden">
         <div>
           <Link to="/home" className="flex items-center gap-2 mb-4">
             <LogoMark />
           </Link>
-          <h3 className="max-w-[20rem] text-white/72">Reservas, pagos y perfil en una sola web.</h3>
+          <h3 className="max-w-[20rem] text-white/58">Reservas, pagos y perfil en una sola web.</h3>
         </div>
 
         <nav className="grid gap-3">
-          <NavLink className="nav-link flex items-center gap-3" to="/home">
+          <NavLink className={navLinkClass} to="/home">
             <IconHome />
             <span>Inicio</span>
           </NavLink>
-          <NavLink className="nav-link flex items-center gap-3" to="/booking/select-local">
+          <NavLink className={navLinkClass} to="/booking/select-local">
             <IconCalendar />
             <span>Reservar</span>
           </NavLink>
-          <NavLink className="nav-link flex items-center gap-3" to="/appointments">
+          <NavLink className={navLinkClass} to="/appointments">
             <IconCalendar />
             <span>Mis turnos</span>
           </NavLink>
-          <NavLink className="nav-link flex items-center gap-3" to="/profile">
+          <NavLink className={navLinkClass} to="/profile">
             <IconUser />
             <span>Perfil</span>
           </NavLink>
-          <NavLink className="nav-link flex items-center gap-3" to="/payments">
+          <NavLink className={navLinkClass} to="/payments">
             <IconPayment />
             <span>Ver Pagos</span>
           </NavLink>
@@ -86,12 +89,12 @@ export function ProtectedShell() {
         <div className="grid gap-[0.85rem]">
           <div>
             <strong>{user?.name}</strong>
-            <p className="text-white/54">{user?.email}</p>
+            <p className="text-white/54 text-sm">{user?.email}</p>
           </div>
           <Button
             variant="ghost"
             onClick={handleLogout}
-            className="nav-link flex items-center gap-3 danger"
+            className="flex items-center gap-3 whitespace-nowrap rounded-[18px] border px-[1.1rem] py-4 text-white/75 bg-white/[0.02] transition-[background-color,color,border-color,transform] duration-150 hover:-translate-y-px border-[#ff5678]/40 hover:bg-[#ff5678]/14 hover:text-[#ffd7e0] [&>svg]:h-5 [&>svg]:w-5"
           >
             <IconLogout />
             <span>Cerrar sesion</span>
@@ -99,7 +102,7 @@ export function ProtectedShell() {
         </div>
       </aside>
 
-      <main className="p-6 border border-[#00f068]/18 bg-[rgba(10,10,10,0.92)] rounded-[28px] shadow-[0_10px_30px_rgba(0,0,0,0.38)] overflow-y-auto max-sm:order-2 max-sm:p-4 max-sm:rounded-[22px]">
+      <main className="p-6 border border-white/10 bg-[#0f1014] rounded-[28px] shadow-[0_12px_32px_rgba(0,0,0,0.28)] overflow-y-auto max-sm:order-2 max-sm:p-4 max-sm:rounded-[22px]">
         <div className="hidden max-sm:flex items-center justify-between gap-3 pb-4">
           <Link to="/home" className="flex items-center gap-2">
             <LogoMark />
@@ -120,25 +123,25 @@ export function ProtectedShell() {
         </div>
 
         {isMobileMenuOpen ? (
-          <div className="hidden max-sm:grid gap-4 mb-4 rounded-[22px] border border-[#00f068]/18 bg-[rgba(10,10,10,0.98)] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.34)]">
+          <div className="hidden max-sm:grid gap-4 mb-4 rounded-[22px] border border-white/10 bg-[rgba(10,10,10,0.96)] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.34)]">
             <nav className="grid gap-2">
-              <NavLink className="nav-link flex items-center gap-3" to="/home" onClick={handleMobileNavigation}>
+              <NavLink className={navLinkClass} to="/home" onClick={handleMobileNavigation}>
                 <IconHome />
                 <span>Inicio</span>
               </NavLink>
-              <NavLink className="nav-link flex items-center gap-3" to="/booking/select-local" onClick={handleMobileNavigation}>
+              <NavLink className={navLinkClass} to="/booking/select-local" onClick={handleMobileNavigation}>
                 <IconCalendar />
                 <span>Reservar</span>
               </NavLink>
-              <NavLink className="nav-link flex items-center gap-3" to="/appointments" onClick={handleMobileNavigation}>
+              <NavLink className={navLinkClass} to="/appointments" onClick={handleMobileNavigation}>
                 <IconCalendar />
                 <span>Mis turnos</span>
               </NavLink>
-              <NavLink className="nav-link flex items-center gap-3" to="/profile" onClick={handleMobileNavigation}>
+              <NavLink className={navLinkClass} to="/profile" onClick={handleMobileNavigation}>
                 <IconUser />
                 <span>Perfil</span>
               </NavLink>
-              <NavLink className="nav-link flex items-center gap-3" to="/payments" onClick={handleMobileNavigation}>
+              <NavLink className={navLinkClass} to="/payments" onClick={handleMobileNavigation}>
                 <IconPayment />
                 <span>Ver pagos</span>
               </NavLink>
@@ -149,7 +152,7 @@ export function ProtectedShell() {
                 <strong>{user?.name}</strong>
                 <p className="text-white/54">{user?.email}</p>
               </div>
-              <Button variant="ghost" onClick={handleLogout} className="nav-link flex items-center gap-3 danger">
+              <Button variant="ghost" onClick={handleLogout} className="flex items-center gap-3 whitespace-nowrap rounded-[18px] border px-[1.1rem] py-4 text-white/75 bg-white/[0.02] transition-[background-color,color,border-color,transform] duration-150 hover:-translate-y-px border-[#ff5678]/40 hover:bg-[#ff5678]/14 hover:text-[#ffd7e0] max-sm:px-[0.95rem] max-sm:py-[0.7rem] max-sm:text-[0.92rem] [&>svg]:h-5 [&>svg]:w-5 max-sm:[&>svg]:h-4 max-sm:[&>svg]:w-4">
                 <IconLogout />
                 <span>Cerrar sesion</span>
               </Button>

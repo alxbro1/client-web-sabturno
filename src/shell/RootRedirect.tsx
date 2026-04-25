@@ -6,7 +6,7 @@ export function RootRedirect() {
 
   if (!hasHydrated) {
     return (
-      <div className="min-h-[140px] grid place-items-center text-center text-[#aab8c9]">
+      <div className="min-h-[140px] grid place-items-center text-center text-[#dfe8f4]/70">
         Cargando...
       </div>
     );

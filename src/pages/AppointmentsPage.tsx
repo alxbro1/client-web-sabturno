@@ -38,7 +38,7 @@ export function AppointmentsPage() {
     <section className="grid gap-6">
       <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch">
         <div>
-          <p className="eyebrow">Turnos</p>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Turnos</p>
           <h2>Mis reservas</h2>
           <p>Gestiona citas proximas, historiales y cancelaciones.</p>
         </div>
@@ -53,18 +53,18 @@ export function AppointmentsPage() {
       </header>
 
       <div className="flex flex-wrap gap-3">
-        <button className={`inline-flex items-center justify-center px-[0.8rem] py-[0.55rem] rounded-full border text-sm cursor-pointer text-white ${activeFilter === "upcoming" ? "border-orange-500/65 bg-orange-500/15" : "border-white/[0.18] bg-transparent"}`} onClick={() => setActiveFilter("upcoming")}>
+        <button className={`inline-flex items-center justify-center px-[0.95rem] py-[0.58rem] rounded-full border text-[0.9rem] cursor-pointer text-white/88 bg-white/[0.02] transition-[border-color,background-color,transform] duration-150 hover:-translate-y-px hover:border-[#00f068]/35 ${activeFilter === "upcoming" ? "border-[#00f068]/56 bg-[#00f068]/16" : "border-white/[0.18]"}`} onClick={() => setActiveFilter("upcoming")}>
           Proximos ({upcomingAppointments.length})
         </button>
-        <button className={`inline-flex items-center justify-center px-[0.8rem] py-[0.55rem] rounded-full border text-sm cursor-pointer text-white ${activeFilter === "past" ? "border-orange-500/65 bg-orange-500/15" : "border-white/[0.18] bg-transparent"}`} onClick={() => setActiveFilter("past")}>
+        <button className={`inline-flex items-center justify-center px-[0.95rem] py-[0.58rem] rounded-full border text-[0.9rem] cursor-pointer text-white/88 bg-white/[0.02] transition-[border-color,background-color,transform] duration-150 hover:-translate-y-px hover:border-[#00f068]/35 ${activeFilter === "past" ? "border-[#00f068]/56 bg-[#00f068]/16" : "border-white/[0.18]"}`} onClick={() => setActiveFilter("past")}>
           Historial
         </button>
       </div>
 
-      {isLoading ? <div className="surface min-h-[140px] grid place-items-center text-center text-[#aab8c9]">Cargando turnos...</div> : null}
-      {error ? <div className="rounded-2xl px-4 py-[0.95rem] border border-white/[0.18] bg-red-950/40 text-red-200">{error}</div> : null}
+      {isLoading ? <div className="border border-white/10 bg-[#12141a] rounded-2xl p-5 min-h-[140px] grid place-items-center text-center text-[#dfe8f4]/70">Cargando turnos...</div> : null}
+      {error ? <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">{error}</div> : null}
 
-      <div className="grid gap-[0.85rem]">
+      <div className="grid gap-[0.85rem] [contain:layout_style]">
         {!isLoading && appointments.length === 0 ? (
           <AppointmentsEmptyState
             title={activeFilter === "upcoming" ? "No tienes turnos reservados" : "Todavia no tienes historial"}

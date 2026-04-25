@@ -105,7 +105,7 @@ export function SelectPaymentPage() {
     <section className="grid gap-6">
       <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch">
         <div>
-          <p className="eyebrow">Reserva paso 4</p>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Reserva paso 4</p>
           <h2>Metodo de pago</h2>
           <p>Selecciona como quieres confirmar tu turno.</p>
         </div>
@@ -116,7 +116,7 @@ export function SelectPaymentPage() {
         {methods.map((item) => (
           <button
             key={item.method}
-            className={`surface grid gap-4 transition-[transform,border-color,background-color] duration-[140ms] hover:-translate-y-0.5 hover:border-orange-500/45 cursor-pointer text-left ${paymentMethod === item.method ? "border-orange-500/65 bg-orange-500/15" : ""}`}
+            className={`border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-4 transition-[transform,border-color,background-color] duration-[140ms] hover:-translate-y-0.5 hover:border-[#00f068]/45 cursor-pointer text-left ${paymentMethod === item.method ? "border-[#00f068]/58 bg-[#00f068]/12" : ""}`}
             onClick={() => setPaymentMethod(item.method)}
             type="button"
           >
@@ -129,7 +129,7 @@ export function SelectPaymentPage() {
       </div>
 
       {paymentMethod === PaymentMethod.RESERVATION_PAYMENT ? (
-        <div className="surface grid gap-[0.85rem]">
+        <div className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
           <h3>Detalle de reserva parcial</h3>
           <p>
             Reserva: ${reservationAmount.toFixed(2)}. Fee app: ${marketplaceFee.toFixed(2)}. Resto en el local: ${
@@ -140,7 +140,7 @@ export function SelectPaymentPage() {
       ) : null}
 
       {paymentMethod === PaymentMethod.MERCADO_PAGO ? (
-        <div className="surface grid gap-[0.85rem]">
+        <div className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
           <h3>Detalle de pago online</h3>
           <p>
             Servicio: ${serviceCost.toFixed(2)}. Fee app: ${marketplaceFee.toFixed(2)}.
@@ -151,7 +151,7 @@ export function SelectPaymentPage() {
         </div>
       ) : null}
 
-      {error ? <div className="rounded-2xl px-4 py-[0.95rem] border border-white/[0.18] bg-red-950/40 text-red-200">{error}</div> : null}
+      {error ? <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">{error}</div> : null}
 
       <Button onClick={handleConfirm} disabled={!paymentMethod || isLoading}>
         {isLoading ? "Confirmando reserva..." : "Confirmar turno"}

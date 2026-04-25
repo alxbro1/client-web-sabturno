@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/Button";
-import { formatCurrency } from "@/lib/utils/date";
+import { ServiceCard } from "@/components/ServiceCard";
 import { buildBookingSearch, parseBookingQuery } from "@/lib/utils/bookingQuery";
 import type { Service } from "@/lib/types/booking";
 import { bookingService } from "@/services/booking";
@@ -138,32 +138,19 @@ export function SelectServicePage() {
     <section className="grid gap-6">
       <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch">
         <div>
-          <p className="eyebrow">Reserva paso 2</p>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Reserva paso 2</p>
           <h2>Selecciona un servicio</h2>
           <p>Local elegido: {local?.name}</p>
         </div>
         <Button variant="secondary" onClick={() => navigate("/booking/select-local")}>Cambiar local</Button>
       </header>
 
-      {loading ? <div className="surface min-h-[140px] grid place-items-center text-center text-[#aab8c9]">Cargando servicios...</div> : null}
-      {error ? <div className="rounded-2xl px-4 py-[0.95rem] border border-white/[0.18] bg-red-950/40 text-red-200">{error}</div> : null}
+      {loading ? <div className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 min-h-[140px] grid place-items-center text-center text-[#dfe8f4]/70">Cargando servicios...</div> : null}
+      {error ? <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">{error}</div> : null}
 
-      <div className="grid grid-cols-2 gap-4 max-lg:grid-cols-1">
+      <div className="grid gap-3">
         {services.map((service) => (
-          <article key={service.id} className="surface grid gap-4 transition-[transform,border-color,background-color] duration-[140ms] hover:-translate-y-0.5 hover:border-orange-500/45">
-            <div className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-start">
-              <div>
-                <p className="eyebrow">{service.category}</p>
-                <h3>{service.name}</h3>
-              </div>
-              <strong>{formatCurrency(service.cost)}</strong>
-            </div>
-            <p>{service.description || "Sin descripcion disponible."}</p>
-            <div className="flex flex-wrap gap-4 items-center justify-between">
-              <span className="meta-label">{service.duration} min</span>
-              <Button onClick={() => handleSelect(service)}>Elegir servicio</Button>
-            </div>
-          </article>
+          <ServiceCard key={service.id} service={service} onSelect={handleSelect} />
         ))}
       </div>
     </section>

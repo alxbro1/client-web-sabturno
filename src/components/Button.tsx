@@ -8,13 +8,16 @@ type ButtonProps = PropsWithChildren<
 >;
 
 const BASE =
-  "border-0 rounded-2xl px-[1.15rem] py-[0.9rem] cursor-pointer transition-[opacity,transform] duration-[120ms] ease-in-out hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-45";
+  "border rounded-2xl px-[1.15rem] py-[0.9rem] cursor-pointer font-semibold transition-[opacity,transform,border-color,background-color,color,box-shadow] duration-[140ms] ease-in-out hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00f068]/50";
 
 const VARIANTS: Record<NonNullable<ButtonProps["variant"]>, string> = {
-  primary: "text-[#0a0a0a] bg-[#00f068] hover:bg-[#33f38a]",
-  secondary: "text-white bg-white/[0.08] border border-[#00f068]/20",
-  danger: "text-white bg-red-500/[0.88]",
-  ghost: "text-[#00f068] bg-transparent border border-[#00f068]/28 hover:bg-[#00f068]/8",
+  primary:
+    "text-[#07150d] border-transparent bg-[linear-gradient(180deg,#6bffb0_0%,#00f068_100%)] hover:shadow-[0_16px_34px_rgba(0,240,104,0.26)]",
+  secondary:
+    "text-white border-white/15 bg-white/[0.04] hover:border-[#00f068]/35 hover:bg-[#00f068]/8",
+  danger: "text-white border-[#ff5678]/35 bg-[#ff5678]/85 hover:bg-[#ff5678]",
+  ghost:
+    "text-[#aafad0] border-[#00f068]/30 bg-transparent hover:border-[#00f068]/55 hover:bg-[#00f068]/8",
 };
 
 export function Button({ children, className = "", variant = "primary", fullWidth, ...props }: ButtonProps) {

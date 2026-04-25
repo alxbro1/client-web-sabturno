@@ -32,35 +32,35 @@ function AppointmentCardComponent({ appointment, showCancel, onCancel }: Appoint
   const formattedPrice = useMemo(() => formatCurrency(appointment.service?.cost), [appointment.service?.cost]);
 
   return (
-    <article className="surface grid gap-4 [content-visibility:auto] [contain:layout_paint_style] [contain-intrinsic-size:260px]">
+    <article className="border border-white/10 bg-[#12141a] rounded-2xl p-5 grid gap-4 [content-visibility:auto] [contain:layout_paint_style] [contain-intrinsic-size:260px]">
       <div className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-start">
         <div>
-          <p className="eyebrow">{appointment.local?.name}</p>
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">{appointment.local?.name}</p>
           <h3>{appointment.service?.name}</h3>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
         <div>
-          <span className="meta-label">Turno</span>
+          <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">Turno</span>
           <strong>{formattedDateTime}</strong>
         </div>
         <div>
-          <span className="meta-label">Precio</span>
+          <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">Precio</span>
           <strong>{formattedPrice}</strong>
         </div>
         <div>
-          <span className="meta-label">Direccion</span>
+          <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">Direccion</span>
           <strong>{appointment.local?.address}</strong>
         </div>
         <div>
-          <span className="meta-label">Ciudad</span>
+          <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">Ciudad</span>
           <strong>{appointment.local?.city}</strong>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-4 items-center">
-        <Link className="text-sky-300" to="/booking/select-local">
+        <Link className="text-[#7bcfff] underline decoration-[#7bcfff]/45 underline-offset-[0.2rem] transition-[color,text-decoration-color] duration-150 hover:text-[#a8dfff] hover:decoration-[#a8dfff]/72" to="/booking/select-local">
           Reservar otro turno
         </Link>
         {showCancel ? (
@@ -75,7 +75,7 @@ function AppointmentCardComponent({ appointment, showCancel, onCancel }: Appoint
 
 export function AppointmentsEmptyState({ title, description, ctaLabel = "Reservar turno" }: AppointmentsEmptyStateProps) {
   return (
-    <div className="surface min-h-[220px] grid place-items-center text-center">
+    <div className="border border-white/10 bg-[#12141a] rounded-2xl p-5 min-h-[220px] grid place-items-center text-center">
       <div className="grid max-w-[28rem] gap-4 justify-items-center">
         <div className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#00f068]/20 bg-[#00f068]/10 text-[#00f068]">
           <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7">

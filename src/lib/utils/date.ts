@@ -1,7 +1,13 @@
 import { parseISO } from "date-fns";
 import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
-import { es } from "date-fns/locale";
+import { es } from "date-fns/locale/es";
 import { DEFAULT_TIMEZONE } from "@/lib/constants/countries";
+
+const ARS_CURRENCY_FORMATTER = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  minimumFractionDigits: 0,
+});
 
 export function convertLocalToUTC(localDate: Date, timezone = DEFAULT_TIMEZONE) {
   return fromZonedTime(localDate, timezone).toISOString();
@@ -38,11 +44,7 @@ export function getFriendlyDateTime(utcDateString: string, timezone = DEFAULT_TI
 }
 
 export function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    minimumFractionDigits: 0,
-  }).format(amount);
+  return ARS_CURRENCY_FORMATTER.format(amount);
 }
 
 export function toDate(utcDateString: string, timezone = DEFAULT_TIMEZONE) {
