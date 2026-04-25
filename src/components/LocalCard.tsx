@@ -31,10 +31,16 @@ export const LocalCard = memo(function LocalCard({ local, onSelect }: LocalCardP
       <div className="flex-1 text-left min-w-0">
         <h3 className="font-semibold text-white truncate mb-0.5">{local.name}</h3>
         
-        <p className="text-xs text-white/50 truncate mb-2">
-          {local.city}
-          {local.province ? `, ${local.province}` : ""}
-        </p>
+        <div className="flex items-center gap-1.5 text-xs text-white/50 truncate mb-2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 shrink-0 text-white/40">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          <span className="truncate">
+            {local.city}
+            {local.province ? `, ${local.province}` : ""}
+          </span>
+        </div>
 
         <div className="flex gap-1.5 flex-wrap">
           {local.mercadoPagoLiveMode && (

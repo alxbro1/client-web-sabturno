@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/Button";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
 import { PaymentMethod } from "@/lib/types/booking";
+import iconMercadoPago from "@/assets/payment-methods/mercado_pago.png";
+import iconReserved from "@/assets/payment-methods/reserved.png";
+import iconCash from "@/assets/payment-methods/cash-in-front.png";
+
+const PAYMENT_METHOD_ICONS: Partial<Record<PaymentMethod, string>> = {
+  [PaymentMethod.MERCADO_PAGO]: iconMercadoPago,
+  [PaymentMethod.RESERVATION_PAYMENT]: iconReserved,
+  [PaymentMethod.CASH_IN_FRONT]: iconCash,
+};
 
 export function SelectPaymentPage() {
   const navigate = useNavigate();
@@ -113,19 +122,41 @@ export function SelectPaymentPage() {
       </header>
 
       <div className="grid grid-cols-2 gap-4 max-lg:grid-cols-1">
-        {methods.map((item) => (
-          <button
-            key={item.method}
-            className={`border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-4 transition-[transform,border-color,background-color] duration-[140ms] hover:-translate-y-0.5 hover:border-[#00f068]/45 cursor-pointer text-left ${paymentMethod === item.method ? "border-[#00f068]/58 bg-[#00f068]/12" : ""}`}
-            onClick={() => setPaymentMethod(item.method)}
-            type="button"
-          >
-            <div>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-            </div>
-          </button>
-        ))}
+        {methods.map((item) => {
+          const isActive = paymentMethod === item.method;
+          return (
+            <button
+              key={item.method}
+              className={`relative rounded-[28px] p-5 flex items-center gap-4 cursor-pointer text-left transition-[transform,border-color,background-color,box-shadow] duration-[140ms] ${
+                isActive
+                  ? "border border-[#00f068]/70 bg-[radial-gradient(circle_at_0%_0%,rgba(0,240,104,0.14),transparent_60%),linear-gradient(180deg,rgba(22,22,22,0.98),rgba(12,12,12,0.96))] shadow-[0_0_0_1px_rgba(0,240,104,0.22),0_20px_50px_rgba(0,240,104,0.08)]"
+                  : "border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] hover:-translate-y-0.5 hover:border-[#00f068]/45"
+              }`}
+              onClick={() => setPaymentMethod(item.method)}
+              type="button"
+            >
+              {isActive ? (
+                <span className="absolute top-4 right-4 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#00f068]">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#07150d" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </span>
+              ) : null}
+              {PAYMENT_METHOD_ICONS[item.method] ? (
+                <img
+                  src={PAYMENT_METHOD_ICONS[item.method]}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-10 w-10 shrink-0 object-contain"
+                />
+              ) : null}
+              <div>
+                <h3 className={isActive ? "text-[#00f068]" : ""}>{item.title}</h3>
+                <p>{item.description}</p>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {paymentMethod === PaymentMethod.RESERVATION_PAYMENT ? (
