@@ -2,12 +2,16 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AppointmentCard, AppointmentsEmptyState } from "@/components/AppointmentCard";
 import { Button } from "@/components/Button";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useUserAppointments } from "@/hooks/useUserAppointments";
 
 type FilterType = "upcoming" | "past";
 
 export function AppointmentsPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>("upcoming");
+  const [cancelingId, setCancelingId] = useState<number | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
   const {
     upcomingAppointments,
     pastAppointments,
@@ -21,17 +25,32 @@ export function AppointmentsPage() {
   } = useUserAppointments(activeFilter);
 
   const appointments = activeFilter === "upcoming" ? upcomingAppointments : pastAppointments;
-  console.log(appointments);
-  async function handleCancel(appointmentId: number) {
-    const shouldCancel = window.confirm("Esta accion cancelara el turno. Quieres continuar?");
-    if (!shouldCancel) {
-      return;
-    }
 
-    const success = await handleCancelAppointment(appointmentId);
-    if (!success) {
-      window.alert("No se pudo cancelar el turno.");
+  function handleCancel(appointmentId: number) {
+    setCancelingId(appointmentId);
+  }
+
+  async function handleConfirmCancel() {
+    if (!cancelingId) return;
+
+    setIsConfirming(true);
+    try {
+      const success = await handleCancelAppointment(cancelingId);
+      if (!success) {
+        setCancelError("No se pudo cancelar el turno.");
+      } else {
+        setCancelingId(null);
+      }
+    } catch (err) {
+      setCancelError("Error inesperado al cancelar el turno.");
+    } finally {
+      setIsConfirming(false);
     }
+  }
+
+  function handleCancelDialog() {
+    setCancelingId(null);
+    setCancelError(null);
   }
 
   return (
@@ -93,6 +112,18 @@ export function AppointmentsPage() {
           </Button>
         </div>
       ) : null}
+
+      <ConfirmDialog
+        isOpen={cancelingId !== null}
+        title="Cancelar turno"
+        description={cancelError || "Esta acción cancelará el turno. ¿Estás seguro de que deseas continuar?"}
+        confirmLabel="Cancelar turno"
+        cancelLabel="No, mantener turno"
+        isDangerous={true}
+        isLoading={isConfirming}
+        onConfirm={handleConfirmCancel}
+        onCancel={handleCancelDialog}
+      />
     </section>
   );
 }

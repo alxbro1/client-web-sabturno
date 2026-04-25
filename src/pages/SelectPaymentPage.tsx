@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/Button";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
@@ -25,7 +25,6 @@ export function SelectPaymentPage() {
     bookAppointment,
     isLoading,
   } = useBookingFlow();
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!local) {
@@ -77,8 +76,6 @@ export function SelectPaymentPage() {
       return;
     }
 
-    setError(null);
-
     try {
       const createdAppointment = await bookAppointment();
       const externalReference = createdAppointment.mercadoPago?.externalReference;
@@ -94,10 +91,10 @@ export function SelectPaymentPage() {
         return;
       }
 
-      window.alert("Tu turno fue reservado correctamente.");
-      navigate("/appointments", { replace: true });
+      navigate("/booking/result?status=success&message=Tu%20turno%20fue%20reservado%20correctamente.%20Te%20enviamos%20los%20detalles%20a%20tu%20email.", { replace: true });
     } catch (caughtError: any) {
-      setError(caughtError?.response?.data?.message || caughtError?.message || "No se pudo reservar el turno");
+      const errorMessage = caughtError?.response?.data?.message || caughtError?.message || "No se pudo reservar el turno";
+      navigate(`/booking/result?status=error&message=${encodeURIComponent(errorMessage)}`, { replace: true });
     }
   }
 
@@ -181,8 +178,6 @@ export function SelectPaymentPage() {
           </p>
         </div>
       ) : null}
-
-      {error ? <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">{error}</div> : null}
 
       <Button onClick={handleConfirm} disabled={!paymentMethod || isLoading}>
         {isLoading ? "Confirmando reserva..." : "Confirmar turno"}

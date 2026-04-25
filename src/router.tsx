@@ -13,6 +13,7 @@ const SelectServicePage = lazy(() => import("@/pages/SelectServicePage").then((m
 const SelectSlotPage = lazy(() => import("@/pages/SelectSlotPage").then((module) => ({ default: module.SelectSlotPage })));
 const SelectPaymentPage = lazy(() => import("@/pages/SelectPaymentPage").then((module) => ({ default: module.SelectPaymentPage })));
 const PaymentStatusPage = lazy(() => import("@/pages/PaymentStatusPage").then((module) => ({ default: module.PaymentStatusPage })));
+const AppointmentResultPage = lazy(() => import("@/pages/AppointmentResultPage").then((module) => ({ default: module.AppointmentResultPage })));
 const AppointmentsPage = lazy(() => import("@/pages/AppointmentsPage").then((module) => ({ default: module.AppointmentsPage })));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage").then((module) => ({ default: module.ProfilePage })));
 const ProfilePaymentsPage = lazy(() => import("@/pages/ProfilePaymentsPage").then((module) => ({ default: module.ProfilePaymentsPage })));
@@ -47,6 +48,7 @@ export const router = createBrowserRouter(
         { path: "/booking/appointment", element: withSuspense(<SelectSlotPage />) },
         { path: "/booking/payment", element: withSuspense(<SelectPaymentPage />) },
         { path: "/booking/payment-status", element: withSuspense(<PaymentStatusPage />) },
+        { path: "/booking/result", element: withSuspense(<AppointmentResultPage />) },
         { path: "/appointments", element: withSuspense(<AppointmentsPage />) },
         { path: "/profile", element: withSuspense(<ProfilePage />) },
         { path: "/payments", element: withSuspense(<ProfilePaymentsPage />) },
