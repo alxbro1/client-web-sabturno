@@ -11,6 +11,7 @@ import {
 } from "@/lib/constants/countries";
 import { type RegisterFormData, validateRegisterForm } from "@/lib/utils/validation";
 import { authService } from "@/services/auth";
+import { LogoMark } from "@/components/Logo";
 
 const INITIAL_FORM: RegisterFormData = {
   name: "",
@@ -117,12 +118,19 @@ export function RegisterPage() {
   }
 
   return (
-    <section className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,12,12,0.96),rgba(8,8,8,0.94)),radial-gradient(circle_at_top_right,rgba(0,240,104,0.12),transparent_38%)] shadow-[0_22px_56px_rgba(0,0,0,0.36)] backdrop-blur-[14px] p-8 flex flex-col gap-5 min-w-0">
-      <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Nuevo cliente</p>
-      <h2>Crea tu cuenta</h2>
-      <p>La web replica el flujo de registro de la app movil, centrado solo en clientes.</p>
+    <section className="w-full max-w-[660px] rounded-[24px] border border-white/10 bg-[#0d0f12]/94 shadow-[0_18px_40px_rgba(0,0,0,0.34)] backdrop-blur-[10px] p-7 sm:p-8 flex flex-col gap-6 min-w-0">
+      <div className="grid gap-4 text-center">
+        <div className="mx-auto px-5 py-3">
+          <LogoMark className="h-10 w-auto" />
+        </div>
+        <div className="grid gap-2">
+          <p className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-[#00f068]">Nuevo cliente</p>
+          <h2 className="text-[1.7rem] leading-none">Crea tu cuenta</h2>
+          <p className="text-white/62">Completa tus datos para reservar turnos desde la web.</p>
+        </div>
+      </div>
 
-      <form className="grid gap-[1.1rem]" onSubmit={handleSubmit}>
+      <form className="grid gap-4" onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
           <InputField label="Nombre" value={formData.name} onChange={(event) => updateField("name", event.target.value)} errors={touched.name ? validation.name : undefined} />
           <InputField label="Telefono" value={formData.phone} onChange={(event) => updateField("phone", event.target.value)} errors={touched.phone ? validation.phone : undefined} />
@@ -176,8 +184,8 @@ export function RegisterPage() {
         </Button>
       </form>
 
-      <div className="flex flex-wrap gap-4">
-        <Link className="text-[#7bcfff] underline decoration-[#7bcfff]/45 underline-offset-[0.2rem] transition-[color,text-decoration-color] duration-150 hover:text-[#a8dfff] hover:decoration-[#a8dfff]/72" to="/login">
+      <div className="grid gap-3 pt-1 text-center sm:text-left">
+        <Link className="text-[#7bcfff] text-[0.95rem] decoration-[#7bcfff]/45 transition-[color,text-decoration-color] duration-150 hover:text-[#a8dfff] hover:decoration-[#a8dfff]/72" to="/login">
           Ya tienes cuenta? Inicia sesion
         </Link>
       </div>
