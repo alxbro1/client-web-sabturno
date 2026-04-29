@@ -42,6 +42,14 @@ export const router = createBrowserRouter(
       element: <ProtectedShell />,
       children: [
         { path: "/home", element: withSuspense(<HomePage />) },
+        { path: "/appointments", element: withSuspense(<AppointmentsPage />) },
+        { path: "/profile", element: withSuspense(<ProfilePage />) },
+        { path: "/payments", element: withSuspense(<ProfilePaymentsPage />) },
+        { path: "/profile/edit", element: withSuspense(<EditProfilePage />) },
+      ],
+    },
+    {
+      children: [
         { path: "/booking", element: <Navigate to="/booking/select-local" replace /> },
         { path: "/booking/select-local", element: withSuspense(<SelectLocalPage />) },
         { path: "/booking/select-service", element: withSuspense(<SelectServicePage />) },
@@ -49,10 +57,6 @@ export const router = createBrowserRouter(
         { path: "/booking/payment", element: withSuspense(<SelectPaymentPage />) },
         { path: "/booking/payment-status", element: withSuspense(<PaymentStatusPage />) },
         { path: "/booking/result", element: withSuspense(<AppointmentResultPage />) },
-        { path: "/appointments", element: withSuspense(<AppointmentsPage />) },
-        { path: "/profile", element: withSuspense(<ProfilePage />) },
-        { path: "/payments", element: withSuspense(<ProfilePaymentsPage />) },
-        { path: "/profile/edit", element: withSuspense(<EditProfilePage />) },
       ],
     },
     {

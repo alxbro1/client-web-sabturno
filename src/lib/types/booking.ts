@@ -33,10 +33,11 @@ export interface MercadoPagoCheckoutData {
 }
 
 export interface CreateAppointmentResponse {
-  id: number;
+  id: string;
   startDateTime: string;
   endDateTime: string;
   mercadoPago?: MercadoPagoCheckoutData;
+  accessHash?: string; // <-- Add this line
 }
 
 export type MercadoPagoPaymentStatus = "PENDING" | "COMPLETED" | "FAILED";
@@ -53,10 +54,12 @@ export interface PaymentStatusResponse {
 export interface BookingDTO {
   startDateTime: string;
   serviceId: number;
-  userId: string;
+  userId?: string;
   countryCode?: string;
   timezone?: string;
   paymentMethod?: PaymentMethod;
+  email: string;
+  userName?: string;
 }
 
 export interface Appointment {

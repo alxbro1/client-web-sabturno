@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuthStore } from "@/stores/auth";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/Button";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
@@ -13,7 +14,12 @@ const PAYMENT_METHOD_ICONS: Partial<Record<PaymentMethod, string>> = {
   [PaymentMethod.CASH_IN_FRONT]: iconCash,
 };
 
+
 export function SelectPaymentPage() {
+  const { user } = useAuthStore();
+  const [email, setEmail] = useState("");
+  const [userName, setUserName] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
   const navigate = useNavigate();
   const {
     local,
@@ -76,8 +82,20 @@ export function SelectPaymentPage() {
       return;
     }
 
+    // Validar email si no loggeado
+    if (!user) {
+      setEmailTouched(true);
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        return;
+      }
+    }
+
     try {
-      const createdAppointment = await bookAppointment();
+      // bookAppointment debe aceptar email/nombre si no hay user
+      const createdAppointment = await bookAppointment({
+        email: user ? user.email : email,
+        userName: user ? user.name : userName,
+      });
       const externalReference = createdAppointment.mercadoPago?.externalReference;
       const checkoutUrl = createdAppointment.mercadoPago?.initPoint || createdAppointment.mercadoPago?.sandboxInitPoint;
 
@@ -88,6 +106,14 @@ export function SelectPaymentPage() {
       ) {
         window.open(checkoutUrl, "_blank", "noopener,noreferrer");
         navigate(`/booking/payment-status?externalReference=${encodeURIComponent(externalReference)}&result=pending`, { replace: true });
+        return;
+      }
+
+      // Si el usuario no está loggeado, mostrar link seguro
+      if (!user && createdAppointment.accessHash) {
+        const publicLink = `${window.location.origin}/appointment/${createdAppointment.id}?hash=${createdAppointment.accessHash}`;
+        const msg = encodeURIComponent(`¡Tu turno fue reservado correctamente!\n\nPuedes acceder a los detalles y gestionar tu turno usando este link seguro:\n${publicLink}\n\nTambién te enviamos los detalles a tu email.`);
+        navigate(`/booking/result?status=success&message=${msg}`, { replace: true });
         return;
       }
 
@@ -179,9 +205,44 @@ export function SelectPaymentPage() {
         </div>
       ) : null}
 
-      <Button onClick={handleConfirm} disabled={!paymentMethod || isLoading}>
+      {/* Formulario de email/nombre si no loggeado */}
+      {!user && (
+        <div className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
+          <h3>Datos de contacto</h3>
+          <label className="block text-sm font-semibold mb-1">Email *</label>
+          <input
+            className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            onBlur={() => setEmailTouched(true)}
+            required
+            placeholder="tu@email.com"
+          />
+          {emailTouched && (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) && (
+            <span className="text-[#ff5678] text-xs">Ingresa un email válido</span>
+          )}
+          <label className="block text-sm font-semibold mb-1 mt-3">Nombre (opcional)</label>
+          <input
+            className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
+            type="text"
+            value={userName}
+            onChange={e => setUserName(e.target.value)}
+            placeholder="Tu nombre"
+          />
+        </div>
+      )}
+
+      <Button onClick={handleConfirm} disabled={!paymentMethod || isLoading || (!user && (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)))}>
         {isLoading ? "Confirmando reserva..." : "Confirmar turno"}
       </Button>
     </section>
   );
+}
+
+export interface CreateAppointmentResponse {
+  id: string;
+  // ...other properties...
+  accessHash?: string; // <-- Add this line
+  // ...other properties...
 }

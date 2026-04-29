@@ -117,8 +117,8 @@ export function useBookingFlow() {
     setTime(time);
   }
 
-  async function bookAppointment() {
-    if (!selectedDate || !selectedTime || !service || !user?.id) {
+  async function bookAppointment(extra?: { email?: string; userName?: string }) {
+    if (!selectedDate || !selectedTime || !service) {
       throw new Error("Faltan datos para reservar");
     }
 
@@ -129,15 +129,17 @@ export function useBookingFlow() {
       const localDateTime = new Date(selectedDate);
       localDateTime.setHours(hours, minutes, 0, 0);
 
-      const timezone = user.timezone || local?.timezone || DEFAULT_TIMEZONE;
+      const timezone = user?.timezone || local?.timezone || DEFAULT_TIMEZONE;
       const appointmentData: BookingDTO = {
         startDateTime: convertLocalToUTC(localDateTime, timezone),
         serviceId: service.id,
-        userId: user.id,
-        countryCode: user.countryCode || local?.countryCode,
+        countryCode: user?.countryCode || local?.countryCode,
         timezone,
         paymentMethod: paymentMethod || undefined,
+        email: user?.email || extra?.email || "",
+        userName: user?.name || extra?.userName,
       };
+      if (user?.id) appointmentData.userId = user.id;
 
       const createdAppointment = await bookingService.createAppointment(appointmentData);
       resetBooking();

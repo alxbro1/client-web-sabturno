@@ -75,13 +75,30 @@ export function AppointmentResultPage() {
 
         {/* Message */}
         <div>
-          <p className="text-white/70 text-sm leading-relaxed">
-            {message || (
-              isSuccess
-                ? "Puedes verlo en tu lista de citas."
-                : "No pudimos completar tu reserva. Intenta nuevamente o contacta con soporte."
-            )}
-          </p>
+          {isSuccess && message && message.includes('http') ? (
+            <div className="text-white/70 text-sm leading-relaxed space-y-3">
+              {message.split(/\n|\\n/).map((line, i) => {
+                const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
+                if (urlMatch) {
+                  return (
+                    <div key={i}>
+                      <span>Accede a tu turno aquí: </span>
+                      <a href={urlMatch[1]} className="text-[#00f068] underline break-all" target="_blank" rel="noopener noreferrer">{urlMatch[1]}</a>
+                    </div>
+                  );
+                }
+                return <div key={i}>{line}</div>;
+              })}
+            </div>
+          ) : (
+            <p className="text-white/70 text-sm leading-relaxed">
+              {message || (
+                isSuccess
+                  ? "Puedes verlo en tu lista de citas."
+                  : "No pudimos completar tu reserva. Intenta nuevamente o contacta con soporte."
+              )}
+            </p>
+          )}
         </div>
 
         {/* Button */}
