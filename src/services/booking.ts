@@ -63,4 +63,11 @@ export const bookingService = {
     );
     return response.data;
   },
+  async getAppointmentPublic(id: string, hash: string) {
+    const response = await apiService.get(`/appointments/${id}/public?hash=${encodeURIComponent(hash)}`);
+    return response.data;
+  },
 };
+
+// Exportar función directa para conveniencia
+export const getAppointmentPublic = bookingService.getAppointmentPublic;

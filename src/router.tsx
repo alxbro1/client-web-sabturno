@@ -18,6 +18,8 @@ const AppointmentsPage = lazy(() => import("@/pages/AppointmentsPage").then((mod
 const ProfilePage = lazy(() => import("@/pages/ProfilePage").then((module) => ({ default: module.ProfilePage })));
 const ProfilePaymentsPage = lazy(() => import("@/pages/ProfilePaymentsPage").then((module) => ({ default: module.ProfilePaymentsPage })));
 const EditProfilePage = lazy(() => import("@/pages/EditProfilePage").then((module) => ({ default: module.EditProfilePage })));
+
+const AppointmentPublicPage = lazy(() => import("@/pages/AppointmentPublicPage").then((module) => ({ default: module.AppointmentPublicPage })));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage").then((module) => ({ default: module.NotFoundPage })));
 
 function withSuspense(element: React.ReactNode) {
@@ -57,6 +59,8 @@ export const router = createBrowserRouter(
         { path: "/booking/payment", element: withSuspense(<SelectPaymentPage />) },
         { path: "/booking/payment-status", element: withSuspense(<PaymentStatusPage />) },
         { path: "/booking/result", element: withSuspense(<AppointmentResultPage />) },
+        // Página pública de acceso a turno
+        { path: "/appointment/:id", element: withSuspense(<AppointmentPublicPage />) },
       ],
     },
     {
