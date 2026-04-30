@@ -101,7 +101,11 @@ export function SelectServicePage() {
       try {
         setLoading(true);
         setError(null);
-        setServices(await bookingService.getServicesByLocal(localId));
+        let services = await bookingService.getServicesByLocal(localId);
+        if (services.length > 0) {
+          services = services.filter((service) => service.isActive);
+        }
+        setServices(services);
       } catch {
         setError("No se pudieron cargar los servicios");
       } finally {
