@@ -117,7 +117,7 @@ export function useBookingFlow() {
     setTime(time);
   }
 
-  async function bookAppointment(extra?: { email?: string; userName?: string }) {
+  async function bookAppointment(extra?: { email?: string; userName?: string, phoneNumber?: string }) {
     if (!selectedDate || !selectedTime || !service) {
       throw new Error("Faltan datos para reservar");
     }
@@ -138,6 +138,7 @@ export function useBookingFlow() {
         paymentMethod: paymentMethod || undefined,
         email: user?.email || extra?.email || "",
         userName: user?.name || extra?.userName,
+        phoneNumber: user?.phone || extra?.phoneNumber,
       };
       if (user?.id) appointmentData.userId = user.id;
 

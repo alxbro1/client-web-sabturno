@@ -57,6 +57,7 @@ export interface BookingDTO {
   userId?: string;
   countryCode?: string;
   timezone?: string;
+  phoneNumber?: string;
   paymentMethod?: PaymentMethod;
   email: string;
   userName?: string;

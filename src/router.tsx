@@ -59,7 +59,6 @@ export const router = createBrowserRouter(
         { path: "/booking/payment", element: withSuspense(<SelectPaymentPage />) },
         { path: "/booking/payment-status", element: withSuspense(<PaymentStatusPage />) },
         { path: "/booking/result", element: withSuspense(<AppointmentResultPage />) },
-        // Página pública de acceso a turno
         { path: "/appointment/:id", element: withSuspense(<AppointmentPublicPage />) },
       ],
     },

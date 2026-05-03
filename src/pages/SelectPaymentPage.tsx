@@ -19,6 +19,7 @@ export function SelectPaymentPage() {
   const { user } = useAuthStore();
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const navigate = useNavigate();
   const {
@@ -91,10 +92,15 @@ export function SelectPaymentPage() {
     }
 
     try {
-      // bookAppointment debe aceptar email/nombre si no hay user
+      let phoneNumberString = `${phoneNumber}`;
+      phoneNumberString = phoneNumberString.replace(/^\+?0?/, "");
+      phoneNumberString = phoneNumberString.replace(/\s/g, "");
+      phoneNumberString = phoneNumberString.replace(/-/g, "");
+      phoneNumberString = `54${phoneNumberString}`;
       const createdAppointment = await bookAppointment({
         email: user ? user.email : email,
         userName: user ? user.name : userName,
+        phoneNumber: user ? user.phone : phoneNumberString,
       });
       const externalReference = createdAppointment.mercadoPago?.externalReference;
       const checkoutUrl = createdAppointment.mercadoPago?.initPoint || createdAppointment.mercadoPago?.sandboxInitPoint;
@@ -205,7 +211,7 @@ export function SelectPaymentPage() {
         </div>
       ) : null}
 
-      {/* Formulario de email/nombre si no loggeado */}
+      {/* Formulario de email/nombre/telefono si no loggeado */}
       {!user && (
         <div className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
           <h3>Datos de contacto</h3>
@@ -222,6 +228,15 @@ export function SelectPaymentPage() {
           {emailTouched && (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) && (
             <span className="text-[#ff5678] text-xs">Ingresa un email válido</span>
           )}
+          <label className="block text-sm font-semibold mt-3 mb-0 pb-0">Teléfono (WhatsApp) </label>
+          <label className="block text-xs mb-1 mt-0 pt-0">Te enviaremos la confirmación de este turno por Whatsapp en caso de que lo hayas agregado</label>
+          <input
+            className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
+            type="tel"
+            value={phoneNumber}
+            onChange={e => setPhoneNumber(e.target.value)}
+            placeholder="Ej: 1123456789"
+          />
           <label className="block text-sm font-semibold mb-1 mt-3">Nombre (opcional)</label>
           <input
             className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
