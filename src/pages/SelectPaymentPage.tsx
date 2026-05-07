@@ -21,6 +21,9 @@ export function SelectPaymentPage() {
   const [userName, setUserName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
+  const hasValidEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  const hasPhoneNumber = phoneNumber.trim().length > 0;
+  const hasGuestContact = hasValidEmail || hasPhoneNumber;
   const navigate = useNavigate();
   const {
     local,
@@ -86,17 +89,16 @@ export function SelectPaymentPage() {
     // Validar email si no loggeado
     if (!user) {
       setEmailTouched(true);
-      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      if (!hasGuestContact) {
         return;
       }
     }
 
     try {
-      let phoneNumberString = `${phoneNumber}`;
-      phoneNumberString = phoneNumberString.replace(/^\+?0?/, "");
-      phoneNumberString = phoneNumberString.replace(/\s/g, "");
-      phoneNumberString = phoneNumberString.replace(/-/g, "");
-      phoneNumberString = `54${phoneNumberString}`;
+      const phoneNumberString = hasPhoneNumber
+        ? `54${phoneNumber.replace(/^\+?0?/, "").replace(/\s/g, "").replace(/-/g, "")}`
+        : undefined;
+
       const createdAppointment = await bookAppointment({
         email: user ? user.email : email,
         userName: user ? user.name : userName,
@@ -118,12 +120,12 @@ export function SelectPaymentPage() {
       // Si el usuario no está loggeado, mostrar link seguro
       if (!user && createdAppointment.accessHash) {
         const publicLink = `${window.location.origin}/appointment/${createdAppointment.id}?hash=${createdAppointment.accessHash}`;
-        const msg = encodeURIComponent(`¡Tu turno fue reservado correctamente!\n\nPuedes acceder a los detalles y gestionar tu turno usando este link seguro:\n${publicLink}\n\nTambién te enviamos los detalles a tu email.`);
+        const msg = encodeURIComponent(`¡Tu turno fue reservado correctamente!\n\nPuedes acceder a los detalles y gestionar tu turno usando este link seguro:\n${publicLink}\n\nTambién te enviamos los detalles a tu email o whatsapp.`);
         navigate(`/booking/result?status=success&message=${msg}`, { replace: true });
         return;
       }
 
-      navigate("/booking/result?status=success&message=Tu%20turno%20fue%20reservado%20correctamente.%20Te%20enviamos%20los%20detalles%20a%20tu%20email.", { replace: true });
+      navigate("/booking/result?status=success&message=Tu%20turno%20fue%20reservado%20correctamente.%20Te%20enviamos%20los%20detalles%20a%20tu%20email%20o%20whatsapp.", { replace: true });
     } catch (caughtError: any) {
       const errorMessage = caughtError?.response?.data?.message || caughtError?.message || "No se pudo reservar el turno";
       navigate(`/booking/result?status=error&message=${encodeURIComponent(errorMessage)}`, { replace: true });
@@ -215,21 +217,8 @@ export function SelectPaymentPage() {
       {!user && (
         <div className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
           <h3>Datos de contacto</h3>
-          <label className="block text-sm font-semibold mb-1">Email *</label>
-          <input
-            className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            onBlur={() => setEmailTouched(true)}
-            required
-            placeholder="tu@email.com"
-          />
-          {emailTouched && (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) && (
-            <span className="text-[#ff5678] text-xs">Ingresa un email válido</span>
-          )}
-          <label className="block text-sm font-semibold mt-3 mb-0 pb-0">Teléfono (WhatsApp) </label>
-          <label className="block text-xs mb-1 mt-0 pt-0">Te enviaremos la confirmación de este turno por Whatsapp en caso de que lo hayas agregado</label>
+          <label className="block text-sm font-semibold mt-3 mb-0 pb-0">Teléfono (WhatsApp) (opcional si completas email)</label>
+          <label className="block text-xs mb-1 mt-0 pt-0">Completa al menos uno: email o teléfono. Te enviaremos la confirmación por email y/o WhatsApp según el dato que ingreses.</label>
           <input
             className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
             type="tel"
@@ -237,6 +226,18 @@ export function SelectPaymentPage() {
             onChange={e => setPhoneNumber(e.target.value)}
             placeholder="Ej: 1123456789"
           />
+          <label className="block text-sm font-semibold mb-1">Email (opcional si completas teléfono)</label>
+          <input
+            className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            onBlur={() => setEmailTouched(true)}
+            placeholder="tu@email.com"
+          />
+          {emailTouched && email.trim().length > 0 && !hasValidEmail && !hasPhoneNumber && (
+            <span className="text-[#ff5678] text-xs">Ingresa un email válido o completa tu teléfono</span>
+          )}
           <label className="block text-sm font-semibold mb-1 mt-3">Nombre (opcional)</label>
           <input
             className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
@@ -248,7 +249,7 @@ export function SelectPaymentPage() {
         </div>
       )}
 
-      <Button onClick={handleConfirm} disabled={!paymentMethod || isLoading || (!user && (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)))}>
+      <Button onClick={handleConfirm} disabled={!paymentMethod || isLoading || (!user && !hasGuestContact)}>
         {isLoading ? "Confirmando reserva..." : "Confirmar turno"}
       </Button>
     </section>
