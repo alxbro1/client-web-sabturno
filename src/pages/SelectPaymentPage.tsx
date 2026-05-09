@@ -19,11 +19,6 @@ export function SelectPaymentPage() {
   const { user } = useAuthStore();
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [emailTouched, setEmailTouched] = useState(false);
-  const hasValidEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
-  const hasPhoneNumber = phoneNumber.trim().length > 0;
-  const hasGuestContact = hasValidEmail || hasPhoneNumber;
   const navigate = useNavigate();
   const {
     local,
@@ -86,23 +81,11 @@ export function SelectPaymentPage() {
       return;
     }
 
-    // Validar email si no loggeado
-    if (!user) {
-      setEmailTouched(true);
-      if (!hasGuestContact) {
-        return;
-      }
-    }
-
     try {
-      const phoneNumberString = hasPhoneNumber
-        ? `54${phoneNumber.replace(/^\+?0?/, "").replace(/\s/g, "").replace(/-/g, "")}`
-        : undefined;
 
       const createdAppointment = await bookAppointment({
         email: user ? user.email : email,
         userName: user ? user.name : userName,
-        phoneNumber: user ? user.phone : phoneNumberString,
       });
       const externalReference = createdAppointment.mercadoPago?.externalReference;
       const checkoutUrl = createdAppointment.mercadoPago?.initPoint || createdAppointment.mercadoPago?.sandboxInitPoint;
@@ -217,7 +200,7 @@ export function SelectPaymentPage() {
       {!user && (
         <div className="border border-white/12 m-4 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
           <h3>Datos de contacto</h3>
-          <label className="block text-sm font-semibold mt-3 mb-0 pb-0">Teléfono (WhatsApp) (opcional si completas email)</label>
+          {/* <label className="block text-sm font-semibold mt-3 mb-0 pb-0">Teléfono (WhatsApp) (opcional si completas email)</label>
           <label className="block text-xs mb-1 mt-0 pt-0">Completa al menos uno: email o teléfono. Te enviaremos la confirmación por email y/o WhatsApp según el dato que ingreses.</label>
           <input
             className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
@@ -225,20 +208,16 @@ export function SelectPaymentPage() {
             value={phoneNumber}
             onChange={e => setPhoneNumber(e.target.value)}
             placeholder="Ej: 1123456789"
-          />
-          <label className="block text-sm font-semibold mb-1">Email (opcional si completas teléfono)</label>
+          /> */}
+          <label className="block text-sm font-semibold mb-1">Email (si quieres que te lleguen las notificaciones)</label>
           <input
             className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            onBlur={() => setEmailTouched(true)}
             placeholder="tu@email.com"
           />
-          {emailTouched && email.trim().length > 0 && !hasValidEmail && !hasPhoneNumber && (
-            <span className="text-[#ff5678] text-xs">Ingresa un email válido o completa tu teléfono</span>
-          )}
-          <label className="block text-sm font-semibold mb-1 mt-3">Nombre (opcional)</label>
+          <label className="block text-sm font-semibold mb-1 mt-3">Nombre</label>
           <input
             className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
             type="text"
@@ -249,7 +228,7 @@ export function SelectPaymentPage() {
         </div>
       )}
 
-      <Button onClick={handleConfirm} disabled={!paymentMethod || isLoading || (!user && !hasGuestContact)}>
+        <Button onClick={handleConfirm} disabled={!paymentMethod || isLoading}>
         {isLoading ? "Confirmando reserva..." : "Confirmar turno"}
       </Button>
     </section>
