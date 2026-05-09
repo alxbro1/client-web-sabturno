@@ -42,7 +42,7 @@ export function SelectLocalPage() {
   }
 
   return (
-    <section className="grid gap-6">
+    <section className="grid gap-6 p-6">
       <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch">
         <div>
           <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Reserva paso 1</p>

@@ -142,7 +142,7 @@ export function SelectPaymentPage() {
   const marketplaceFee = serviceCost * 0.03;
 
   return (
-    <section className="grid gap-6">
+    <section className="grid gap-6 p-6">
       <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch">
         <div>
           <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Reserva paso 4</p>
@@ -215,7 +215,7 @@ export function SelectPaymentPage() {
 
       {/* Formulario de email/nombre/telefono si no loggeado */}
       {!user && (
-        <div className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
+        <div className="border border-white/12 m-4 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
           <h3>Datos de contacto</h3>
           <label className="block text-sm font-semibold mt-3 mb-0 pb-0">Teléfono (WhatsApp) (opcional si completas email)</label>
           <label className="block text-xs mb-1 mt-0 pt-0">Completa al menos uno: email o teléfono. Te enviaremos la confirmación por email y/o WhatsApp según el dato que ingreses.</label>
