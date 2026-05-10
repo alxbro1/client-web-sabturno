@@ -20,6 +20,7 @@ const ProfilePaymentsPage = lazy(() => import("@/pages/ProfilePaymentsPage").the
 const EditProfilePage = lazy(() => import("@/pages/EditProfilePage").then((module) => ({ default: module.EditProfilePage })));
 
 const AppointmentPublicPage = lazy(() => import("@/pages/AppointmentPublicPage").then((module) => ({ default: module.AppointmentPublicPage })));
+const AppointmentCancelPage = lazy(() => import("@/pages/AppointmentCancelPage").then((module) => ({ default: module.AppointmentCancelPage })));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage").then((module) => ({ default: module.NotFoundPage })));
 
 function withSuspense(element: React.ReactNode) {
@@ -60,6 +61,7 @@ export const router = createBrowserRouter(
         { path: "/booking/payment-status", element: withSuspense(<PaymentStatusPage />) },
         { path: "/booking/result", element: withSuspense(<AppointmentResultPage />) },
         { path: "/appointment/:id", element: withSuspense(<AppointmentPublicPage />) },
+          { path: "/appointment/:id/cancel", element: withSuspense(<AppointmentCancelPage />) },
       ],
     },
     {
