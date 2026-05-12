@@ -31,6 +31,8 @@ export function SelectPaymentPage() {
     isLoading,
   } = useBookingFlow();
 
+  const isGuestEmailMissing = !user && !email.trim();
+
   useEffect(() => {
     if (!local) {
       navigate("/booking/select-local", { replace: true });
@@ -78,6 +80,10 @@ export function SelectPaymentPage() {
 
   async function handleConfirm() {
     if (!paymentMethod) {
+      return;
+    }
+
+    if (isGuestEmailMissing) {
       return;
     }
 
@@ -217,6 +223,9 @@ export function SelectPaymentPage() {
             onChange={e => setEmail(e.target.value)}
             placeholder="tu@email.com"
           />
+          {isGuestEmailMissing ? (
+            <p className="text-sm !text-red-300">Falta completar un campo obligatorio: email.</p>
+          ) : null}
           <label className="block text-sm font-semibold mb-1 mt-3">Nombre</label>
           <input
             className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
@@ -228,7 +237,7 @@ export function SelectPaymentPage() {
         </div>
       )}
 
-        <Button onClick={handleConfirm} disabled={!paymentMethod || isLoading}>
+        <Button onClick={handleConfirm} disabled={!paymentMethod || isLoading || isGuestEmailMissing}>
         {isLoading ? "Confirmando reserva..." : "Confirmar turno"}
       </Button>
     </section>
