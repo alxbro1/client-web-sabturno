@@ -12,7 +12,7 @@ export const ServiceCard = memo(function ServiceCard({ service, onSelect }: Serv
     <button
       type="button"
       onClick={() => onSelect(service)}
-      className="w-full max-w-full overflow-hidden flex items-center gap-4 p-3 rounded-[20px] border border-white/12 bg-gradient-to-b from-[rgba(22,22,22,0.96)] to-[rgba(12,12,12,0.95)] backdrop-blur-[12px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] transition-all duration-[140ms] hover:border-[#00f068]/45 hover:shadow-[0_20px_50px_rgba(0,240,104,0.1)] active:scale-95 group text-left"
+      className="w-full h-24 max-w-full overflow-hidden flex items-center gap-4 p-3 rounded-[20px] border border-white/12 bg-gradient-to-b from-[rgba(22,22,22,0.96)] to-[rgba(12,12,12,0.95)] backdrop-blur-[12px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] transition-all duration-[140ms] hover:border-[#00f068]/45 hover:shadow-[0_20px_50px_rgba(0,240,104,0.1)] active:scale-95 group text-left"
     >
       <div className="flex-shrink-0">
         <div className="w-15 h-15 rounded-[16px] bg-gradient-to-br from-[#00f068]/22 to-[#00f068]/8 border border-[#00f068]/30 flex items-center justify-center text-[#00f068]">

@@ -10,7 +10,7 @@ export const LocalCard = memo(function LocalCard({ local, onSelect }: LocalCardP
   return (
     <button
       onClick={() => onSelect(local)}
-      className="w-full flex items-center gap-4 p-3 rounded-[20px] border border-white/12 bg-gradient-to-b from-[rgba(22,22,22,0.96)] to-[rgba(12,12,12,0.95)] backdrop-blur-[12px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] transition-all duration-[140ms] hover:border-[#00f068]/45 hover:shadow-[0_20px_50px_rgba(0,240,104,0.1)] active:scale-95 group text-left"
+      className="w-full h-24 flex items-center gap-4 p-3 rounded-[20px] border border-white/12 bg-gradient-to-b from-[rgba(22,22,22,0.96)] to-[rgba(12,12,12,0.95)] backdrop-blur-[12px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] transition-all duration-[140ms] hover:border-[#00f068]/45 hover:shadow-[0_20px_50px_rgba(0,240,104,0.1)] active:scale-95 group text-left"
     >
       <div className="flex-shrink-0">
         <div className="w-15 h-15 rounded-[16px] bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden flex items-center justify-center">
