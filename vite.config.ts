@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     // Example: VITE_BASE_PATH=/app/ for production subpath deploys.
-    base: env.VITE_BASE_PATH || "/",
+    base: "/",
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

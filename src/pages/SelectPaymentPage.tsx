@@ -42,6 +42,10 @@ export function SelectPaymentPage() {
     if (!service || !selectedDate || !selectedTime) {
       navigate("/booking/appointment", { replace: true });
     }
+
+    if (methods.length == 1) {
+      setPaymentMethod(methods[0].method);
+    }
   }, [local, navigate, selectedDate, selectedTime, service]);
 
   const methods = useMemo(() => {
@@ -136,7 +140,7 @@ export function SelectPaymentPage() {
         <div>
           <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Reserva paso 4</p>
           <h2>Metodo de pago</h2>
-          <p>Selecciona como quieres confirmar tu turno.</p>
+          <p>Selecciona un método de pago.</p>
         </div>
         <Button variant="secondary" onClick={() => navigate("/booking/appointment")}>Volver</Button>
       </header>
