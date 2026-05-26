@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/Button";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
 import { PaymentMethod } from "@/lib/types/booking";
+import { taloService } from "@/services/talo";
 import iconMercadoPago from "@/assets/payment-methods/mercado_pago.png";
 import iconReserved from "@/assets/payment-methods/reserved.png";
 import iconCash from "@/assets/payment-methods/cash-in-front.png";
@@ -31,22 +32,17 @@ export function SelectPaymentPage() {
     isLoading,
   } = useBookingFlow();
 
-  const isGuestEmailMissing = !user && !email.trim();
+  const [taloEnabled, setTaloEnabled] = useState(false);
 
   useEffect(() => {
-    if (!local) {
-      navigate("/booking/select-local", { replace: true });
-      return;
+    if (local?.id) {
+      taloService.getStatus(local.id).then((status) => {
+        setTaloEnabled(status.connected);
+      }).catch(() => setTaloEnabled(false));
     }
+  }, [local?.id]);
 
-    if (!service || !selectedDate || !selectedTime) {
-      navigate("/booking/appointment", { replace: true });
-    }
-
-    if (methods.length == 1) {
-      setPaymentMethod(methods[0].method);
-    }
-  }, [local, navigate, selectedDate, selectedTime, service]);
+  const isGuestEmailMissing = !user && !email.trim();
 
   const methods = useMemo(() => {
     if (!local || !service) {
@@ -54,6 +50,14 @@ export function SelectPaymentPage() {
     }
 
     const items = [] as { method: PaymentMethod; title: string; description: string }[];
+
+    if (local.payWithTalo && taloEnabled) {
+      items.push({
+        method: PaymentMethod.TALO,
+        title: "Transferencia bancaria (Talo)",
+        description: "Pagá con cualquier banco argentino. Sin costo adicional.",
+      });
+    }
 
     if (local.mercadoPagoLiveMode) {
       items.push({
@@ -80,7 +84,22 @@ export function SelectPaymentPage() {
     }
 
     return items;
-  }, [local, service]);
+  }, [local, service, taloEnabled]);
+
+  useEffect(() => {
+    if (!local) {
+      navigate("/booking/select-local", { replace: true });
+      return;
+    }
+
+    if (!service || !selectedDate || !selectedTime) {
+      navigate("/booking/appointment", { replace: true });
+    }
+
+    if (methods.length == 1) {
+      setPaymentMethod(methods[0].method);
+    }
+  }, [local, navigate, selectedDate, selectedTime, service, methods.length, setPaymentMethod]);
 
   async function handleConfirm() {
     if (!paymentMethod) {
@@ -107,6 +126,11 @@ export function SelectPaymentPage() {
       ) {
         window.open(checkoutUrl, "_blank", "noopener,noreferrer");
         navigate(`/booking/payment-status?externalReference=${encodeURIComponent(externalReference)}&result=pending`, { replace: true });
+        return;
+      }
+
+      if (paymentMethod === PaymentMethod.TALO && createdAppointment.talo?.paymentUrl) {
+        window.location.href = createdAppointment.talo.paymentUrl;
         return;
       }
 
@@ -210,15 +234,6 @@ export function SelectPaymentPage() {
       {!user && (
         <div className="border border-white/12 m-4 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
           <h3>Datos de contacto</h3>
-          {/* <label className="block text-sm font-semibold mt-3 mb-0 pb-0">Teléfono (WhatsApp) (opcional si completas email)</label>
-          <label className="block text-xs mb-1 mt-0 pt-0">Completa al menos uno: email o teléfono. Te enviaremos la confirmación por email y/o WhatsApp según el dato que ingreses.</label>
-          <input
-            className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
-            type="tel"
-            value={phoneNumber}
-            onChange={e => setPhoneNumber(e.target.value)}
-            placeholder="Ej: 1123456789"
-          /> */}
           <label className="block text-sm font-semibold mb-1">Email (si quieres que te lleguen las notificaciones)</label>
           <input
             className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
@@ -246,11 +261,4 @@ export function SelectPaymentPage() {
       </Button>
     </section>
   );
-}
-
-export interface CreateAppointmentResponse {
-  id: string;
-  // ...other properties...
-  accessHash?: string; // <-- Add this line
-  // ...other properties...
 }

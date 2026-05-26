@@ -1,22 +1,73 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/Button";
+import { useBookingStore } from "@/stores/booking";
+import TaloPaymentInfo from "@/components/TaloPaymentInfo";
 
 type ResultStatus = "success" | "error";
 
 export function AppointmentResultPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { taloPaymentData } = useBookingStore();
 
   const status = (searchParams.get("status") || "success") as ResultStatus;
   const message = searchParams.get("message") || "";
+  const result = searchParams.get("result");
+  const paymentMethod = searchParams.get("paymentMethod");
+  const paymentId = searchParams.get("paymentId");
 
   useEffect(() => {
     // Redirect to home if no valid status
-    if (!["success", "error"].includes(status)) {
+    if (!["success", "error"].includes(status) && !(result === "success" && paymentMethod === "talo")) {
       navigate("/home", { replace: true });
     }
-  }, [status, navigate]);
+  }, [status, navigate, result, paymentMethod]);
+
+  if (result === "success" && paymentMethod === "talo" && taloPaymentData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-md grid gap-6 text-center">
+          <div className="flex justify-center">
+            <div className="relative w-24 h-24 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-yellow-500/5 rounded-full" />
+              <div className="absolute inset-0 border-2 border-yellow-500/30 rounded-full animate-pulse" />
+              <div className="relative flex items-center justify-center text-5xl">⏳</div>
+            </div>
+          </div>
+
+          <div>
+            <h1 className="text-3xl font-bold text-yellow-500 mb-2">Turno Reservado</h1>
+            <p className="text-white/70 text-sm leading-relaxed">
+              Tu turno está reservado. Completá el pago para confirmar.
+            </p>
+          </div>
+
+          <TaloPaymentInfo
+            paymentId={paymentId!}
+            amount={taloPaymentData.amount}
+            currency={taloPaymentData.currency}
+            cbu={taloPaymentData.cbu}
+            alias={taloPaymentData.alias}
+            aliasCbu={taloPaymentData.aliasCbu}
+            expirationTimestamp={taloPaymentData.expirationTimestamp}
+          />
+
+          <Button
+            onClick={() => navigate(`/booking/payment-status?taloPaymentId=${paymentId}`, { replace: true })}
+            variant="primary"
+            className="mt-4"
+          >
+            Verificar estado del pago
+          </Button>
+
+          <p className="text-xs text-white/50">
+            No necesitás hacer nada más. Te notificaremos cuando el pago sea confirmado.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const isSuccess = status === "success";
 

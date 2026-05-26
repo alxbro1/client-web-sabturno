@@ -171,6 +171,7 @@ export function useBookingFlow() {
     hasCheckoutMethods:
       Boolean(local?.mercadoPagoLiveMode) ||
       Boolean(local?.payWithCashInFront) ||
-      Boolean(local?.payWithReservation),
+      Boolean(local?.payWithReservation) ||
+      Boolean(local?.payWithTalo),
   };
 }

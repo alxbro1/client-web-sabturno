@@ -5,6 +5,7 @@ export enum PaymentMethod {
   TRANSFERENCE = "TRANSFERENCE",
   CASH_IN_FRONT = "CASH_IN_FRONT",
   RESERVATION_PAYMENT = "RESERVATION_PAYMENT",
+  TALO = "TALO",
 }
 
 export interface TimeSlot {
@@ -32,12 +33,24 @@ export interface MercadoPagoCheckoutData {
   externalReference?: string;
 }
 
+export interface TaloPaymentData {
+  paymentId: string;
+  paymentUrl?: string;
+  amount: number;
+  currency: string;
+  cbu?: string;
+  alias?: string;
+  aliasCbu?: string;
+  expirationTimestamp?: string;
+}
+
 export interface CreateAppointmentResponse {
   id: string;
   startDateTime: string;
   endDateTime: string;
   mercadoPago?: MercadoPagoCheckoutData;
-  accessHash?: string; // <-- Add this line
+  talo?: TaloPaymentData;
+  accessHash?: string;
 }
 
 export type MercadoPagoPaymentStatus = "PENDING" | "COMPLETED" | "FAILED";

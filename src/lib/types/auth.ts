@@ -16,6 +16,7 @@ export interface User {
   payWithReservation?: boolean;
   reservationPercentage?: number | null;
   payWithCashInFront?: boolean;
+  payWithTalo?: boolean;
 }
 
 export interface LoginRequest {

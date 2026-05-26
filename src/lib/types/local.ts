@@ -15,4 +15,5 @@ export interface Local {
   payWithReservation?: boolean;
   reservationPercentage?: number | null;
   payWithCashInFront?: boolean;
+  payWithTalo?: boolean;
 }
