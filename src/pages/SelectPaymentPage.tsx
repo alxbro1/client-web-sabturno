@@ -159,8 +159,8 @@ export function SelectPaymentPage() {
   const marketplaceFee = serviceCost * 0.03;
 
   return (
-    <section className="grid gap-6 p-6">
-      <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch">
+    <section className="flex flex-col gap-6 p-8 h-[100dvh] items-center">
+      <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch w-full">
         <div>
           <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Reserva paso 4</p>
           <h2>Metodo de pago</h2>
@@ -169,7 +169,7 @@ export function SelectPaymentPage() {
         <Button variant="secondary" onClick={() => navigate("/booking/appointment")}>Volver</Button>
       </header>
 
-      <div className="grid grid-cols-2 gap-4 max-lg:grid-cols-1">
+      <div className="grid grid-cols-3 gap-4 max-lg:grid-cols-1 w-full">
         {methods.map((item) => {
           const isActive = paymentMethod === item.method;
           return (
@@ -218,21 +218,23 @@ export function SelectPaymentPage() {
         </div>
       ) : null}
 
-      {paymentMethod === PaymentMethod.MERCADO_PAGO ? (
-        <div className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
+      {paymentMethod === PaymentMethod.MERCADO_PAGO || paymentMethod ===PaymentMethod.TALO ? (
+        <div className="w-full border border-white/12 rounded-[28px] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
           <h3>Detalle de pago online</h3>
           <p>
             Servicio: ${serviceCost.toFixed(2)}. Fee app: ${marketplaceFee.toFixed(2)}.
           </p>
-          <p className="text-white/68">
-            El fee se informa en el checkout de Mercado Pago al confirmar el pago.
-          </p>
+          {paymentMethod === PaymentMethod.MERCADO_PAGO && 
+            <p className="text-white/68">
+              El fee se informa en el checkout de Mercado Pago al confirmar el pago.
+            </p>
+          }
         </div>
       ) : null}
 
       {/* Formulario de email/nombre/telefono si no loggeado */}
       {!user && (
-        <div className="border border-white/12 m-4 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
+        <div className="w-full border border-white/12 m-4 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
           <h3>Datos de contacto</h3>
           <label className="block text-sm font-semibold mb-1">Email (si quieres que te lleguen las notificaciones)</label>
           <input
