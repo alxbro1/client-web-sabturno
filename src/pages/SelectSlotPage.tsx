@@ -120,7 +120,7 @@ export function SelectSlotPage() {
         </section>
       </div>
 
-        <Button disabled={!isFormValid} onClick={() => navigate("/booking/payment")}>Continuar a pago</Button>
+        <Button disabled={!isFormValid} onClick={() => navigate("/booking/payment")}>Continuar</Button>
     </section>
   );
 }
