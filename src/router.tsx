@@ -22,6 +22,7 @@ const EditProfilePage = lazy(() => import("@/pages/EditProfilePage").then((modul
 const AppointmentPublicPage = lazy(() => import("@/pages/AppointmentPublicPage").then((module) => ({ default: module.AppointmentPublicPage })));
 const AppointmentCancelPage = lazy(() => import("@/pages/AppointmentCancelPage").then((module) => ({ default: module.AppointmentCancelPage })));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage").then((module) => ({ default: module.NotFoundPage })));
+const VerifiedPage = lazy(() => import("@/pages/VerifiedPage").then((module) => ({ default: module.VerifiedPage })));
 
 function withSuspense(element: React.ReactNode) {
   return <Suspense fallback={<div className="centered-loader">Cargando...</div>}>{element}</Suspense>;
@@ -39,6 +40,7 @@ export const router = createBrowserRouter(
         { path: "/login", element: withSuspense(<LoginPage />) },
         { path: "/register", element: withSuspense(<RegisterPage />) },
         { path: "/forgot-password", element: withSuspense(<ForgotPasswordPage />) },
+        { path: "/verified", element: withSuspense(<VerifiedPage />) },
       ],
     },
     {
