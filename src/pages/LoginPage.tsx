@@ -44,12 +44,9 @@ export function LoginPage() {
         email: email.trim(),
         password,
       });
-      if (response.user.isLocal) {
-        setError("Esta web esta preparada solo para clientes.");
-        return;
-      }
       login(response.user, response.token);
-      navigate(locationState?.from || "/home", { replace: true });
+      const redirectPath = response.user.isLocal ? "/local/dashboard" : "/home";
+      navigate(locationState?.from || redirectPath, { replace: true });
     } catch (caughtError: any) {
       setError(
         caughtError?.response?.data?.message || "No se pudo iniciar sesion",
@@ -66,7 +63,7 @@ export function LoginPage() {
           <LogoMark className="h-10 w-auto" />
         </div>
         <div className="grid gap-2">
-          <p className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-[#00f068]">Acceso clientes</p>
+          <p className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-[#00f068]">Acceso</p>
           <h2 className="text-[1.7rem] leading-none">Inicia sesion</h2>
         </div>
       </div>

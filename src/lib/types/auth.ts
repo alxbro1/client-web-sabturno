@@ -3,7 +3,7 @@ export interface User {
   name: string;
   email: string;
   isLocal: boolean;
-  localId?: string;
+  localName?: string;
   phone: string;
   province?: string;
   address?: string;
