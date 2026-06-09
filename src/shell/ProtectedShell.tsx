@@ -36,23 +36,6 @@ export function ProtectedShell() {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  if (user?.isLocal) {
-    return (
-        <div className="min-h-screen grid place-items-center p-8 max-sm:p-4">
-          <section className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-4">
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">Acceso restringido</p>
-          <h2>Esta web es solo para clientes</h2>
-          <p>Tu cuenta corresponde a un local. Usa la app actual para la administracion del negocio.</p>
-          <Button
-            onClick={handleLogout}
-          >
-            Volver al login
-          </Button>
-        </section>
-      </div>
-    );
-  }
-
   return (
     <div className="grid grid-cols-[300px_1fr] gap-5 min-h-screen p-5 max-lg:grid-cols-1 max-sm:gap-3 max-sm:p-3">
       <aside className="self-start sticky top-5 h-[calc(100vh-2.5rem)] overflow-y-auto p-6 flex flex-col gap-8 justify-between border border-white/10 bg-[rgba(10,10,10,0.9)] rounded-[28px] shadow-[0_24px_65px_rgba(0,0,0,0.38)] backdrop-blur-md max-sm:hidden">

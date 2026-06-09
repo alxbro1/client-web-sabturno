@@ -31,6 +31,8 @@ const LocalSchedulesPage = lazy(() => import("@/pages/local/LocalSchedulesPage")
 const LocalScheduleEditorPage = lazy(() => import("@/pages/local/LocalScheduleEditorPage").then((module) => ({ default: module.LocalScheduleEditorPage })));
 const LocalBlockingsPage = lazy(() => import("@/pages/local/LocalBlockingsPage").then((module) => ({ default: module.LocalBlockingsPage })));
 const LocalImagesPage = lazy(() => import("@/pages/local/LocalImagesPage").then((module) => ({ default: module.LocalImagesPage })));
+const DemoAppointmentTimelinePage = lazy(() => import("@/pages/demo/DemoAppointmentTimelinePage").then((module) => ({ default: module.DemoAppointmentTimelinePage })));
+const LocalTimelinePage = lazy(() => import("@/pages/local/LocalTimelinePage").then((module) => ({ default: module.LocalTimelinePage })));
 const LocalProfilePage = lazy(() => import("@/pages/local/LocalProfilePage").then((module) => ({ default: module.LocalProfilePage })));
 
 function withSuspense(element: React.ReactNode) {
@@ -72,6 +74,8 @@ export const router = createBrowserRouter(
         { path: "/local/blockings", element: withSuspense(<LocalBlockingsPage />) },
         { path: "/local/images", element: withSuspense(<LocalImagesPage />) },
         { path: "/local/profile", element: withSuspense(<LocalProfilePage />) },
+        { path: "/local/timeline", element: withSuspense(<LocalTimelinePage />) },
+        { path: "/demo/timeline", element: withSuspense(<DemoAppointmentTimelinePage />) },
       ],
     },
     {
