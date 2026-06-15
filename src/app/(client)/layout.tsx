@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
@@ -23,12 +23,17 @@ export default function ClientLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  console.log('pathname', pathname);
+  useEffect(() => {
+    // if (hasHydrated && !user ) {
+    //   router.replace("/login");
+    // }
+  }, [hasHydrated, user, router]);
 
   function handleLogout() {
     fetch("/api/auth/logout", { method: "POST" }).catch(console.error);
     logout();
     setIsMobileMenuOpen(false);
-    router.replace("/login");
   }
 
   function handleMobileNavigation() {
@@ -50,11 +55,6 @@ export default function ClientLayout({
         Cargando...
       </div>
     );
-  }
-
-  if (!user) {
-    router.replace("/login");
-    return null;
   }
 
   return (

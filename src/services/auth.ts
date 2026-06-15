@@ -28,4 +28,14 @@ export const authService = {
   async forgotPassword(email: string) {
     await apiService.post("/auth/forgot-password", { email });
   },
+
+  async resetPassword(token: string, newPassword: string) {
+    const response = await apiService.post("/auth/reset-password", { token, newPassword });
+    return response.data;
+  },
+
+  async resendVerification(email: string) {
+    const response = await apiService.post("/auth/resend-verification", { email });
+    return response.data;
+  },
 };

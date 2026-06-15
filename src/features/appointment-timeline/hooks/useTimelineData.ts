@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { timelineService, type BackendEmployee } from '@/services/timeline';
-import { mapBackendAppointments, mapBackendTimeStocks, formatDateParam, formatDateRange } from '../utils/mappers';
+import { mapBackendAppointments, mapBackendTimeStocks, formatDateParam } from '../utils/mappers';
 import type { Appointment, Block, Resource } from '../types';
 
 interface UseTimelineDataParams {
   entityId: string;
   date: Date;
-  viewMode?: 'day' | 'week';
   enabled?: boolean;
   employees?: BackendEmployee[];
 }
@@ -23,7 +22,6 @@ interface UseTimelineDataReturn {
 export function useTimelineData({
   entityId,
   date,
-  viewMode = 'day',
   enabled = true,
   employees = [],
 }: UseTimelineDataParams): UseTimelineDataReturn {
@@ -52,43 +50,20 @@ export function useTimelineData({
 
     try {
       const localId = entityId;
+      const dateStr = formatDateParam(date);
 
-      if (viewMode === 'week') {
-        const weekStart = new Date(date);
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekEnd.getDate() + 7);
+      const [aptResult, blockedRaw] = await Promise.all([
+        timelineService.getAppointmentsByEntity(entityId, {
+          minDate: dateStr,
+          maxDate: dateStr,
+          status: ['PENDING', 'CONFIRMED', 'COMPLETED'],
+          limit: 100,
+        }),
+        timelineService.getBlockedTimes(entityId, dateStr, dateStr),
+      ]);
 
-        const { minDate, maxDate } = formatDateRange(weekStart, weekEnd);
-
-        const [aptResult, blockedRaw] = await Promise.all([
-          timelineService.getAppointmentsByEntity(entityId, {
-            minDate,
-            maxDate,
-            status: ['PENDING', 'CONFIRMED', 'COMPLETED'],
-            limit: 200,
-          }),
-          timelineService.getBlockedTimes(entityId, minDate, maxDate),
-        ]);
-
-        setAppointments(mapBackendAppointments(aptResult.items, localId));
-        setBlocks(mapBackendTimeStocks(blockedRaw, localId));
-      } else {
-        const dateStr = formatDateParam(date);
-
-        const [aptResult, blockedRaw] = await Promise.all([
-          timelineService.getAppointmentsByEntity(entityId, {
-            minDate: dateStr,
-            maxDate: dateStr,
-            status: ['PENDING', 'CONFIRMED', 'COMPLETED'],
-            limit: 100,
-          }),
-          timelineService.getBlockedTimes(entityId, dateStr, dateStr),
-        ]);
-
-        setAppointments(mapBackendAppointments(aptResult.items, localId));
-        setBlocks(mapBackendTimeStocks(blockedRaw, localId));
-      }
+      setAppointments(mapBackendAppointments(aptResult.items, localId));
+      setBlocks(mapBackendTimeStocks(blockedRaw, localId));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar datos';
       setError(message);
@@ -96,7 +71,7 @@ export function useTimelineData({
     } finally {
       setIsLoading(false);
     }
-  }, [entityId, date, viewMode, enabled]);
+  }, [entityId, date, enabled]);
 
   useEffect(() => {
     fetchData();

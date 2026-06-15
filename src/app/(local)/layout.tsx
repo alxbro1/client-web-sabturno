@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
 import { LogoMark } from "@/components/Logo";
+import { IconPayment } from "@/components/Icons";
 import { useAuthStore } from "@/stores/auth";
 
 function IconDashboard() {
@@ -39,6 +40,22 @@ function IconBlock() {
   );
 }
 
+function IconUsers() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+    </svg>
+  );
+}
+
+function IconService() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+      <path d="M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7zM7 9H4V5h3v4zm10 6h3v4h-3v-4zm0-10h3v4h-3V5z" />
+    </svg>
+  );
+}
+
 function IconLogout() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -65,8 +82,11 @@ const navItems: NavItem[] = [
   { to: "/local/dashboard", label: "Panel", icon: <IconDashboard /> },
   { to: "/local/calendar", label: "Turnos", icon: <IconSchedule /> },
   { to: "/local/schedules", label: "Horarios", icon: <IconSchedule /> },
+  { to: "/local/employees", label: "Empleados", icon: <IconUsers /> },
+  { to: "/local/services", label: "Servicios", icon: <IconService /> },
   { to: "/local/blockings", label: "Bloqueos", icon: <IconBlock /> },
   { to: "/local/images", label: "Fotos", icon: <IconImage /> },
+  { to: "/local/payment-methods", label: "Metodos de cobro", icon: <IconPayment /> },
   {
     to: "/local/profile",
     label: "Perfil",
@@ -88,11 +108,19 @@ export default function LocalLayout({
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (!user) {
+      router.replace("/login");
+    } else if (!user.isLocal) {
+      router.replace("/home");
+    }
+  }, [hasHydrated, user, router]);
+
   function handleLogout() {
     fetch("/api/auth/logout", { method: "POST" }).catch(console.error);
     logout();
     setIsMobileMenuOpen(false);
-    router.replace("/login");
   }
 
   function handleMobileNavigation() {
@@ -114,16 +142,6 @@ export default function LocalLayout({
         Cargando...
       </div>
     );
-  }
-
-  if (!user) {
-    router.replace("/login");
-    return null;
-  }
-
-  if (!user.isLocal) {
-    router.replace("/home");
-    return null;
   }
 
   return (

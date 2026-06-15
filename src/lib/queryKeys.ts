@@ -19,4 +19,7 @@ export const queryKeys = {
     ["local-calendar", localId, month, year] as const,
   localImages: (localId: string) => ["local-images", localId] as const,
   userPayments: () => ["user-payments"] as const,
+  employees: (localId: string) => ["employees", localId] as const,
+  localServices: (localId: string) => ["local-services", localId] as const,
+  myReports: () => ["my-reports"] as const,
 };

@@ -76,8 +76,19 @@ export const localService = {
       return [];
     }
   },
+  /**
+   * `PATCH /local/:id` — actualiza campos parciales del local.
+   *
+   * IMPORTANTE: el backend expone este endpoint como **PATCH** (no PUT).
+   * Ver `backend/src/local/local.controller.ts`. Usar `apiService.put` aquí
+   * provocaba 404/405 silenciosos al guardar cambios.
+   *
+   * Acepta cualquier subset de `Local` (incluido los flags de payment
+   * methods: `mercadoPagoLiveMode`, `payWithTalo`, `payWithReservation`,
+   * `payWithCashInFront`, `reservationPercentage`).
+   */
   updateLocal: async (localId: string, data: Partial<Local>): Promise<Local> => {
-    const response = await apiService.put<Local>(`/local/${localId}`, data);
+    const response = await apiService.patch<Local>(`/local/${localId}`, data);
     return response.data;
   },
 };

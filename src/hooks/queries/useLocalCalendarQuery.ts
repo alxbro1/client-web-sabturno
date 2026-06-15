@@ -20,6 +20,7 @@ import {
   calculateOccupancyPercentage,
   isDateBlocked,
   isCurrentMonth,
+  utcToLocalDate,
 } from "@/features/local/utils/calendarUtils";
 
 interface CalendarData {
@@ -190,8 +191,9 @@ export function useLocalCalendarQuery() {
             });
             createdRanges.push({
               id: created.id,
-              startDate: new Date(created.date),
-              endDate: new Date(created.date),
+              startDate: utcToLocalDate(created.date),
+              endDate: utcToLocalDate(created.date),
+              type: 'full-day',
               reason: created.notes || "",
               localId: created.localId,
               createdAt: created.createdAt,
@@ -212,8 +214,11 @@ export function useLocalCalendarQuery() {
           });
           createdRanges.push({
             id: created.id,
-            startDate: new Date(created.moduleStartTime),
-            endDate: new Date(created.moduleEndTime),
+            startDate: utcToLocalDate(created.moduleStartTime),
+            endDate: utcToLocalDate(created.moduleEndTime),
+            type: 'time-slot',
+            startTime,
+            endTime,
             reason: created.notes || "",
             localId: created.localId,
             createdAt: created.createdAt,
@@ -228,8 +233,9 @@ export function useLocalCalendarQuery() {
           });
           createdRanges.push({
             id: created.id,
-            startDate: new Date(created.date),
-            endDate: new Date(created.date),
+            startDate: utcToLocalDate(created.date),
+            endDate: utcToLocalDate(created.date),
+            type: 'full-day',
             reason: created.notes || "",
             localId: created.localId,
             createdAt: created.createdAt,

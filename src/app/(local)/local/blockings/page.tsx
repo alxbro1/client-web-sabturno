@@ -1,41 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { dateFnsLocalizer, type SlotInfo, type View, Views } from "react-big-calendar";
+import { format, parse, startOfWeek, getDay } from "date-fns";
+import { es } from "date-fns/locale/es";
 import { Button } from "@/components/Button";
 import { useLocalCalendarQuery } from "@/hooks/queries/useLocalCalendarQuery";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import ShadcnBigCalendar from "@/components/shadcn-big-calendar/shadcn-big-calendar";
+import "@/components/shadcn-big-calendar/shadcn-big-calendar.css";
 
-function IconChevronLeft() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-    </svg>
-  );
-}
+const locales = { es };
 
-function IconChevronRight() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-    </svg>
-  );
-}
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek: (date: Date) => startOfWeek(date, { weekStartsOn: 1 }),
+  getDay,
+  locales,
+});
 
-const WEEKDAYS = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
-const MONTH_NAMES = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
+const messages = {
+  allDay: "Todo el día",
+  previous: "Anterior",
+  next: "Siguiente",
+  today: "Hoy",
+  month: "Mes",
+  week: "Semana",
+  day: "Día",
+  agenda: "Agenda",
+  date: "Fecha",
+  time: "Hora",
+  event: "Evento",
+  noEventsInRange: "No hay eventos en este rango.",
+  showMore: (total: number) => `+ Ver ${total} más`,
+};
 
 type BlockingType = "full-day" | "time-slot";
 
@@ -47,21 +46,22 @@ interface BlockingFormData {
   notes: string;
 }
 
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  allDay: boolean;
+}
+
 export default function LocalBlockingsPage() {
   const {
-    calendarDays,
-    currentMonth,
-    currentYear,
-    isLoading,
     blockedDates,
-    goToNextMonth,
-    goToPreviousMonth,
-    goToToday,
+    isLoading,
     blockDate,
     unblockDate,
   } = useLocalCalendarQuery();
 
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<BlockingFormData>({
     type: "full-day",
@@ -69,41 +69,78 @@ export default function LocalBlockingsPage() {
     notes: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deleteId, setDeleteId] = useState<string>("");
+  const [deleteId, setDeleteId] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [calendarView, setCalendarView] = useState<View>(Views.MONTH);
+  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
 
-  function handleDayClick(date: Date) {
-    const dateStr = date.toISOString().split("T")[0];
+  const events = useMemo<CalendarEvent[]>(() => {
+    return blockedDates.map((block) => {
+      const isSameDay = block.startDate.toDateString() === block.endDate.toDateString();
+      const title = isSameDay
+        ? block.type === "time-slot" && block.startTime && block.endTime
+          ? `Bloqueado ${block.startTime}-${block.endTime}`
+          : "Bloqueado"
+        : `Bloqueado: ${block.reason || "rango"}`;
+      return {
+        id: block.id || "",
+        title,
+        start: block.startDate,
+        end: block.endDate,
+        allDay: true,
+      };
+    });
+  }, [blockedDates]);
+
+  const eventPropGetter = useCallback(() => {
+    return { className: "event-variant-blocked" };
+  }, []);
+
+  const handleNavigate = useCallback((newDate: Date, view: View) => {
+    setCalendarDate(newDate);
+    setCalendarView(view);
+  }, []);
+
+  const handleViewChange = useCallback((view: View) => {
+    setCalendarView(view);
+  }, []);
+
+  function handleSelectSlot(slotInfo: SlotInfo) {
+    const dateStr = slotInfo.start.toISOString().split("T")[0];
     const existingBlock = blockedDates.find((b) => {
-      const start = new Date(b.startDate).toISOString().split("T")[0];
-      const end = new Date(b.endDate).toISOString().split("T")[0];
+      const start = b.startDate.toISOString().split("T")[0];
+      const end = b.endDate.toISOString().split("T")[0];
       return dateStr >= start && dateStr <= end;
     });
-
     if (existingBlock?.id) {
-      setDeleteId(existingBlock.id || "");
+      setDeleteId(existingBlock.id);
     } else {
-      setSelectedDate(date);
       setFormData({ type: "full-day", date: dateStr, notes: "" });
       setShowForm(true);
     }
   }
 
+  function handleSelectEvent(event: CalendarEvent) {
+    if (event.id) {
+      setDeleteId(event.id);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!selectedDate) return;
-
     setIsSubmitting(true);
     try {
-      const startDate = new Date(formData.date);
-      const endDate =
-        formData.type === "full-day"
-          ? new Date(formData.date)
-          : new Date(formData.date);
-
+      let startDate: Date;
+      let endDate: Date;
+      if (formData.type === "time-slot" && formData.startTime && formData.endTime) {
+        startDate = new Date(`${formData.date}T${formData.startTime}:00`);
+        endDate = new Date(`${formData.date}T${formData.endTime}:00`);
+      } else {
+        startDate = new Date(formData.date);
+        endDate = new Date(formData.date);
+      }
       await blockDate(startDate, endDate, formData.notes);
       setShowForm(false);
-      setSelectedDate(null);
     } catch (err) {
       console.error("Error blocking date:", err);
     } finally {
@@ -132,105 +169,49 @@ export default function LocalBlockingsPage() {
     });
   }
 
+  const deleteTarget = blockedDates.find((b) => b.id === deleteId);
+
   return (
     <section className="grid gap-6">
-      <header className="flex justify-between items-center">
-        <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
-            Configuracion
-          </p>
-          <h2 className="text-2xl font-bold text-white">
-            Bloqueos de calendario
-          </h2>
-        </div>
-        <Button variant="secondary" onClick={goToToday}>
-          Hoy
-        </Button>
+      <header>
+        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+          Configuracion
+        </p>
+        <h2 className="text-2xl font-bold text-white">
+          Bloqueos de calendario
+        </h2>
       </header>
 
-      <article className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] p-6 overflow-hidden">
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={goToPreviousMonth}
-            className="p-2 rounded-xl border border-white/10 text-white/60 hover:text-white hover:border-[#00f068]/30 transition-all"
-          >
-            <IconChevronLeft />
-          </button>
-          <h3 className="text-xl font-bold text-white">
-            {MONTH_NAMES[currentMonth]} {currentYear}
-          </h3>
-          <button
-            onClick={goToNextMonth}
-            className="p-2 rounded-xl border border-white/10 text-white/60 hover:text-white hover:border-[#00f068]/30 transition-all"
-          >
-            <IconChevronRight />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-7 gap-1 mb-2">
-          {WEEKDAYS.map((day) => (
-            <div
-              key={day}
-              className="text-center text-[0.75rem] font-semibold text-white/50 uppercase tracking-wider py-2"
-            >
-              {day}
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-7 gap-1">
-          {calendarDays.map((day, idx) => {
-            const isToday =
-              day.date.toDateString() === new Date().toDateString();
-            const isCurrentMonthDay = day.date.getMonth() === currentMonth;
-            const isSelected =
-              selectedDate?.toDateString() === day.date.toDateString();
-
-            return (
-              <button
-                key={idx}
-                onClick={() => isCurrentMonthDay && handleDayClick(day.date)}
-                disabled={!isCurrentMonthDay}
-                className={`
-                  relative min-h-[60px] p-2 rounded-xl border transition-all text-left
-                  ${isCurrentMonthDay
-                    ? day.isBlocked
-                      ? "bg-[#ff5678]/20 border-[#ff5678]/40 cursor-pointer hover:bg-[#ff5678]/30"
-                      : "bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 hover:border-white/20"
-                    : "bg-transparent border-transparent cursor-default opacity-30"}
-                  ${isToday ? "ring-2 ring-[#00f068]/50" : ""}
-                  ${isSelected ? "ring-2 ring-[#00f068]" : ""}
-                `}
-              >
-                <span
-                  className={`text-sm font-medium ${isCurrentMonthDay ? "text-white" : "text-white/40"}`}
-                >
-                  {day.date.getDate()}
-                </span>
-                {day.isBlocked && isCurrentMonthDay && (
-                  <div className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-[#ff5678]" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-white/10">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-white/5 border border-white/10" />
-            <span className="text-[0.7rem] text-white/60">Disponible</span>
+        {isLoading ? (
+          <div className="h-[650px] flex items-center justify-center">
+            <div className="text-white/60">Cargando calendario...</div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-[#ff5678]/20 border border-[#ff5678]/40" />
-            <span className="text-[0.7rem] text-white/60">Bloqueado</span>
-          </div>
-        </div>
-      </article>
+        ) : (
+          <ShadcnBigCalendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            allDayAccessor="allDay"
+            views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
+            view={calendarView}
+            date={calendarDate}
+            onNavigate={handleNavigate}
+            onView={handleViewChange}
+            messages={messages}
+            culture="es"
+            selectable
+            onSelectSlot={handleSelectSlot}
+            onSelectEvent={handleSelectEvent}
+            eventPropGetter={eventPropGetter}
+            style={{ height: 650 }}
+          />
+        )}
 
       {blockedDates.length > 0 && (
         <section>
           <h3 className="text-lg font-semibold text-white mb-3">
-            Bloqueos activos
+            Bloqueos activos ({blockedDates.length})
           </h3>
           <div className="grid gap-2">
             {blockedDates.map((block) => (
@@ -240,10 +221,12 @@ export default function LocalBlockingsPage() {
               >
                 <div>
                   <p className="text-white font-medium">
-                    {new Date(block.startDate).toDateString() ===
-                    new Date(block.endDate).toDateString()
-                      ? formatDate(new Date(block.startDate))
-                      : `${formatDate(new Date(block.startDate))} - ${formatDate(new Date(block.endDate))}`}
+                    {block.startDate.toDateString() ===
+                    block.endDate.toDateString()
+                      ? block.type === "time-slot" && block.startTime && block.endTime
+                        ? `${formatDate(block.startDate)} \u00b7 ${block.startTime} - ${block.endTime}`
+                        : formatDate(block.startDate)
+                      : `${formatDate(block.startDate)} - ${formatDate(block.endDate)}`}
                   </p>
                   {block.reason && (
                     <p className="text-sm text-white/50">{block.reason}</p>
@@ -269,9 +252,10 @@ export default function LocalBlockingsPage() {
               Bloquear fecha
             </h3>
 
-            {selectedDate && (
-              <p className="text-white/60 mb-4">{formatDate(selectedDate)}</p>
-            )}
+            <p className="text-white/60 mb-4">
+              {formData.date &&
+                formatDate(new Date(formData.date + "T12:00:00"))}
+            </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -353,10 +337,7 @@ export default function LocalBlockingsPage() {
                   type="text"
                   value={formData.notes}
                   onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      notes: e.target.value,
-                    }))
+                    setFormData((prev) => ({ ...prev, notes: e.target.value }))
                   }
                   placeholder="Ej: Feriado, mantenimiento..."
                   className="w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder:text-white/40 focus:outline-none focus:border-[#00f068]/50"
@@ -367,10 +348,7 @@ export default function LocalBlockingsPage() {
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => {
-                    setShowForm(false);
-                    setSelectedDate(null);
-                  }}
+                  onClick={() => setShowForm(false)}
                   className="flex-1"
                 >
                   Cancelar
@@ -391,7 +369,19 @@ export default function LocalBlockingsPage() {
       <ConfirmDialog
         isOpen={!!deleteId}
         title="Desbloquear fecha"
-        description="Esta seguro de que desea desbloquear esta fecha? Los turnos bloqueados volveran a estar disponibles."
+        description={
+          deleteTarget
+            ? (() => {
+                const sameDay = deleteTarget.startDate.toDateString() === deleteTarget.endDate.toDateString();
+                const dateText = sameDay
+                  ? deleteTarget.type === "time-slot" && deleteTarget.startTime && deleteTarget.endTime
+                    ? `${formatDate(deleteTarget.startDate)} \u00b7 ${deleteTarget.startTime} - ${deleteTarget.endTime}`
+                    : formatDate(deleteTarget.startDate)
+                  : `${formatDate(deleteTarget.startDate)} - ${formatDate(deleteTarget.endDate)}`;
+                return `¿Está seguro de que desea desbloquear ${dateText}? Los turnos bloqueados volverán a estar disponibles.`;
+              })()
+            : "¿Está seguro de que desea desbloquear esta fecha?"
+        }
         confirmLabel="Desbloquear"
         isDangerous={false}
         isLoading={isDeleting}

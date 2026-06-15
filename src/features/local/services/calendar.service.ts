@@ -1,5 +1,6 @@
 import { apiService } from '@/lib/api';
 import { BlockedDateRange, WorkingDayTemplate } from '../types/calendar.types';
+import { utcToLocalDate } from '../utils/calendarUtils';
 
 export interface Appointment {
   id: number;
@@ -53,11 +54,15 @@ export const calendarService = {
         }
       }
     );
-    return response.data.map(item => ({
-      ...item,
-      startDate: new Date(item.startDate),
-      endDate: new Date(item.endDate)
-    }));
+    return response.data.map(item => {
+      const start = utcToLocalDate(item.startDate as unknown as string);
+      const end = utcToLocalDate(item.endDate as unknown as string);
+      if (start.toDateString() !== end.toDateString()) {
+        end.setDate(end.getDate() - 1);
+      }
+      const isTimeSlot = (item.startTime ?? '') < (item.endTime ?? '');
+      return { ...item, startDate: start, endDate: end, type: isTimeSlot ? 'time-slot' as const : 'full-day' as const };
+    });
   },
   getWorkingDaysFromTemplates: async (localId: string): Promise<WorkingDayTemplate[]> => {
     const response = await apiService.get<WorkingDayTemplate[]>(

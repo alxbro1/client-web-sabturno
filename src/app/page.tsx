@@ -14,7 +14,7 @@ export default function HomePage() {
     if (user) {
       router.replace(user.isLocal ? "/local/dashboard" : "/home");
     } else {
-      router.replace("/login");
+      router.replace("/home");
     }
   }, [hasHydrated, user, router]);
 

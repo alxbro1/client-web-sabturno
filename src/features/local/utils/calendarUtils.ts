@@ -100,6 +100,15 @@ export const formatTime = (time: string): string => {
   return time.slice(0, 5);
 };
 
+export const utcToLocalDate = (value: string | Date): Date => {
+  if (value instanceof Date) return value;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [y, m, d] = value.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+  return new Date(value.replace(/Z$/, "").replace(/\+00:00$/, ""));
+};
+
 export const isDateBlocked = (date: Date, blockedRanges: { startDate: Date; endDate: Date }[]): boolean => {
   return blockedRanges.some(range => {
     const dateTime = date.getTime();

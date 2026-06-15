@@ -23,6 +23,9 @@ export interface BlockedDateRange {
   startDate: Date;
   endDate: Date;
   reason: string;
+  type?: 'full-day' | 'time-slot';
+  startTime?: string;
+  endTime?: string;
   isRecurring?: boolean;
   recurrencePattern?: 'weekly' | 'monthly' | 'yearly';
   localId: string;

@@ -12,6 +12,27 @@
   --brand-neon-soft: rgba(0, 240, 104, 0.2);
   --brand-danger: #ff5678;
   --brand-info: #7bcfff;
+  --radius: 0.75rem;
+  --background: 0 0% 4%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 8%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 8%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 149 100% 47%;
+  --primary-foreground: 0 0% 4%;
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 68%;
+  --accent: 0 0% 12%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 348 100% 66%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 12%;
+  --input: 0 0% 12%;
+  --ring: 149 100% 47%;
+
   color-scheme: dark;
   font-family: var(--font-body);
   background: var(--brand-night);

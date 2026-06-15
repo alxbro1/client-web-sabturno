@@ -15,7 +15,8 @@ import {
   getDateRange,
   getWorkingDayTemplate,
   isCurrentMonth,
-  isDateBlocked
+  isDateBlocked,
+  utcToLocalDate
 } from '../utils/calendarUtils';
 
 interface UseLocalCalendarReturn {
@@ -201,8 +202,8 @@ export const useLocalCalendar = (): UseLocalCalendarReturn => {
           const created = await blockingService.createBlockedDate({ localId, date: dateStr, notes: reason });
           const normalized: BlockedDateRange = {
             id: created.id,
-            startDate: new Date(created.date),
-            endDate: new Date(created.date),
+            startDate: utcToLocalDate(created.date),
+            endDate: utcToLocalDate(created.date),
             reason: created.notes || '',
             localId: created.localId,
             createdAt: created.createdAt,
@@ -217,8 +218,8 @@ export const useLocalCalendar = (): UseLocalCalendarReturn => {
         const created = await blockingService.createBlockedTimeSlot({ localId, date: dateStr, startTime, endTime, notes: reason });
         const normalized: BlockedDateRange = {
           id: created.id,
-          startDate: new Date(created.moduleStartTime),
-          endDate: new Date(created.moduleEndTime),
+          startDate: utcToLocalDate(created.moduleStartTime),
+          endDate: utcToLocalDate(created.moduleEndTime),
           reason: created.notes || '',
           localId: created.localId,
           createdAt: created.createdAt,
@@ -230,8 +231,8 @@ export const useLocalCalendar = (): UseLocalCalendarReturn => {
         const created = await blockingService.createBlockedDate({ localId, date: dateStr, notes: reason });
         const normalized: BlockedDateRange = {
           id: created.id,
-          startDate: new Date(created.date),
-          endDate: new Date(created.date),
+          startDate: utcToLocalDate(created.date),
+          endDate: utcToLocalDate(created.date),
           reason: created.notes || '',
           localId: created.localId,
           createdAt: created.createdAt,

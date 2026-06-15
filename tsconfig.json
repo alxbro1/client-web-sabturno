@@ -45,6 +45,8 @@
     "src/shell-legacy",
     "src/router.tsx.bak",
     "src/main.tsx.bak",
+    "playwright.config.ts",
+    "src/e2e",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
     "src/**/__tests__"
