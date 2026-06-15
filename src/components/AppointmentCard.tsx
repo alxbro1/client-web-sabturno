@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { getFriendlyDateTime, formatCurrency } from "@/lib/utils/date";
 import type { Appointment } from "@/lib/types/booking";
 import { Button } from "@/components/Button";
@@ -103,7 +103,7 @@ export function AppointmentsEmptyState({ title, description, ctaLabel = "Reserva
           <h3>{title}</h3>
           <p className="text-white/68">{description}</p>
         </div>
-        <Link to="/booking/select-local">
+        <Link href="/booking/select-local">
           <Button>{ctaLabel}</Button>
         </Link>
       </div>

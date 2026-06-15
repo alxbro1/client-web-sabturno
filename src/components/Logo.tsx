@@ -1,9 +1,7 @@
-import whiteLogotype from "@/assets/white_logotype.webp";
-
 export function LogoFull() {
   return (
     <img
-      src={whiteLogotype}
+      src="/white_logotype.webp"
       alt="SabTurno"
       className="h-8 w-auto"
     />
@@ -13,10 +11,9 @@ export function LogoFull() {
 export function LogoMark({ className }: { className?: string }) {
   return (
     <img
-      src={whiteLogotype}
+      src="/white_logotype.webp"
       alt="SabTurno"
       className={`h-8 w-auto ${className} object-contain`}
-
     />
   );
 }
@@ -24,7 +21,7 @@ export function LogoMark({ className }: { className?: string }) {
 export function LogoText() {
   return (
     <img
-      src={whiteLogotype}
+      src="/white_logotype.webp"
       alt="SabTurno"
       className="h-6 w-auto"
     />

@@ -136,7 +136,7 @@ export const timelineService = {
     if (startDate) params.set('startDate', startDate);
     if (endDate) params.set('endDate', endDate);
     const query = params.toString();
-    const url = withCacheBust(`/locals/${localId}/blocked-times${query ? `?${query}` : ''}`);
+    const url = withCacheBust(`/local/${localId}/blocked-times${query ? `?${query}` : ''}`);
     const response = await apiService.get<BackendTimeStock[]>(url);
     return response.data;
   },

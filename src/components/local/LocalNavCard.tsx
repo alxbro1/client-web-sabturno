@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 type LocalNavCardProps = {
   to: string;
@@ -10,7 +10,7 @@ type LocalNavCardProps = {
 export function LocalNavCard({ to, title, description, icon }: LocalNavCardProps) {
   return (
     <Link
-      to={to}
+      href={to}
       className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 transition-[transform,border-color,background-color] duration-[140ms] hover:-translate-y-0.5 hover:border-[#00f068]/45 flex flex-col gap-3"
     >
       <div className="flex items-start justify-between">

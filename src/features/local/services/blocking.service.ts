@@ -48,6 +48,6 @@ export const blockingService = {
   },
 
   cancelBlockedTimeSlot: async (id: string): Promise<void> => {
-    await apiService.delete(`/blocking/time-slot/${id}`);
+    await apiService.delete(`/time_stock/unblock/${id}`);
   },
 };
