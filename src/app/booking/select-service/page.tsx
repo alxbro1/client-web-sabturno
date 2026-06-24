@@ -14,6 +14,7 @@ export default function SelectServicePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const local = useBookingStore((s) => s.local);
+  const service = useBookingStore((s) => s.service);
   const setLocal = useBookingStore((s) => s.setLocal);
   const setService = useBookingStore((s) => s.setService);
   const hasHandledServiceDeepLinkRef = useRef(false);
@@ -46,7 +47,12 @@ export default function SelectServicePage() {
   }
 
   useEffect(() => {
-    if (!serviceIdQuery || !services?.length || hasHandledServiceDeepLinkRef.current) {
+    if (
+      !serviceIdQuery ||
+      !services?.length ||
+      hasHandledServiceDeepLinkRef.current ||
+      service?.id // ya hay un servicio en el store (back navigation)
+    ) {
       return;
     }
 
@@ -59,7 +65,7 @@ export default function SelectServicePage() {
       setService(matchedService);
       router.replace(buildAppointmentUrl(matchedService.id));
     }
-  }, [serviceIdQuery, services, router, setService]);
+  }, [serviceIdQuery, services, router, setService, service?.id]);
 
   useEffect(() => {
     if (!localIdQuery && !local?.id) {
@@ -88,7 +94,10 @@ export default function SelectServicePage() {
         </div>
         <Button
           variant="secondary"
-          onClick={() => router.push("/booking/select-local")}
+          onClick={() => {
+            setLocal(null);
+            router.push("/booking/select-local");
+          }}
         >
           Cambiar local
         </Button>

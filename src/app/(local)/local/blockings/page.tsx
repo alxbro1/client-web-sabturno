@@ -115,7 +115,30 @@ export default function LocalBlockingsPage() {
     if (existingBlock?.id) {
       setDeleteId(existingBlock.id);
     } else {
-      setFormData({ type: "full-day", date: dateStr, notes: "" });
+      // Detectar si el usuario seleccionó un rango horario específico
+      // o un día completo (vista mes: start y end a medianoche)
+      const startHour = slotInfo.start.getHours();
+      const startMin = slotInfo.start.getMinutes();
+      const endHour = slotInfo.end.getHours();
+      const endMin = slotInfo.end.getMinutes();
+      const isFullDay =
+        startHour === 0 &&
+        startMin === 0 &&
+        ((endHour === 0 && endMin === 0) || endHour === 23);
+
+      if (isFullDay) {
+        setFormData({ type: "full-day", date: dateStr, notes: "" });
+      } else {
+        const startTime = `${String(startHour).padStart(2, "0")}:${String(startMin).padStart(2, "0")}`;
+        const endTime = `${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
+        setFormData({
+          type: "time-slot",
+          date: dateStr,
+          startTime,
+          endTime,
+          notes: "",
+        });
+      }
       setShowForm(true);
     }
   }
@@ -128,14 +151,34 @@ export default function LocalBlockingsPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // Validaciones (alineadas con la app móvil)
+    if (!formData.date) {
+      return;
+    }
+
+    if (formData.type === "time-slot") {
+      if (!formData.startTime || !formData.endTime) {
+        return;
+      }
+      if (formData.startTime >= formData.endTime) {
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
       let startDate: Date;
       let endDate: Date;
-      if (formData.type === "time-slot" && formData.startTime && formData.endTime) {
+      if (
+        formData.type === "time-slot" &&
+        formData.startTime &&
+        formData.endTime
+      ) {
         startDate = new Date(`${formData.date}T${formData.startTime}:00`);
         endDate = new Date(`${formData.date}T${formData.endTime}:00`);
       } else {
+        // Día completo: solo fecha, sin horas específicas
         startDate = new Date(formData.date);
         endDate = new Date(formData.date);
       }
