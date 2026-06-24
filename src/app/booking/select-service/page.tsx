@@ -78,11 +78,13 @@ export default function SelectServicePage() {
     <section className="flex flex-col gap-6 p-6 min-h-screen items-start">
       <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch w-full">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+          <p className="text-xs font-bold uppercase tracking-widest text-primary">
             Reserva paso 2
           </p>
-          <h2>Selecciona un servicio</h2>
-          {local?.name && <p>Local elegido: {local.name}</p>}
+          <h2 className="text-2xl font-bold text-foreground">Selecciona un servicio</h2>
+          {local?.name && (
+            <p className="text-muted-foreground">Local elegido: {local.name}</p>
+          )}
         </div>
         <Button
           variant="secondary"
@@ -93,13 +95,13 @@ export default function SelectServicePage() {
       </header>
 
       {isLoading ? (
-        <div className="w-full rounded-[28px] border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 min-h-[140px] grid place-items-center text-center text-[#dfe8f4]/70">
+        <div className="w-full rounded-xl border border-border bg-card p-5 min-h-[140px] grid place-items-center text-center text-muted-foreground">
           Cargando servicios...
         </div>
       ) : null}
 
       {error ? (
-        <div className="w-full rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">
+        <div className="w-full rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error.message}
         </div>
       ) : null}

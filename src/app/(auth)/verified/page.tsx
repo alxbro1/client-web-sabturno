@@ -3,6 +3,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { LogoMark } from "@/components/Logo";
 import { Button } from "@/components/Button";
 import { InputField } from "@/components/Field";
@@ -40,65 +46,65 @@ export default function VerifiedPage() {
   }
 
   return (
-    <section className="w-full max-w-140 rounded-[24px] border border-white/10 bg-[#0d0f12]/94 shadow-[0_18px_40px_rgba(0,0,0,0.34)] backdrop-blur-[10px] p-7 sm:p-8 flex flex-col gap-6 min-w-0">
-      <div className="grid gap-4 text-center">
-        <div className="mx-auto px-5 py-3">
+    <Card className="w-full max-w-md">
+      <CardHeader className="text-center gap-2">
+        <div className="mx-auto">
           <LogoMark className="h-10 w-auto" />
         </div>
-        <div className="grid gap-2">
-          <p className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-[#00f068]">
+        <div className="grid gap-1">
+          <p className="text-xs font-bold uppercase tracking-widest text-primary">
             Verificacion
           </p>
-          <h2 className="text-[1.7rem] leading-none">
+          <h2 className="text-[1.7rem] leading-none font-semibold">
             {success ? "Correo verificado" : "Error de verificacion"}
           </h2>
         </div>
-      </div>
+      </CardHeader>
 
-      <div className="grid gap-4">
-        <p className="text-center text-white/68">
+      <CardContent className="grid gap-4">
+        <p className="text-center text-muted-foreground">
           {success
             ? "Tu correo ha sido verificado correctamente. Ya puedes iniciar sesion."
             : "No se pudo verificar tu correo. El enlace puede haber expirado."}
         </p>
-      </div>
 
-      {!success && (
-        <form className="grid gap-[1.1rem]" onSubmit={handleResend}>
-          <p className="text-center text-white/54 text-[0.9rem]">
-            Ingresa tu correo para recibir un nuevo enlace de verificacion.
-          </p>
-          <InputField
-            label="Correo electronico"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            errors={errors}
-          />
-          {message ? (
-            <div className="rounded-2xl border border-[#00f068]/32 bg-[rgba(3,58,29,0.36)] px-4 py-[0.95rem] text-[#cdfbe1]">
-              {message}
-            </div>
-          ) : null}
-          {error ? (
-            <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">
-              {error}
-            </div>
-          ) : null}
-          <Button type="submit" disabled={!isFormValid || loading} fullWidth>
-            {loading ? "Enviando..." : "Reenviar verificacion"}
-          </Button>
-        </form>
-      )}
+        {!success && (
+          <form className="grid gap-4" onSubmit={handleResend}>
+            <p className="text-center text-muted-foreground text-sm">
+              Ingresa tu correo para recibir un nuevo enlace de verificacion.
+            </p>
+            <InputField
+              label="Correo electronico"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              errors={errors}
+            />
+            {message ? (
+              <div className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary-foreground">
+                {message}
+              </div>
+            ) : null}
+            {error ? (
+              <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {error}
+              </div>
+            ) : null}
+            <Button type="submit" disabled={!isFormValid || loading} fullWidth>
+              {loading ? "Enviando..." : "Reenviar verificacion"}
+            </Button>
+          </form>
+        )}
+      </CardContent>
 
-      <div className="grid gap-3 pt-1 text-center">
+      <CardFooter className="justify-center">
         <Link
-          className="text-[#7bcfff] text-[0.95rem] decoration-[#7bcfff]/45 transition-[color,text-decoration-color] duration-150 hover:text-[#a8dfff] hover:decoration-[#a8dfff]/72"
+          className="text-sm text-info underline decoration-info/30 underline-offset-2 transition-colors hover:text-info/80 hover:decoration-info/70"
           href="/login"
         >
           Ir a iniciar sesion
         </Link>
-      </div>
-    </section>
+      </CardFooter>
+    </Card>
   );
 }

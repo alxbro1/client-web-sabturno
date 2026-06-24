@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Check, X, Hourglass } from "lucide-react";
 import { Button } from "@/components/Button";
 import TaloPaymentInfo from "@/components/TaloPaymentInfo";
 import { useBookingStore } from "@/stores/booking";
@@ -38,19 +39,19 @@ export default function AppointmentResultPage() {
         <div className="w-full max-w-md grid gap-6 text-center">
           <div className="flex justify-center">
             <div className="relative w-24 h-24 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-yellow-500/5 rounded-full" />
-              <div className="absolute inset-0 border-2 border-yellow-500/30 rounded-full animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-amber-500/5 rounded-full" />
+              <div className="absolute inset-0 border-2 border-amber-500/30 rounded-full animate-pulse" />
               <div className="relative flex items-center justify-center text-5xl">
-                ⏳
+                <Hourglass className="size-12 text-amber-400" />
               </div>
             </div>
           </div>
 
           <div>
-            <h1 className="text-3xl font-bold text-yellow-500 mb-2">
+            <h1 className="text-3xl font-bold text-amber-400 mb-2">
               Turno Reservado
             </h1>
-            <p className="text-white/70 text-sm leading-relaxed">
+            <p className="text-muted-foreground text-sm leading-relaxed">
               Tu turno esta reservado. Completa el pago para confirmar.
             </p>
           </div>
@@ -77,7 +78,7 @@ export default function AppointmentResultPage() {
             Verificar estado del pago
           </Button>
 
-          <p className="text-xs text-white/50">
+          <p className="text-xs text-muted-foreground">
             No necesitas hacer nada mas. Te notificaremos cuando el pago sea
             confirmado.
           </p>
@@ -94,40 +95,18 @@ export default function AppointmentResultPage() {
         <div className="flex justify-center">
           {isSuccess ? (
             <div className="relative w-24 h-24 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#00f068]/20 to-[#00f068]/5 rounded-full" />
-              <div className="absolute inset-0 border-2 border-[#00f068]/30 rounded-full animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full" />
+              <div className="absolute inset-0 border-2 border-primary/30 rounded-full animate-pulse" />
               <div className="relative flex items-center justify-center">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#00f068"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-12 h-12"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <Check className="size-12 text-primary" />
               </div>
             </div>
           ) : (
             <div className="relative w-24 h-24 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ff5678]/20 to-[#ff5678]/5 rounded-full" />
-              <div className="absolute inset-0 border-2 border-[#ff5678]/30 rounded-full animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-br from-destructive/20 to-destructive/5 rounded-full" />
+              <div className="absolute inset-0 border-2 border-destructive/30 rounded-full animate-pulse" />
               <div className="relative flex items-center justify-center">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#ff5678"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-12 h-12"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="15" y1="9" x2="9" y2="15" />
-                  <line x1="9" y1="9" x2="15" y2="15" />
-                </svg>
+                <X className="size-12 text-destructive" />
               </div>
             </div>
           )}
@@ -135,7 +114,7 @@ export default function AppointmentResultPage() {
 
         <div>
           <h1
-            className={`text-3xl font-bold mb-2 ${isSuccess ? "text-[#00f068]" : "text-[#ff5678]"}`}
+            className={`text-3xl font-bold mb-2 ${isSuccess ? "text-primary" : "text-destructive"}`}
           >
             {isSuccess ? "Reserva Exitosa!" : "Reserva No Completada"}
           </h1>
@@ -143,7 +122,7 @@ export default function AppointmentResultPage() {
 
         <div>
           {isSuccess && message.includes("http") ? (
-            <div className="text-white/70 text-sm leading-relaxed space-y-3">
+            <div className="text-muted-foreground text-sm leading-relaxed space-y-3">
               {message.split(/\n|\\n/).map((line, i) => {
                 const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
                 if (urlMatch) {
@@ -152,7 +131,7 @@ export default function AppointmentResultPage() {
                       <span>Accede a tu turno aqui: </span>
                       <a
                         href={urlMatch[1]}
-                        className="text-[#00f068] underline break-all"
+                        className="text-primary underline break-all"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -165,7 +144,7 @@ export default function AppointmentResultPage() {
               })}
             </div>
           ) : (
-            <p className="text-white/70 text-sm leading-relaxed">
+            <p className="text-muted-foreground text-sm leading-relaxed">
               {message ||
                 (isSuccess
                   ? "Puedes verlo en tu lista de citas."

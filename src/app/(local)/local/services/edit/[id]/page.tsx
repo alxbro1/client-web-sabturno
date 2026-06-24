@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import { InputField, TextareaField } from "@/components/Field";
 import { useLocalServicesQuery } from "@/hooks/queries/useLocalServicesQuery";
@@ -161,9 +162,7 @@ export default function ServiceEditPage() {
           href="/local/services"
           className="text-white/48 hover:text-white/72 transition-colors duration-150"
         >
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-          </svg>
+          <ArrowLeft className="w-6 h-6" />
         </Link>
         <div>
           <h1 className="text-[1.5rem] font-bold">

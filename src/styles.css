@@ -1,4 +1,10 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-info: #7bcfff;
+  --color-info-foreground: #0a0a0a;
+}
 
 :root {
   --font-display: "Space Grotesk", "Manrope", "Segoe UI", sans-serif;

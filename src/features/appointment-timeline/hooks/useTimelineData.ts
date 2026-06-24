@@ -1,11 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { timelineService, type BackendEmployee } from '@/services/timeline';
-import { mapBackendAppointments, mapBackendTimeStocks, formatDateParam } from '../utils/mappers';
+import { mapBackendAppointments, mapBackendTimeStocks, formatDateRange } from '../utils/mappers';
 import type { Appointment, Block, Resource } from '../types';
+
+interface DateRange {
+  start: Date;
+  end: Date;
+}
 
 interface UseTimelineDataParams {
   entityId: string;
-  date: Date;
+  dateRange: DateRange;
   enabled?: boolean;
   employees?: BackendEmployee[];
 }
@@ -21,7 +26,7 @@ interface UseTimelineDataReturn {
 
 export function useTimelineData({
   entityId,
-  date,
+  dateRange,
   enabled = true,
   employees = [],
 }: UseTimelineDataParams): UseTimelineDataReturn {
@@ -50,16 +55,16 @@ export function useTimelineData({
 
     try {
       const localId = entityId;
-      const dateStr = formatDateParam(date);
+      const { minDate, maxDate } = formatDateRange(dateRange.start, dateRange.end);
 
       const [aptResult, blockedRaw] = await Promise.all([
         timelineService.getAppointmentsByEntity(entityId, {
-          minDate: dateStr,
-          maxDate: dateStr,
+          minDate,
+          maxDate,
           status: ['PENDING', 'CONFIRMED', 'COMPLETED'],
           limit: 100,
         }),
-        timelineService.getBlockedTimes(entityId, dateStr, dateStr),
+        timelineService.getBlockedTimes(entityId, minDate, maxDate),
       ]);
 
       setAppointments(mapBackendAppointments(aptResult.items, localId));
@@ -71,7 +76,7 @@ export function useTimelineData({
     } finally {
       setIsLoading(false);
     }
-  }, [entityId, date, enabled]);
+  }, [entityId, dateRange.start, dateRange.end, enabled]);
 
   useEffect(() => {
     fetchData();

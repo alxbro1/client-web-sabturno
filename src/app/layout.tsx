@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Manrope } from "next/font/google";
+import { Toaster } from "sonner";
 import { AuthProvider } from "@/components/AuthProvider";
 import { QueryProvider } from "@/components/QueryProvider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "@/styles.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -44,7 +46,17 @@ export default function RootLayout({
     >
       <body>
         <QueryProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <TooltipProvider delayDuration={0}>
+              {children}
+              <Toaster
+                position="top-right"
+                richColors
+                closeButton
+                theme="dark"
+              />
+            </TooltipProvider>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

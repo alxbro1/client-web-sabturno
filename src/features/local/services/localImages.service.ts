@@ -1,6 +1,18 @@
 import { apiService } from '@/lib/api';
 import { LocalImage, ImageUploadRequest } from '../types/local.types';
 
+function dataUrlToBlob(dataUrl: string): Blob {
+  const [header, base64] = dataUrl.split(',');
+  const mimeMatch = header.match(/:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+  const binary = atob(base64);
+  const array = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    array[i] = binary.charCodeAt(i);
+  }
+  return new Blob([array], { type: mime });
+}
+
 export const localImagesService = {
   getLocalImages: async (localId: string): Promise<LocalImage[]> => {
     try {
@@ -31,11 +43,9 @@ export const localImagesService = {
   ): Promise<LocalImage | null> => {
     try {
       const formData = new FormData();
-      formData.append('image', {
-        uri: imageData.uri,
-        type: 'image/jpeg',
-        name: 'image.jpg',
-      } as any);
+      const blob = dataUrlToBlob(imageData.uri);
+      const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
+      formData.append('image', file);
 
       if (imageData.description) {
         formData.append('description', imageData.description);

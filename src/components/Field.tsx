@@ -1,5 +1,12 @@
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
+/* ------------------------------------------------------------------ */
+/*  Shared props for all field variants                               */
+/* ------------------------------------------------------------------ */
 type SharedProps = {
   label: string;
   errors?: string[];
@@ -7,53 +14,120 @@ type SharedProps = {
   trailing?: ReactNode;
 };
 
-export function InputField({ label, errors, hint, trailing, ...props }: SharedProps & InputHTMLAttributes<HTMLInputElement>) {
+/* ------------------------------------------------------------------ */
+/*  InputField                                                         */
+/* ------------------------------------------------------------------ */
+export function InputField({
+  label,
+  errors,
+  hint,
+  trailing,
+  className,
+  id,
+  ...props
+}: SharedProps & InputHTMLAttributes<HTMLInputElement>) {
+  const fieldId = id ?? label.toLowerCase().replace(/\s+/g, "-");
+
   return (
-      <label className="grid gap-[0.45rem]">
-        <span className="text-[0.86rem] font-semibold tracking-[0.04em] text-white/88">{label}</span>
-        <div className="relative">
-          <input
-            className="w-full border border-white/16 bg-[rgba(255,255,255,0.03)] text-white rounded-2xl px-4 py-[0.95rem] transition-[border-color,box-shadow,background-color] duration-150 focus:border-[#00f068]/55 focus:bg-[rgba(255,255,255,0.045)] focus:outline-none focus:ring-2 focus:ring-[#00f068]/22"
-            {...props}
-          />
-        {trailing}
+    <div className="grid gap-1.5">
+      <Label htmlFor={fieldId}>{label}</Label>
+
+      <div className="relative">
+        <Input id={fieldId} className={className} {...props} />
+        {trailing && (
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+            {trailing}
+          </div>
+        )}
       </div>
-        {hint ? <span className="text-white/52 text-sm">{hint}</span> : null}
+
+      {hint && !errors?.length && (
+        <p className="text-sm text-muted-foreground">{hint}</p>
+      )}
+
       {errors?.map((error) => (
-          <span key={error} className="text-rose-300 text-[0.84rem]">{error}</span>
+        <p key={error} className="text-sm text-destructive">
+          {error}
+        </p>
       ))}
-    </label>
+    </div>
   );
 }
 
-export function SelectField({ label, errors, children, ...props }: SharedProps & SelectHTMLAttributes<HTMLSelectElement>) {
+/* ------------------------------------------------------------------ */
+/*  SelectField                                                        */
+/* ------------------------------------------------------------------ */
+export function SelectField({
+  label,
+  errors,
+  hint,
+  children,
+  className,
+  id,
+  ...props
+}: SharedProps & SelectHTMLAttributes<HTMLSelectElement>) {
+  const fieldId = id ?? label.toLowerCase().replace(/\s+/g, "-");
+
   return (
-      <label className="grid gap-[0.45rem]">
-        <span className="text-[0.86rem] font-semibold tracking-[0.04em] text-white/88">{label}</span>
-        <select
-          className="w-full border border-white/16 bg-[rgba(255,255,255,0.03)] text-white rounded-2xl px-4 py-[0.95rem] transition-[border-color,box-shadow,background-color] duration-150 focus:border-[#00f068]/55 focus:bg-[rgba(255,255,255,0.045)] focus:outline-none focus:ring-2 focus:ring-[#00f068]/22"
-          {...props}
-        >
+    <div className="grid gap-1.5">
+      <Label htmlFor={fieldId}>{label}</Label>
+
+      <select
+        id={fieldId}
+        className={cn(
+          // Misma apariencia que Input — border, ring, bg, shadow
+          "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] md:text-sm",
+          "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          "aria-invalid:border-destructive",
+          className,
+        )}
+        {...props}
+      >
         {children}
       </select>
+
+      {hint && !errors?.length && (
+        <p className="text-sm text-muted-foreground">{hint}</p>
+      )}
+
       {errors?.map((error) => (
-          <span key={error} className="text-rose-300 text-[0.84rem]">{error}</span>
+        <p key={error} className="text-sm text-destructive">
+          {error}
+        </p>
       ))}
-    </label>
+    </div>
   );
 }
 
-export function TextareaField({ label, errors, ...props }: SharedProps & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+/* ------------------------------------------------------------------ */
+/*  TextareaField                                                      */
+/* ------------------------------------------------------------------ */
+export function TextareaField({
+  label,
+  errors,
+  hint,
+  className,
+  id,
+  ...props
+}: SharedProps & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const fieldId = id ?? label.toLowerCase().replace(/\s+/g, "-");
+
   return (
-      <label className="grid gap-[0.45rem]">
-        <span className="text-[0.86rem] font-semibold tracking-[0.04em] text-white/88">{label}</span>
-        <textarea
-          className="w-full border border-white/16 bg-[rgba(255,255,255,0.03)] text-white rounded-2xl px-4 py-[0.95rem] min-h-[140px] resize-y transition-[border-color,box-shadow,background-color] duration-150 focus:border-[#00f068]/55 focus:bg-[rgba(255,255,255,0.045)] focus:outline-none focus:ring-2 focus:ring-[#00f068]/22"
-          {...props}
-        />
+    <div className="grid gap-1.5">
+      <Label htmlFor={fieldId}>{label}</Label>
+
+      <Textarea id={fieldId} className={className} {...props} />
+
+      {hint && !errors?.length && (
+        <p className="text-sm text-muted-foreground">{hint}</p>
+      )}
+
       {errors?.map((error) => (
-          <span key={error} className="text-rose-300 text-[0.84rem]">{error}</span>
+        <p key={error} className="text-sm text-destructive">
+          {error}
+        </p>
       ))}
-    </label>
+    </div>
   );
 }

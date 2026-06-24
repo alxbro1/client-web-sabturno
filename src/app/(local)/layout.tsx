@@ -1,76 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Image as ImageIcon,
+  Ban,
+  Users,
+  Wrench,
+  LogOut,
+  UserCircle,
+  Menu,
+  CreditCard,
+  Crown,
+} from "lucide-react";
 import { Button } from "@/components/Button";
 import { LogoMark } from "@/components/Logo";
-import { IconPayment } from "@/components/Icons";
+import { PlanBadge, TrialCountdown } from "@/components/premium";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useAuthStore } from "@/stores/auth";
-
-function IconDashboard() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-    </svg>
-  );
-}
-
-function IconSchedule() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z" />
-    </svg>
-  );
-}
-
-function IconImage() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-    </svg>
-  );
-}
-
-function IconBlock() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 5.69C8.45 4.63 10.15 4 12 4c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9z" />
-    </svg>
-  );
-}
-
-function IconUsers() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-    </svg>
-  );
-}
-
-function IconService() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7zM7 9H4V5h3v4zm10 6h3v4h-3v-4zm0-10h3v4h-3V5z" />
-    </svg>
-  );
-}
-
-function IconLogout() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
-    </svg>
-  );
-}
-
-function IconClose() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-    </svg>
-  );
-}
+import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
 
 interface NavItem {
   to: string;
@@ -79,22 +36,19 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { to: "/local/dashboard", label: "Panel", icon: <IconDashboard /> },
-  { to: "/local/calendar", label: "Turnos", icon: <IconSchedule /> },
-  { to: "/local/schedules", label: "Horarios", icon: <IconSchedule /> },
-  { to: "/local/employees", label: "Empleados", icon: <IconUsers /> },
-  { to: "/local/services", label: "Servicios", icon: <IconService /> },
-  { to: "/local/blockings", label: "Bloqueos", icon: <IconBlock /> },
-  { to: "/local/images", label: "Fotos", icon: <IconImage /> },
-  { to: "/local/payment-methods", label: "Metodos de cobro", icon: <IconPayment /> },
+  { to: "/local/dashboard", label: "Panel", icon: <LayoutDashboard className="size-5" /> },
+  { to: "/local/calendar", label: "Turnos", icon: <CalendarDays className="size-5" /> },
+  { to: "/local/schedules", label: "Horarios", icon: <CalendarDays className="size-5" /> },
+  { to: "/local/employees", label: "Empleados", icon: <Users className="size-5" /> },
+  { to: "/local/services", label: "Servicios", icon: <Wrench className="size-5" /> },
+  { to: "/local/blockings", label: "Bloqueos", icon: <Ban className="size-5" /> },
+  { to: "/local/images", label: "Fotos", icon: <ImageIcon className="size-5" /> },
+  { to: "/local/payment-methods", label: "Metodos de cobro", icon: <CreditCard className="size-5" /> },
+  { to: "/local/premium", label: "Planes", icon: <Crown className="size-5" /> },
   {
     to: "/local/profile",
     label: "Perfil",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-      </svg>
-    ),
+    icon: <UserCircle className="size-5" />,
   },
 ];
 
@@ -106,7 +60,7 @@ export default function LocalLayout({
   const { user, hasHydrated, logout } = useAuthStore();
   const pathname = usePathname();
   const router = useRouter();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { data: premiumStatus } = usePremiumStatusQuery();
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -120,132 +74,157 @@ export default function LocalLayout({
   function handleLogout() {
     fetch("/api/auth/logout", { method: "POST" }).catch(console.error);
     logout();
-    setIsMobileMenuOpen(false);
   }
 
-  function handleMobileNavigation() {
-    setIsMobileMenuOpen(false);
-  }
+  const isActive = (path: string) => pathname === path;
 
   const navLinkClass = (path: string) => {
-    const isActive = pathname === path;
-    return `flex items-center gap-3 whitespace-nowrap rounded-[18px] border px-[1.1rem] py-4 text-white/75 bg-white/[0.02] transition-[background-color,color,border-color,transform] duration-150 hover:-translate-y-px max-sm:rounded-[14px] max-sm:px-[0.95rem] max-sm:py-[0.7rem] max-sm:text-[0.92rem] ${
-      isActive
-        ? "border-[#00f068]/40 bg-[#00f068]/14 text-[#eafff3]"
-        : "border-transparent"
-    }`;
+    const active = isActive(path);
+    return [
+      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+      active
+        ? "bg-primary/10 text-primary border border-primary/30"
+        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-transparent",
+    ].join(" ");
   };
 
   if (!hasHydrated) {
     return (
-      <div className="min-h-[140px] grid place-items-center text-center text-[#dfe8f4]/70">
+      <div className="min-h-[140px] grid place-items-center text-center text-muted-foreground">
         Cargando...
       </div>
     );
   }
 
+  const sidebar = (
+    <aside className="self-start sticky top-5 h-[calc(100vh-2.5rem)] overflow-y-auto p-6 flex flex-col gap-8 justify-between bg-card border border-border shadow-sm rounded-xl max-sm:hidden">
+      <div>
+        <Link href="/local/dashboard" className="flex items-center gap-2 mb-4">
+          <LogoMark />
+        </Link>
+        <p className="text-xs text-muted-foreground max-w-[18rem]">
+          Panel de administracion del local
+        </p>
+      </div>
+
+      <nav className="grid gap-1.5">
+        {navItems.map((item) => (
+          <Link
+            key={item.to}
+            className={navLinkClass(item.to)}
+            href={item.to}
+          >
+            {item.icon}
+            <span>{item.label}</span>
+          </Link>
+        ))}
+      </nav>
+
+      <div className="grid gap-3">
+        <div className="p-3 rounded-lg bg-muted/50 border border-border">
+          <p className="text-[0.7rem] text-muted-foreground uppercase tracking-wider mb-1">
+            Local
+          </p>
+          <strong className="text-sm text-foreground">
+            {user?.localName || user?.name}
+          </strong>
+          {premiumStatus && (
+            <div className="mt-2">
+              <PlanBadge tier={premiumStatus.tier} />
+            </div>
+          )}
+        </div>
+        {premiumStatus?.status === "trial" && premiumStatus.trialEndDate && (
+          <TrialCountdown trialEndDate={premiumStatus.trialEndDate} />
+        )}
+        <Button
+          variant="ghost"
+          onClick={handleLogout}
+          className="flex items-center gap-3 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive [&>svg]:size-5"
+        >
+          <LogOut />
+          <span>Cerrar sesion</span>
+        </Button>
+      </div>
+    </aside>
+  );
+
+  const mobileNavItems = (
+    <nav className="grid gap-1.5">
+      {navItems.map((item) => (
+        <Link
+          key={item.to}
+          className={navLinkClass(item.to)}
+          href={item.to}
+        >
+          {item.icon}
+          <span>{item.label}</span>
+        </Link>
+      ))}
+    </nav>
+  );
+
   return (
     <div className="grid grid-cols-[280px_1fr] gap-5 min-h-screen p-5 max-lg:grid-cols-1 max-sm:gap-3 max-sm:p-3">
-      <aside className="self-start sticky top-5 h-[calc(100vh-2.5rem)] overflow-y-auto p-6 flex flex-col gap-8 justify-between border border-white/10 bg-[rgba(10,10,10,0.9)] rounded-[28px] shadow-[0_24px_65px_rgba(0,0,0,0.38)] backdrop-blur-md max-sm:hidden">
-        <div>
-          <Link href="/local/dashboard" className="flex items-center gap-2 mb-4">
-            <LogoMark />
-          </Link>
-          <p className="text-[0.8rem] text-white/48 max-w-[18rem]">
-            Panel de administracion del local
-          </p>
-        </div>
+      {sidebar}
 
-        <nav className="grid gap-2">
-          {navItems.map((item) => (
-            <Link
-              key={item.to}
-              className={navLinkClass(item.to)}
-              href={item.to}
-              onClick={handleMobileNavigation}
-            >
-              {item.icon}
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="grid gap-[0.85rem]">
-          <div className="p-3 rounded-[18px] border border-white/10 bg-white/[0.02]">
-            <p className="text-[0.75rem] text-white/48 uppercase tracking-wider mb-1">
-              Local
-            </p>
-            <strong className="text-[0.95rem] text-white">
-              {user?.localName || user?.name}
-            </strong>
-          </div>
-          <Button
-            variant="ghost"
-            onClick={handleLogout}
-            className="flex items-center gap-3 whitespace-nowrap rounded-[18px] border px-[1.1rem] py-4 text-white/75 bg-white/[0.02] transition-[background-color,color,border-color,transform] duration-150 hover:-translate-y-px border-[#ff5678]/40 hover:bg-[#ff5678]/14 hover:text-[#ffd7e0] [&>svg]:h-5 [&>svg]:w-5"
-          >
-            <IconLogout />
-            <span>Cerrar sesion</span>
-          </Button>
-        </div>
-      </aside>
-
-      <main className="p-6 border border-white/10 bg-[#0f1014] rounded-[28px] shadow-[0_12px_32px_rgba(0,0,0,0.28)] overflow-y-auto max-sm:order-2 max-sm:p-4 max-sm:rounded-[22px]">
+      <main className="p-6 bg-card border border-border shadow-sm rounded-xl overflow-y-auto max-sm:order-2 max-sm:p-4 max-sm:rounded-xl">
         <div className="hidden max-sm:flex items-center justify-between gap-3 pb-4">
           <Link href="/local/dashboard" className="flex items-center gap-2">
             <LogoMark />
           </Link>
-          <button
-            type="button"
-            aria-label={isMobileMenuOpen ? "Cerrar menu" : "Abrir menu"}
-            aria-expanded={isMobileMenuOpen}
-            onClick={() => setIsMobileMenuOpen((current) => !current)}
-            className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-[#00f068]/22 bg-[#0a0a0a] text-[#00f068] shadow-[0_10px_24px_rgba(0,0,0,0.34)]"
-          >
-            {isMobileMenuOpen ? (
-              <IconClose />
-            ) : (
-              <span className="flex h-4 w-5 flex-col justify-between">
-                <span className="block h-0.5 w-5 rounded-full bg-current" />
-                <span className="block h-0.5 w-5 rounded-full bg-current" />
-                <span className="block h-0.5 w-5 rounded-full bg-current" />
-              </span>
-            )}
-          </button>
-        </div>
 
-        {isMobileMenuOpen ? (
-          <div className="hidden max-sm:grid gap-4 mb-4 rounded-[22px] border border-white/10 bg-[rgba(10,10,10,0.96)] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.34)]">
-            <nav className="grid gap-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.to}
-                  className={navLinkClass(item.to)}
-                  href={item.to}
-                  onClick={handleMobileNavigation}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </Link>
-              ))}
-            </nav>
-
-            <div className="grid gap-3 border-t border-[#00f068]/12 pt-3">
-              <div>
-                <strong>{user?.localName || user?.name}</strong>
-                <p className="text-white/54 text-sm">{user?.email}</p>
-              </div>
-              <Button
-                variant="ghost"
-                onClick={handleLogout}
-                className="flex items-center gap-3 whitespace-nowrap rounded-[18px] border px-[1.1rem] py-4 text-white/75 bg-white/[0.02] transition-[background-color,color,border-color,transform] duration-150 hover:-translate-y-px border-[#ff5678]/40 hover:bg-[#ff5678]/14 hover:text-[#ffd7e0] max-sm:px-[0.95rem] max-sm:py-[0.7rem] max-sm:text-[0.92rem] [&>svg]:h-5 [&>svg]:w-5 max-sm:[&>svg]:h-4 max-sm:[&>svg]:w-4"
+          <Sheet>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                aria-label="Abrir menu"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-card text-primary"
               >
-                <IconLogout />
-                <span>Cerrar sesion</span>
-              </Button>
-            </div>
-          </div>
-        ) : null}
+                <Menu className="size-5" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] sm:max-w-[280px]">
+              <SheetHeader className="pb-0">
+                <SheetTitle className="flex items-center gap-2">
+                  <LogoMark />
+                  <span className="sr-only">Menu</span>
+                </SheetTitle>
+              </SheetHeader>
+
+              <div className="flex flex-col gap-6 px-4">
+                {mobileNavItems}
+
+                <div className="flex flex-col gap-3 border-t border-border pt-4">
+                  <div>
+                    <p className="text-[0.7rem] text-muted-foreground uppercase tracking-wider">
+                      Local
+                    </p>
+                    <strong className="text-sm text-foreground">
+                      {user?.localName || user?.name}
+                    </strong>
+                    {premiumStatus && (
+                      <div className="mt-2">
+                        <PlanBadge tier={premiumStatus.tier} />
+                      </div>
+                    )}
+                  </div>
+                  {premiumStatus?.status === "trial" && premiumStatus.trialEndDate && (
+                    <TrialCountdown trialEndDate={premiumStatus.trialEndDate} />
+                  )}
+                  <Button
+                    variant="ghost"
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive [&>svg]:size-5"
+                  >
+                    <LogOut />
+                    <span>Cerrar sesion</span>
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
 
         {children}
       </main>

@@ -16,4 +16,10 @@ export interface Local {
   reservationPercentage?: number | null;
   payWithCashInFront?: boolean;
   payWithTalo?: boolean;
+  /** ID del plan de suscripción actual */
+  subscriptionPlanId?: string | null;
+  /** Tier del plan: basic, pro, enterprise */
+  subscriptionTier?: "basic" | "pro" | "enterprise" | null;
+  /** Estado de la suscripción */
+  subscriptionStatus?: "active" | "trial" | "cancelled" | "expired" | null;
 }

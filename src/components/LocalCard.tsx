@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { MapPin } from "lucide-react";
 import type { Local } from "@/lib/types/local";
 
 interface LocalCardProps {
@@ -6,62 +7,70 @@ interface LocalCardProps {
   onSelect: (local: Local) => void;
 }
 
-export const LocalCard = memo(function LocalCard({ local, onSelect }: LocalCardProps) {
+export const LocalCard = memo(function LocalCard({
+  local,
+  onSelect,
+}: LocalCardProps) {
   return (
     <button
+      type="button"
       onClick={() => onSelect(local)}
-      className="w-full h-24 flex items-center gap-4 p-3 rounded-[20px] border border-white/12 bg-gradient-to-b from-[rgba(22,22,22,0.96)] to-[rgba(12,12,12,0.95)] backdrop-blur-[12px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] transition-all duration-[140ms] hover:border-[#00f068]/45 hover:shadow-[0_20px_50px_rgba(0,240,104,0.1)] active:scale-95 group text-left"
+      className="group flex h-24 w-full items-center gap-4 overflow-hidden rounded-xl border bg-card p-3 text-left shadow-sm transition-all duration-[140ms] hover:border-[#00f068]/45 active:scale-95"
     >
+      {/* Avatar / imagen del local */}
       <div className="flex-shrink-0">
-        <div className="w-15 h-15 rounded-[16px] bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden flex items-center justify-center">
+        <div className="flex h-15 w-15 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted">
           {local.imageProfile ? (
             <img
               src={local.imageProfile}
               alt={local.name}
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[#00f068]/20 to-[#00f068]/5 flex items-center justify-center text-[#00f068]/60">
-              <span className="text-xl font-semibold">{local.name.charAt(0)}</span>
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 text-primary/60">
+              <span className="text-xl font-semibold">
+                {local.name.charAt(0)}
+              </span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="flex-1 text-left min-w-0">
-        <h3 className="font-semibold text-white truncate mb-0.5">{local.name}</h3>
-        
-        <div className="flex items-center gap-1.5 text-xs text-white/50 truncate mb-2">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 shrink-0 text-white/40">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-            <circle cx="12" cy="10" r="3" />
-          </svg>
+      {/* Contenido */}
+      <div className="min-w-0 flex-1 text-left">
+        <h3 className="mb-0.5 truncate font-semibold text-foreground">
+          {local.name}
+        </h3>
+
+        <div className="mb-2 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+          <MapPin className="h-3 w-3 shrink-0" />
           <span className="truncate">
             {local.city}
             {local.province ? `, ${local.province}` : ""}
           </span>
         </div>
 
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="flex flex-wrap gap-1.5">
           {local.mercadoPagoLiveMode && (
-            <span className="inline-block px-2 py-0.5 mt-0.5 text-[0.65rem] font-medium text-white/70 bg-white/6 border border-white/0 rounded-full whitespace-nowrap">
+            <span className="mt-0.5 inline-block whitespace-nowrap rounded-full border bg-muted px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
               MP
             </span>
           )}
           {local.payWithCashInFront && (
-            <span className="inline-block px-2 py-0.5 mt-0.5 text-[0.65rem] font-medium text-white/70 bg-white/6 border border-white/0 rounded-full whitespace-nowrap">
+            <span className="mt-0.5 inline-block whitespace-nowrap rounded-full border bg-muted px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
               Efectivo
             </span>
           )}
           {local.payWithReservation && (
-            <span className="inline-block px-2 py-0.5 mt-0.5 text-[0.65rem] font-medium text-white/70 bg-white/6 border border-white/0 rounded-full whitespace-nowrap">
+            <span className="mt-0.5 inline-block whitespace-nowrap rounded-full border bg-muted px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
               Reserva
             </span>
           )}
         </div>
       </div>
 
-      <div className="flex-shrink-0 text-white/30 group-hover:text-[#00f068] group-hover:translate-x-1 transition-all duration-[140ms] text-xl">
+      {/* Chevron */}
+      <div className="flex-shrink-0 text-xl text-muted-foreground transition-all duration-[140ms] group-hover:translate-x-1 group-hover:text-primary">
         ›
       </div>
     </button>

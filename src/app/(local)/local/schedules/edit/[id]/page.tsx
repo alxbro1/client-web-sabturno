@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/Button";
-import { useScheduleTemplatesQuery } from "@/hooks/queries/useScheduleTemplatesQuery";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { scheduleService } from "@/features/local/services/schedule.service";
 import { useAuthStore } from "@/stores/auth";
 import { useQueryClient } from "@tanstack/react-query";
@@ -12,36 +14,12 @@ import { queryKeys } from "@/lib/queryKeys";
 const DAYS = [
   { key: 1, label: "Lunes" },
   { key: 2, label: "Martes" },
-  { key: 3, label: "Miercoles" },
+  { key: 3, label: "Miércoles" },
   { key: 4, label: "Jueves" },
   { key: 5, label: "Viernes" },
-  { key: 6, label: "Sabado" },
-  { key: 0, label: "Domingo" },
+  { key: 6, label: "Sábado" },
+  { key: 7, label: "Domingo" },
 ] as const;
-
-function IconAdd() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-    </svg>
-  );
-}
-
-function IconDelete() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-    </svg>
-  );
-}
-
-function IconBack() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-    </svg>
-  );
-}
 
 interface DaySlots {
   active: boolean;
@@ -49,13 +27,13 @@ interface DaySlots {
 }
 
 const emptySchedule: Record<number, DaySlots> = {
-  0: { active: false, slots: [] },
   1: { active: false, slots: [] },
   2: { active: false, slots: [] },
   3: { active: false, slots: [] },
   4: { active: false, slots: [] },
   5: { active: false, slots: [] },
   6: { active: false, slots: [] },
+  7: { active: false, slots: [] },
 };
 
 export default function LocalScheduleEditorPage() {
@@ -63,27 +41,69 @@ export default function LocalScheduleEditorPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
-  const { data: templates = [] } = useScheduleTemplatesQuery();
   const isNew = id === "new";
 
-  const existingTemplate = !isNew
-    ? templates.find((t) => t.id === id)
-    : null;
-
-  const [name, setName] = useState(existingTemplate?.name || "");
+  const [name, setName] = useState("");
   const [schedule, setSchedule] =
     useState<Record<number, DaySlots>>(emptySchedule);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [isLoadingTemplate, setIsLoadingTemplate] = useState(!isNew);
 
   const localId = user?.id ?? "";
 
+  // Cargar plantilla completa al editar
+  useEffect(() => {
+    if (!id || isNew) {
+      setIsLoadingTemplate(false);
+      return;
+    }
+    let cancelled = false;
+
+    async function loadTemplate() {
+      try {
+        const full = await scheduleService.getTemplate(id);
+        if (cancelled || !full) return;
+        setName(full.name);
+        const loaded: Record<number, DaySlots> = { ...emptySchedule };
+        for (const slot of full.timeStockTemplates) {
+          if (!slot.isActive) continue;
+          const dayNum = slot.dayOfWeek; // ISO: 1=lunes…7=domingo
+          loaded[dayNum] = { active: true, slots: [] };
+        }
+        for (const slot of full.timeStockTemplates) {
+          if (!slot.isActive) continue;
+          const dayNum = slot.dayOfWeek;
+          loaded[dayNum].slots.push({ start: slot.startTime, end: slot.endTime });
+        }
+        if (!cancelled) setSchedule(loaded);
+      } catch (err) {
+        console.error("Error loading template:", err);
+      } finally {
+        if (!cancelled) setIsLoadingTemplate(false);
+      }
+    }
+
+    loadTemplate();
+    return () => { cancelled = true; };
+  }, [id, isNew]);
+
   function handleDayToggle(dayNum: number) {
-    setSchedule((prev) => ({
-      ...prev,
-      [dayNum]: { ...prev[dayNum], active: !prev[dayNum].active },
-    }));
+    setSchedule((prev) => {
+      const wasActive = prev[dayNum].active;
+      const becomingActive = !wasActive;
+      const needsDefaultSlot = becomingActive && prev[dayNum].slots.length === 0;
+      return {
+        ...prev,
+        [dayNum]: {
+          active: becomingActive,
+          slots: needsDefaultSlot
+            ? [{ start: "09:00", end: "18:00" }]
+            : prev[dayNum].slots,
+        },
+      };
+    });
   }
 
   function handleAddSlot(dayNum: number) {
@@ -190,18 +210,15 @@ export default function LocalScheduleEditorPage() {
           timeStockTemplates,
         });
       } else if (id) {
-        const existing = templates.find((t) => t.id === id);
-        if (existing) {
-          await scheduleService.updateTemplate(id, {
-            id,
-            name,
-            isActive: true,
-            localId: localId,
-            timeStockTemplates,
-            createdAt: "",
-            updatedAt: new Date().toISOString(),
-          });
-        }
+        await scheduleService.updateTemplate(id, {
+          id,
+          name,
+          isActive: true,
+          localId: localId,
+          timeStockTemplates,
+          createdAt: "",
+          updatedAt: new Date().toISOString(),
+        });
       }
 
       queryClient.invalidateQueries({
@@ -224,13 +241,13 @@ export default function LocalScheduleEditorPage() {
       <header className="flex items-center gap-4">
         <button
           onClick={() => router.push("/local/schedules")}
-          className="p-2 rounded-xl border border-white/10 text-white/60 hover:text-white hover:border-[#00f068]/30 transition-all"
+          className="p-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
         >
-          <IconBack />
+          <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
-            Configuracion
+          <p className="text-xs font-bold uppercase tracking-widest text-primary">
+            Configuración
           </p>
           <h2 className="text-2xl font-bold text-white">
             {isNew ? "Nueva plantilla" : "Editar plantilla"}
@@ -240,24 +257,24 @@ export default function LocalScheduleEditorPage() {
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-white/80 mb-2">
+          <label className="block text-sm font-medium text-foreground/80 mb-2">
             Nombre de la plantilla
           </label>
-          <input
+          <Input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Ej: Horario regular de verano"
-            className="w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder:text-white/40 focus:outline-none focus:border-[#00f068]/50 focus:ring-1 focus:ring-[#00f068]/30 transition-all"
+            className="h-10"
           />
         </div>
 
-        <div className="border border-white/12 bg-white/[0.02] rounded-[28px] p-6 space-y-6">
+        <div className="border border-border bg-card rounded-xl p-6 space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-white">Dias laborables</h3>
-              <p className="text-sm text-white/50">
-                {activeDaysCount} dia{activeDaysCount !== 1 ? "s" : ""} activo
+              <h3 className="font-semibold text-foreground">Días laborables</h3>
+              <p className="text-sm text-muted-foreground">
+                {activeDaysCount} día{activeDaysCount !== 1 ? "s" : ""} activo
                 {activeDaysCount !== 1 ? "s" : ""}
               </p>
             </div>
@@ -268,52 +285,37 @@ export default function LocalScheduleEditorPage() {
               <div
                 key={day.key}
                 className={`p-4 rounded-xl border transition-all ${
-                  schedule[day.key].active
-                    ? "border-[#00f068]/30 bg-[#00f068]/5"
-                    : "border-white/10 bg-white/[0.02]"
+                  schedule[day.key]?.active
+                    ? "border-primary/30 bg-primary/[0.04]"
+                    : "border-border bg-muted/20"
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={schedule[day.key].active}
-                      onClick={() => handleDayToggle(day.key)}
-                      className={`relative w-12 h-6 rounded-full transition-colors ${
-                        schedule[day.key].active
-                          ? "bg-[#00f068]"
-                          : "bg-white/20"
-                      }`}
-                    >
-                      <span
-                        className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                          schedule[day.key].active
-                            ? "translate-x-7"
-                            : "translate-x-1"
-                        }`}
-                      />
-                    </button>
+                    <Switch
+                      checked={schedule[day.key]?.active ?? false}
+                      onCheckedChange={() => handleDayToggle(day.key)}
+                    />
                     <span
                       className={`font-medium ${
-                        schedule[day.key].active
-                          ? "text-white"
-                          : "text-white/60"
+                        schedule[day.key]?.active
+                          ? "text-foreground"
+                          : "text-muted-foreground"
                       }`}
                     >
                       {day.label}
                     </span>
                   </div>
 
-                  {schedule[day.key].active && (
+                  {schedule[day.key]?.active && (
                     <Button
                       type="button"
                       variant="ghost"
-                      className="text-[#00f068] border-[#00f068]/30"
+                      className="text-primary border-primary/30"
                       onClick={() => handleAddSlot(day.key)}
                     >
                       <span className="flex items-center gap-1">
-                        <IconAdd /> Agregar horario
+                        <Plus className="w-4 h-4" /> Agregar horario
                       </span>
                     </Button>
                   )}
@@ -328,7 +330,7 @@ export default function LocalScheduleEditorPage() {
                           className="flex items-center gap-3"
                         >
                           <div className="flex items-center gap-2 flex-1">
-                            <input
+                            <Input
                               type="time"
                               value={slot.start}
                               onChange={(e) =>
@@ -339,10 +341,10 @@ export default function LocalScheduleEditorPage() {
                                   e.target.value,
                                 )
                               }
-                              className="px-3 py-2 rounded-lg border border-white/15 bg-white/5 text-white focus:outline-none focus:border-[#00f068]/50"
+                              className="w-auto"
                             />
-                            <span className="text-white/40">a</span>
-                            <input
+                            <span className="text-muted-foreground">a</span>
+                            <Input
                               type="time"
                               value={slot.end}
                               onChange={(e) =>
@@ -353,7 +355,7 @@ export default function LocalScheduleEditorPage() {
                                   e.target.value,
                                 )
                               }
-                              className="px-3 py-2 rounded-lg border border-white/15 bg-white/5 text-white focus:outline-none focus:border-[#00f068]/50"
+                              className="w-auto"
                             />
                           </div>
                           <button
@@ -361,9 +363,9 @@ export default function LocalScheduleEditorPage() {
                             onClick={() =>
                               handleRemoveSlot(day.key, slotIdx)
                             }
-                            className="p-2 text-[#ff5678] hover:bg-[#ff5678]/10 rounded-lg transition-colors"
+                            className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                           >
-                            <IconDelete />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       ))}
@@ -372,7 +374,7 @@ export default function LocalScheduleEditorPage() {
 
                 {schedule[day.key].active &&
                   schedule[day.key].slots.length === 0 && (
-                    <p className="text-sm text-white/50 ml-15">
+                    <p className="text-sm text-muted-foreground ml-15">
                       Sin horarios configurados
                     </p>
                   )}
@@ -383,17 +385,15 @@ export default function LocalScheduleEditorPage() {
       </div>
 
       {validationErrors.length > 0 && (
-        <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] space-y-1">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 space-y-1 text-sm text-destructive">
           {validationErrors.map((err, i) => (
-            <p key={i} className="text-[#ffd6df] text-sm">
-              {err}
-            </p>
+            <p key={i}>{err}</p>
           ))}
         </div>
       )}
 
       {saveError && (
-        <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {saveError}
         </div>
       )}

@@ -1,4 +1,12 @@
 import type { PropsWithChildren } from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardAction,
+} from "@/components/ui/card";
 
 type LocalStatsCardProps = PropsWithChildren<{
   title: string;
@@ -10,22 +18,40 @@ type LocalStatsCardProps = PropsWithChildren<{
   };
 }>;
 
-export function LocalStatsCard({ title, value, icon, trend, children }: LocalStatsCardProps) {
+export function LocalStatsCard({
+  title,
+  value,
+  icon,
+  trend,
+  children,
+}: LocalStatsCardProps) {
   return (
-    <article className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 min-h-[140px] transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-[#00f068]/38 flex flex-col justify-between">
-      <div>
-        <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">{title}</span>
-        <strong className="block mt-2 text-[1.7rem] text-white">{value}</strong>
-      </div>
-      <div className="flex items-end justify-between">
-        {trend && (
-          <span className={`text-[0.8rem] ${trend.positive ? 'text-[#00f068]' : 'text-[#ff5678]'}`}>
-            {trend.positive ? '+' : ''}{trend.value}%
-          </span>
-        )}
-        {icon && <div className="text-white/30">{icon}</div>}
-        {children}
-      </div>
-    </article>
+    <Card className="transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-[#00f068]/38">
+      <CardHeader>
+        <div className="flex items-start justify-between gap-4">
+          <div className="grid gap-1">
+            <CardDescription className="text-[0.78rem] uppercase tracking-[0.08em]">
+              {title}
+            </CardDescription>
+            <CardTitle className="text-3xl">{value}</CardTitle>
+          </div>
+          {icon && <CardAction>{icon}</CardAction>}
+        </div>
+      </CardHeader>
+
+      {(trend || children) && (
+        <CardContent className="flex items-center gap-2">
+          {trend && (
+            <span
+              className={`text-sm font-medium ${trend.positive ? "text-emerald-400" : "text-rose-400"}`}
+            >
+              {trend.positive ? "+" : ""}
+              {trend.value}%
+            </span>
+          )}
+          {children}
+        </CardContent>
+      )}
+    </Card>
   );
 }

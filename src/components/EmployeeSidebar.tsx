@@ -19,7 +19,7 @@ export function EmployeeSidebar({
 }: EmployeeSidebarProps) {
   return (
     <nav
-      className={`flex md:flex-col gap-1 md:w-48 shrink-0 overflow-x-auto md:overflow-x-visible ${className}`}
+      className={`flex md:flex-col gap-1 md:w-48 shrink-0 overflow-x-auto md:overflow-x-visible p-3 ${className}`}
     >
       <button
         type="button"

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Wrench } from "lucide-react";
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useLocalServicesQuery } from "@/hooks/queries/useLocalServicesQuery";
@@ -66,13 +67,7 @@ export default function ServicesPage() {
       ) : services.length === 0 ? (
         <div className="min-h-[200px] grid place-items-center text-center">
           <div className="grid gap-4">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-12 h-12 mx-auto text-white/24"
-            >
-              <path d="M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7zM7 9H4V5h3v4zm10 6h3v4h-3v-4zm0-10h3v4h-3V5z" />
-            </svg>
+            <Wrench className="w-12 h-12 mx-auto text-white/24" />
             <p className="text-white/48">No hay servicios registrados</p>
             <Link href="/local/services/edit/new">
               <Button variant="secondary">Agregar primer servicio</Button>

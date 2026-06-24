@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Home, CalendarDays, User, LogOut, CreditCard, Menu } from "lucide-react";
 import { Button } from "@/components/Button";
 import { LogoMark } from "@/components/Logo";
 import {
-  IconHome,
-  IconCalendar,
-  IconUser,
-  IconLogout,
-  IconPayment,
-} from "@/components/Icons";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useAuthStore } from "@/stores/auth";
 
 export default function ClientLayout({
@@ -22,193 +23,182 @@ export default function ClientLayout({
   const { user, hasHydrated, logout } = useAuthStore();
   const pathname = usePathname();
   const router = useRouter();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  console.log('pathname', pathname);
+
   useEffect(() => {
-    // if (hasHydrated && !user ) {
-    //   router.replace("/login");
-    // }
+    // Auth guard disabled intentionally (commented out in original)
   }, [hasHydrated, user, router]);
 
   function handleLogout() {
     fetch("/api/auth/logout", { method: "POST" }).catch(console.error);
     logout();
-    setIsMobileMenuOpen(false);
   }
 
-  function handleMobileNavigation() {
-    setIsMobileMenuOpen(false);
-  }
+  const isActive = (path: string) => pathname === path;
 
   const navLinkClass = (path: string) => {
-    const isActive = pathname === path;
-    return `flex items-center gap-3 whitespace-nowrap rounded-[18px] border px-[1.1rem] py-4 text-white/75 bg-white/[0.02] transition-[background-color,color,border-color,transform] duration-150 hover:-translate-y-px max-sm:rounded-[14px] max-sm:px-[0.95rem] max-sm:py-[0.7rem] max-sm:text-[0.92rem] [&>svg]:h-5 [&>svg]:w-5 max-sm:[&>svg]:h-4 max-sm:[&>svg]:w-4 ${
-      isActive
-        ? "border-[#00f068]/40 bg-[#00f068]/14 text-[#eafff3]"
-        : "border-transparent"
-    }`;
+    const active = isActive(path);
+    return [
+      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+      active
+        ? "bg-primary/10 text-primary border border-primary/30"
+        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-transparent",
+    ].join(" ");
   };
 
   if (!hasHydrated) {
     return (
-      <div className="min-h-[140px] grid place-items-center text-center text-[#dfe8f4]/70">
+      <div className="min-h-[140px] grid place-items-center text-center text-muted-foreground">
         Cargando...
       </div>
     );
   }
 
+  const sidebar = (
+    <aside className="self-start sticky top-5 h-[calc(100vh-2.5rem)] overflow-y-auto p-6 flex flex-col gap-8 justify-between bg-card border border-border shadow-sm rounded-xl max-sm:hidden">
+      <div>
+        <Link href="/home" className="flex items-center gap-2 mb-4">
+          <LogoMark />
+        </Link>
+        <h3 className="text-muted-foreground text-sm max-w-[20rem]">
+          Reservas, pagos y perfil en una sola web.
+        </h3>
+      </div>
+
+      <nav className="grid gap-1.5">
+        <Link className={navLinkClass("/home")} href="/home">
+          <Home className="size-5" />
+          <span>Inicio</span>
+        </Link>
+        <Link
+          className={navLinkClass("/booking/select-local")}
+          href="/booking/select-local"
+        >
+          <CalendarDays className="size-5" />
+          <span>Reservar</span>
+        </Link>
+        <Link
+          className={navLinkClass("/appointments")}
+          href="/appointments"
+        >
+          <CalendarDays className="size-5" />
+          <span>Mis turnos</span>
+        </Link>
+        <Link className={navLinkClass("/profile")} href="/profile">
+          <User className="size-5" />
+          <span>Perfil</span>
+        </Link>
+        <Link className={navLinkClass("/payments")} href="/payments">
+          <CreditCard className="size-5" />
+          <span>Ver Pagos</span>
+        </Link>
+      </nav>
+
+      <div className="grid gap-3">
+        <div>
+          <strong className="text-foreground">{user?.name}</strong>
+          <p className="text-muted-foreground text-sm">{user?.email}</p>
+        </div>
+        <Button
+          variant="ghost"
+          onClick={handleLogout}
+          className="flex items-center gap-3 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive [&>svg]:size-5"
+        >
+          <LogOut />
+          <span>Cerrar sesion</span>
+        </Button>
+      </div>
+    </aside>
+  );
+
+  const mobileNavItems = (
+    <nav className="grid gap-1.5">
+      <Link
+        className={navLinkClass("/home")}
+        href="/home"
+      >
+        <Home className="size-5" />
+        <span>Inicio</span>
+      </Link>
+      <Link
+        className={navLinkClass("/booking/select-local")}
+        href="/booking/select-local"
+      >
+        <CalendarDays className="size-5" />
+        <span>Reservar</span>
+      </Link>
+      <Link
+        className={navLinkClass("/appointments")}
+        href="/appointments"
+      >
+        <CalendarDays className="size-5" />
+        <span>Mis turnos</span>
+      </Link>
+      <Link
+        className={navLinkClass("/profile")}
+        href="/profile"
+      >
+        <User className="size-5" />
+        <span>Perfil</span>
+      </Link>
+      <Link
+        className={navLinkClass("/payments")}
+        href="/payments"
+      >
+        <CreditCard className="size-5" />
+        <span>Ver pagos</span>
+      </Link>
+    </nav>
+  );
+
   return (
     <div className="grid grid-cols-[300px_1fr] gap-5 min-h-screen p-5 max-lg:grid-cols-1 max-sm:gap-3 max-sm:p-3">
-      <aside className="self-start sticky top-5 h-[calc(100vh-2.5rem)] overflow-y-auto p-6 flex flex-col gap-8 justify-between border border-white/10 bg-[rgba(10,10,10,0.9)] rounded-[28px] shadow-[0_24px_65px_rgba(0,0,0,0.38)] backdrop-blur-md max-sm:hidden">
-        <div>
-          <Link href="/home" className="flex items-center gap-2 mb-4">
-            <LogoMark />
-          </Link>
-          <h3 className="max-w-[20rem] text-white/58">
-            Reservas, pagos y perfil en una sola web.
-          </h3>
-        </div>
+      {sidebar}
 
-        <nav className="grid gap-3">
-          <Link className={navLinkClass("/home")} href="/home">
-            <IconHome />
-            <span>Inicio</span>
-          </Link>
-          <Link
-            className={navLinkClass("/booking/select-local")}
-            href="/booking/select-local"
-          >
-            <IconCalendar />
-            <span>Reservar</span>
-          </Link>
-          <Link
-            className={navLinkClass("/appointments")}
-            href="/appointments"
-          >
-            <IconCalendar />
-            <span>Mis turnos</span>
-          </Link>
-          <Link className={navLinkClass("/profile")} href="/profile">
-            <IconUser />
-            <span>Perfil</span>
-          </Link>
-          <Link className={navLinkClass("/payments")} href="/payments">
-            <IconPayment />
-            <span>Ver Pagos</span>
-          </Link>
-        </nav>
-
-        <div className="grid gap-[0.85rem]">
-          <div>
-            <strong>{user?.name}</strong>
-            <p className="text-white/54 text-sm">{user?.email}</p>
-          </div>
-          <Button
-            variant="ghost"
-            onClick={handleLogout}
-            className="flex items-center gap-3 whitespace-nowrap rounded-[18px] border px-[1.1rem] py-4 text-white/75 bg-white/[0.02] transition-[background-color,color,border-color,transform] duration-150 hover:-translate-y-px border-[#ff5678]/40 hover:bg-[#ff5678]/14 hover:text-[#ffd7e0] [&>svg]:h-5 [&>svg]:w-5"
-          >
-            <IconLogout />
-            <span>Cerrar sesion</span>
-          </Button>
-        </div>
-      </aside>
-
-      <main className="p-6 border border-white/10 bg-[#0f1014] rounded-[28px] shadow-[0_12px_32px_rgba(0,0,0,0.28)] overflow-y-auto max-sm:order-2 max-sm:p-4 max-sm:rounded-[22px]">
+      <main className="p-6 bg-card border border-border shadow-sm rounded-xl overflow-y-auto max-sm:order-2 max-sm:p-4 max-sm:rounded-xl">
         <div className="hidden max-sm:flex items-center justify-between gap-3 pb-4">
           <Link href="/home" className="flex items-center gap-2">
             <LogoMark />
           </Link>
-          <button
-            type="button"
-            aria-label={isMobileMenuOpen ? "Cerrar menu" : "Abrir menu"}
-            aria-expanded={isMobileMenuOpen}
-            onClick={() =>
-              setIsMobileMenuOpen((current) => !current)
-            }
-            className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-[#00f068]/22 bg-[#0a0a0a] text-[#00f068] shadow-[0_10px_24px_rgba(0,0,0,0.34)]"
-          >
-            <span className="flex h-4 w-5 flex-col justify-between">
-              <span
-                className={`block h-0.5 w-5 rounded-full bg-current transition-transform duration-150 ${
-                  isMobileMenuOpen ? "translate-y-[7px] rotate-45" : ""
-                }`}
-              />
-              <span
-                className={`block h-0.5 w-5 rounded-full bg-current transition-opacity duration-150 ${
-                  isMobileMenuOpen ? "opacity-0" : "opacity-100"
-                }`}
-              />
-              <span
-                className={`block h-0.5 w-5 rounded-full bg-current transition-transform duration-150 ${
-                  isMobileMenuOpen ? "-translate-y-[7px] -rotate-45" : ""
-                }`}
-              />
-            </span>
-          </button>
-        </div>
 
-        {isMobileMenuOpen ? (
-          <div className="hidden max-sm:grid gap-4 mb-4 rounded-[22px] border border-white/10 bg-[rgba(10,10,10,0.96)] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.34)]">
-            <nav className="grid gap-2">
-              <Link
-                className={navLinkClass("/home")}
-                href="/home"
-                onClick={handleMobileNavigation}
+          <Sheet>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                aria-label="Abrir menu"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-card text-primary"
               >
-                <IconHome />
-                <span>Inicio</span>
-              </Link>
-              <Link
-                className={navLinkClass("/booking/select-local")}
-                href="/booking/select-local"
-                onClick={handleMobileNavigation}
-              >
-                <IconCalendar />
-                <span>Reservar</span>
-              </Link>
-              <Link
-                className={navLinkClass("/appointments")}
-                href="/appointments"
-                onClick={handleMobileNavigation}
-              >
-                <IconCalendar />
-                <span>Mis turnos</span>
-              </Link>
-              <Link
-                className={navLinkClass("/profile")}
-                href="/profile"
-                onClick={handleMobileNavigation}
-              >
-                <IconUser />
-                <span>Perfil</span>
-              </Link>
-              <Link
-                className={navLinkClass("/payments")}
-                href="/payments"
-                onClick={handleMobileNavigation}
-              >
-                <IconPayment />
-                <span>Ver pagos</span>
-              </Link>
-            </nav>
+                <Menu className="size-5" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] sm:max-w-[280px]">
+              <SheetHeader className="pb-0">
+                <SheetTitle className="flex items-center gap-2">
+                  <LogoMark />
+                  <span className="sr-only">Menu</span>
+                </SheetTitle>
+              </SheetHeader>
 
-            <div className="grid gap-3 border-t border-[#00f068]/12 pt-3">
-              <div>
-                <strong>{user?.name}</strong>
-                <p className="text-white/54">{user?.email}</p>
+              <div className="flex flex-col gap-6 px-4">
+                {mobileNavItems}
+
+                <div className="flex flex-col gap-3 border-t border-border pt-4">
+                  <div>
+                    <strong className="text-foreground">{user?.name}</strong>
+                    <p className="text-muted-foreground text-sm">{user?.email}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive [&>svg]:size-5"
+                  >
+                    <LogOut />
+                    <span>Cerrar sesion</span>
+                  </Button>
+                </div>
               </div>
-              <Button
-                variant="ghost"
-                onClick={handleLogout}
-                className="flex items-center gap-3 whitespace-nowrap rounded-[18px] border px-[1.1rem] py-4 text-white/75 bg-white/[0.02] transition-[background-color,color,border-color,transform] duration-150 hover:-translate-y-px border-[#ff5678]/40 hover:bg-[#ff5678]/14 hover:text-[#ffd7e0] max-sm:px-[0.95rem] max-sm:py-[0.7rem] max-sm:text-[0.92rem] [&>svg]:h-5 [&>svg]:w-5 max-sm:[&>svg]:h-4 max-sm:[&>svg]:w-4"
-              >
-                <IconLogout />
-                <span>Cerrar sesion</span>
-              </Button>
-            </div>
-          </div>
-        ) : null}
+            </SheetContent>
+          </Sheet>
+        </div>
 
         {children}
       </main>

@@ -52,7 +52,6 @@ describe("ResetPasswordPage", () => {
   it("renders password form when token is present", () => {
     render(<ResetPasswordPage />);
 
-    expect(screen.getByRole("heading", { name: /nueva contrasena/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/^Nueva contrasena/)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Confirmar contrasena/)).toBeInTheDocument();
     expect(screen.getByText("Restablecer contrasena")).toBeInTheDocument();

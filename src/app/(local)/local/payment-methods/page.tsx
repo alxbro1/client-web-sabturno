@@ -17,12 +17,15 @@
  * `usePaymentMethods` (feature `payment-methods`).
  */
 import { useEffect, useState } from "react";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/Button";
 import {
   PaymentMethodCard,
   TaloStatusIndicator,
   usePaymentMethods,
 } from "@/features/payment-methods";
+import { FeatureLockedOverlay } from "@/components/premium";
+import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
 import { useAuthStore } from "@/stores/auth";
 import iconMercadoPago from "@/assets/payment-methods/mercado_pago.png";
 import iconTalo from "@/assets/payment-methods/talo.png";
@@ -43,7 +46,10 @@ function MethodIcon({ src, alt }: { src: string; alt: string }) {
 export default function PaymentMethodsPage() {
   const { user, hasHydrated } = useAuthStore();
   const pm = usePaymentMethods();
+  const { data: premiumStatus } = usePremiumStatusQuery();
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const isCashLocked = premiumStatus?.tier === "basic";
 
   // Auto-clear del banner de éxito después de 3s (paridad con
   // `local/profile/page.tsx:89`).
@@ -131,8 +137,19 @@ export default function PaymentMethodsPage() {
           title="Efectivo en el local"
           description="El cliente paga presencialmente al momento del turno."
           selected={pm.form.payWithCashInFront}
-          onClick={() => pm.toggle("payWithCashInFront")}
+          onClick={() => !isCashLocked && pm.toggle("payWithCashInFront")}
           icon={<MethodIcon src={iconCash.src} alt="Efectivo" />}
+          disabled={isCashLocked}
+          rightContent={
+            isCashLocked ? (
+              <FeatureLockedOverlay
+                featureName="Efectivo"
+                requiredTier="pro"
+                variant="inline"
+                className="border-0 bg-transparent p-0"
+              />
+            ) : undefined
+          }
         />
       </div>
 
@@ -172,14 +189,7 @@ export default function PaymentMethodsPage() {
 
       {saveSuccess ? (
         <div className="rounded-2xl border border-[#00f068]/40 bg-[rgba(0,240,104,0.1)] px-4 py-[0.95rem] text-[#00f068] flex items-center gap-2">
-          <svg
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="w-5 h-5"
-            aria-hidden="true"
-          >
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-          </svg>
+          <CheckCircle2 className="w-5 h-5" aria-hidden="true" />
           Cambios guardados exitosamente
         </div>
       ) : null}

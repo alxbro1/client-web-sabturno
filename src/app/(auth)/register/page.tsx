@@ -6,6 +6,12 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/Button";
 import { InputField, SelectField } from "@/components/Field";
 import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import {
   type CountryCode,
   DEFAULT_COUNTRY_CODE,
   getDeviceTimezone,
@@ -128,160 +134,164 @@ export default function RegisterPage() {
   }
 
   return (
-    <section className="w-full max-w-[660px] rounded-[24px] border border-white/10 bg-[#0d0f12]/94 shadow-[0_18px_40px_rgba(0,0,0,0.34)] backdrop-blur-[10px] p-7 sm:p-8 flex flex-col gap-6 min-w-0">
-      <div className="grid gap-4 text-center">
-        <div className="mx-auto px-5 py-3">
+    <Card className="w-full max-w-[660px]">
+      <CardHeader className="text-center gap-2">
+        <div className="mx-auto">
           <LogoMark className="h-10 w-auto" />
         </div>
-        <div className="grid gap-2">
-          <p className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-[#00f068]">
+        <div className="grid gap-1">
+          <p className="text-xs font-bold uppercase tracking-widest text-primary">
             Nuevo cliente
           </p>
-          <h2 className="text-[1.7rem] leading-none">Crea tu cuenta</h2>
-          <p className="text-white/62">
+          <h2 className="text-[1.7rem] leading-none font-semibold">
+            Crea tu cuenta
+          </h2>
+          <p className="text-muted-foreground text-sm">
             Completa tus datos para reservar turnos desde la web.
           </p>
         </div>
-      </div>
+      </CardHeader>
 
-      <form className="grid gap-4" onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-          <InputField
-            label="Nombre"
-            value={formData.name}
-            onChange={(event) => updateField("name", event.target.value)}
-            errors={touched.name ? validation.name : undefined}
-          />
-          <InputField
-            label="Telefono"
-            value={formData.phone}
-            onChange={(event) => updateField("phone", event.target.value)}
-            errors={touched.phone ? validation.phone : undefined}
-          />
-        </div>
+      <CardContent>
+        <form className="grid gap-4" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+            <InputField
+              label="Nombre"
+              value={formData.name}
+              onChange={(event) => updateField("name", event.target.value)}
+              errors={touched.name ? validation.name : undefined}
+            />
+            <InputField
+              label="Telefono"
+              value={formData.phone}
+              onChange={(event) => updateField("phone", event.target.value)}
+              errors={touched.phone ? validation.phone : undefined}
+            />
+          </div>
 
-        <InputField
-          label="Correo electronico"
-          type="email"
-          value={formData.email}
-          onChange={(event) => updateField("email", event.target.value)}
-          errors={touched.email ? validation.email : undefined}
-        />
+          <InputField
+            label="Correo electronico"
+            type="email"
+            value={formData.email}
+            onChange={(event) => updateField("email", event.target.value)}
+            errors={touched.email ? validation.email : undefined}
+          />
 
-        <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-          <InputField
-            label="Contrasena"
-            type="password"
-            value={formData.password}
-            onChange={(event) => updateField("password", event.target.value)}
-            errors={touched.password ? validation.password : undefined}
-          />
-          <InputField
-            label="Confirmar Contrasena"
-            type="password"
-            value={formData.confirmPassword}
-            onChange={(event) =>
-              updateField("confirmPassword", event.target.value)
-            }
-            errors={
-              touched.confirmPassword ? validation.confirmPassword : undefined
-            }
-          />
-        </div>
+          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+            <InputField
+              label="Contrasena"
+              type="password"
+              value={formData.password}
+              onChange={(event) => updateField("password", event.target.value)}
+              errors={touched.password ? validation.password : undefined}
+            />
+            <InputField
+              label="Confirmar Contrasena"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(event) =>
+                updateField("confirmPassword", event.target.value)
+              }
+              errors={
+                touched.confirmPassword ? validation.confirmPassword : undefined
+              }
+            />
+          </div>
 
-        <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-          <InputField
-            label="Fecha de nacimiento"
-            type="date"
-            value={formData.birthDate}
-            onChange={(event) => updateField("birthDate", event.target.value)}
-            errors={touched.birthDate ? validation.birthDate : undefined}
-          />
+          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+            <InputField
+              label="Fecha de nacimiento"
+              type="date"
+              value={formData.birthDate}
+              onChange={(event) => updateField("birthDate", event.target.value)}
+              errors={touched.birthDate ? validation.birthDate : undefined}
+            />
+            <SelectField
+              label="Pais"
+              value={formData.countryCode}
+              onChange={(event) =>
+                updateField("countryCode", event.target.value as CountryCode)
+              }
+            >
+              {VALID_COUNTRY_CODES.map((country) => (
+                <option key={country.code} value={country.code}>
+                  {country.name}
+                </option>
+              ))}
+            </SelectField>
+          </div>
+
           <SelectField
-            label="Pais"
-            value={formData.countryCode}
-            onChange={(event) =>
-              updateField("countryCode", event.target.value as CountryCode)
-            }
+            label="Zona horaria"
+            value={formData.timezone}
+            onChange={(event) => updateField("timezone", event.target.value)}
           >
-            {VALID_COUNTRY_CODES.map((country) => (
-              <option key={country.code} value={country.code}>
-                {country.name}
+            {timezones.map((timezone) => (
+              <option key={timezone.value} value={timezone.value}>
+                {timezone.label}
               </option>
             ))}
           </SelectField>
-        </div>
 
-        <SelectField
-          label="Zona horaria"
-          value={formData.timezone}
-          onChange={(event) => updateField("timezone", event.target.value)}
-        >
-          {timezones.map((timezone) => (
-            <option key={timezone.value} value={timezone.value}>
-              {timezone.label}
-            </option>
-          ))}
-        </SelectField>
-
-        <label className="flex gap-[0.8rem] items-start">
-          <input
-            type="checkbox"
-            checked={formData.acceptTerms}
-            onChange={(event) =>
-              updateField("acceptTerms", event.target.checked)
-            }
-            className="mt-1 h-4 w-4 accent-[#00f068]"
-          />
-          <span>
-            Acepto los{" "}
-            <a
-              href="https://sabturno.com/terminos-y-condiciones.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#7bcfff] underline decoration-[#7bcfff]/45 underline-offset-[0.2rem] transition-[color,text-decoration-color] duration-150 hover:text-[#a8dfff] hover:decoration-[#a8dfff]/72"
-            >
-              terminos y condiciones
-            </a>{" "}
-            y la{" "}
-            <a
-              href="https://sabturno.com/politica-de-privacidad.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#7bcfff] underline decoration-[#7bcfff]/45 underline-offset-[0.2rem] transition-[color,text-decoration-color] duration-150 hover:text-[#a8dfff] hover:decoration-[#a8dfff]/72"
-            >
-              politica de privacidad
-            </a>
-            .
-          </span>
-        </label>
-        {(touched.acceptTerms ? validation.acceptTerms : []).map(
-          (errorText) => (
-            <span key={errorText} className="text-rose-300 text-[0.84rem]">
-              {errorText}
+          <label className="flex gap-3 items-start">
+            <input
+              type="checkbox"
+              checked={formData.acceptTerms}
+              onChange={(event) =>
+                updateField("acceptTerms", event.target.checked)
+              }
+              className="mt-1 h-4 w-4 accent-primary"
+            />
+            <span className="text-sm text-muted-foreground">
+              Acepto los{" "}
+              <a
+                href="https://sabturno.com/terminos-y-condiciones.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-info underline decoration-info/30 underline-offset-2 transition-colors hover:text-info/80 hover:decoration-info/70"
+              >
+                terminos y condiciones
+              </a>{" "}
+              y la{" "}
+              <a
+                href="https://sabturno.com/politica-de-privacidad.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-info underline decoration-info/30 underline-offset-2 transition-colors hover:text-info/80 hover:decoration-info/70"
+              >
+                politica de privacidad
+              </a>
+              .
             </span>
-          ),
-        )}
+          </label>
+          {(touched.acceptTerms ? validation.acceptTerms : []).map(
+            (errorText) => (
+              <span key={errorText} className="text-sm text-destructive">
+                {errorText}
+              </span>
+            ),
+          )}
 
-        {error ? (
-          <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">
-            {error}
-          </div>
-        ) : null}
+          {error ? (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error}
+            </div>
+          ) : null}
 
-        <Button type="submit" disabled={!isFormValid || loading} fullWidth>
-          {loading ? "Creando cuenta..." : "Crear cuenta"}
-        </Button>
-      </form>
+          <Button type="submit" disabled={!isFormValid || loading} fullWidth>
+            {loading ? "Creando cuenta..." : "Crear cuenta"}
+          </Button>
+        </form>
+      </CardContent>
 
-      <div className="grid gap-3 pt-1 text-center sm:text-left">
+      <CardFooter className="flex-col items-start gap-3 pt-1">
         <Link
-          className="text-[#7bcfff] text-[0.95rem] decoration-[#7bcfff]/45 transition-[color,text-decoration-color] duration-150 hover:text-[#a8dfff] hover:decoration-[#a8dfff]/72"
+          className="text-sm text-info underline decoration-info/30 underline-offset-2 transition-colors hover:text-info/80 hover:decoration-info/70"
           href="/login"
         >
           Ya tienes cuenta? Inicia sesion
         </Link>
-      </div>
-    </section>
+      </CardFooter>
+    </Card>
   );
 }

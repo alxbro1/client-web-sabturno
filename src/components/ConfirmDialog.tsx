@@ -1,4 +1,12 @@
 import { memo } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/Button";
 
 interface ConfirmDialogProps {
@@ -24,27 +32,23 @@ export const ConfirmDialog = memo(function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onCancel}
-        aria-hidden="true"
-      />
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onCancel();
+      }}
+    >
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-md"
+      >
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
 
-      {/* Dialog */}
-      <div className="relative w-full max-w-sm rounded-[28px] border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-[12px] p-6 grid gap-6">
-        {/* Title */}
-        <div>
-          <h2 className="text-xl font-semibold text-white mb-2">{title}</h2>
-          <p className="text-sm text-white/60">{description}</p>
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-3 justify-end">
+        <DialogFooter className="gap-3 sm:gap-3">
           <Button
             variant="secondary"
             onClick={onCancel}
@@ -61,8 +65,8 @@ export const ConfirmDialog = memo(function ConfirmDialog({
           >
             {isLoading ? "Confirmando..." : confirmLabel}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 });

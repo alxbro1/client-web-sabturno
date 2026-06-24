@@ -4,6 +4,14 @@ import { useState } from "react";
 import { Button } from "@/components/Button";
 import { TextareaField, SelectField } from "@/components/Field";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   ReportReason,
   REPORT_REASON_LABELS,
 } from "@/lib/types/report";
@@ -78,26 +86,34 @@ export function ReportDialog({
     }
   }
 
-  function handleClose() {
+  function resetForm() {
     setReason(ReportReason.INAPPROPRIATE_CONTENT);
     setDescription("");
     setError(null);
     setDescriptionErrors([]);
+  }
+
+  function handleClose() {
+    resetForm();
     onClose();
   }
 
-  if (!isOpen) return null;
+  function handleOpenChange(open: boolean) {
+    if (!open) handleClose();
+  }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-[#0d0f12] p-6 shadow-[0_24px_65px_rgba(0,0,0,0.5)]">
-        <h2 className="text-[1.25rem] font-bold mb-2">Reportar local</h2>
-        <p className="text-white/54 text-[0.9rem] mb-6">
-          Estas a punto de reportar a <strong>{localName}</strong>. Tu reporte
-          sera revisado por nuestro equipo.
-        </p>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md" showCloseButton>
+        <DialogHeader>
+          <DialogTitle>Reportar local</DialogTitle>
+          <DialogDescription>
+            Estas a punto de reportar a <strong>{localName}</strong>. Tu reporte
+            sera revisado por nuestro equipo.
+          </DialogDescription>
+        </DialogHeader>
 
-        <form className="grid gap-[1.1rem]" onSubmit={handleSubmit}>
+        <form className="grid gap-4" onSubmit={handleSubmit}>
           <SelectField
             label="Motivo"
             value={reason}
@@ -118,17 +134,17 @@ export function ReportDialog({
             hint="Explica el motivo del reporte (minimo 10 caracteres)"
           />
 
-          <p className="text-[0.78rem] text-white/36 text-right">
+          <p className="text-sm text-muted-foreground text-right">
             {description.length}/500
           </p>
 
           {error ? (
-            <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]">
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {error}
             </div>
           ) : null}
 
-          <div className="flex gap-3 pt-2">
+          <DialogFooter className="gap-2 pt-2 sm:gap-3">
             <Button
               variant="secondary"
               type="button"
@@ -145,9 +161,9 @@ export function ReportDialog({
             >
               {isCreating ? "Enviando..." : "Enviar reporte"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

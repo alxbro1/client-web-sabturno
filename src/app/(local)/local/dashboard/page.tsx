@@ -1,45 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { CalendarDays, Clock, Users, DollarSign, Ban, Image as ImageIcon, Crown } from "lucide-react";
 import { LocalStatsCard } from "@/components/local/LocalStatsCard";
 import { LocalNavCard } from "@/components/local/LocalNavCard";
+import { PlanBadge, TrialCountdown } from "@/components/premium";
 import { useLocalHomeQuery } from "@/hooks/queries/useLocalHomeQuery";
+import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
 import { useAuthStore } from "@/stores/auth";
 import { formatCurrency } from "@/lib/utils/date";
 import { Button } from "@/components/Button";
-import { IconPayment } from "@/components/Icons";
-
-function IconCalendar() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-      <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V10h14v9zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z" />
-    </svg>
-  );
-}
-
-function IconClock() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
-    </svg>
-  );
-}
-
-function IconUsers() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-    </svg>
-  );
-}
-
-function IconDollar() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
-    </svg>
-  );
-}
 
 function formatTime(dateString: string): string {
   const date = new Date(dateString);
@@ -60,14 +30,15 @@ function formatDateLong(dateString: string): string {
 
 const statusColors: Record<string, string> = {
   pending: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  confirmed: "bg-[#00f068]/15 text-[#00f068] border-[#00f068]/30",
-  completed: "bg-white/5 text-white/50 border-white/10",
-  cancelled: "bg-[#ff5678]/15 text-[#ff5678] border-[#ff5678]/30",
+  confirmed: "bg-primary/15 text-primary border-primary/30",
+  completed: "bg-muted text-muted-foreground border-border",
+  cancelled: "bg-destructive/15 text-destructive border-destructive/30",
 };
 
 export default function LocalDashboardPage() {
   const { user } = useAuthStore();
   const { data, isLoading, error, refetch } = useLocalHomeQuery();
+  const { data: premiumStatus } = usePremiumStatusQuery();
 
   const nextAppointment = data?.nextAppointment ?? null;
   const todayAppointments = data?.todayAppointments ?? [];
@@ -80,21 +51,30 @@ export default function LocalDashboardPage() {
 
   return (
     <section className="grid gap-6">
-      <header className="rounded-[28px] border border-white/12 bg-[radial-gradient(circle_at_0%_0%,rgba(0,240,104,0.18),transparent_42%),linear-gradient(180deg,rgba(20,20,20,0.98),rgba(11,11,11,0.96))] shadow-[0_24px_70px_rgba(0,0,0,0.34)] flex justify-between gap-6 items-end p-8 max-sm:flex-col max-sm:items-stretch">
+      <header className="bg-gradient-to-b from-primary/[0.06] to-transparent bg-card border border-border shadow-sm rounded-xl flex justify-between gap-6 items-end p-8 max-sm:flex-col max-sm:items-stretch">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068] mb-1">
+          <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">
             Panel del Local
           </p>
-          <h2 className="text-2xl font-bold text-white">
-            {user?.localName || user?.name}
-          </h2>
-          <p className="text-white/60 mt-1">
+          <div className="flex items-center gap-3 mb-1">
+            <h2 className="text-2xl font-bold text-foreground">
+              {user?.localName || user?.name}
+            </h2>
+            {premiumStatus && <PlanBadge tier={premiumStatus.tier} />}
+          </div>
+          {premiumStatus?.status === "trial" && premiumStatus.trialEndDate && (
+            <TrialCountdown
+              trialEndDate={premiumStatus.trialEndDate}
+              className="mb-2"
+            />
+          )}
+          <p className="text-muted-foreground mt-1">
             Desde aqui puedes gestionar turnos, horarios y mas.
           </p>
         </div>
         <div className="flex flex-wrap gap-3 items-center">
           <Link href="/local/calendar">
-            <Button variant="primary">Ver turnos</Button>
+            <Button>Ver turnos</Button>
           </Link>
           <Button variant="secondary" onClick={() => refetch()}>
             Actualizar
@@ -103,7 +83,7 @@ export default function LocalDashboardPage() {
       </header>
 
       {error && (
-        <div className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df] flex flex-wrap gap-4 items-center justify-between">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive flex flex-wrap gap-4 items-center justify-between">
           <span>{error.message}</span>
           <Button variant="ghost" onClick={() => refetch()}>
             Reintentar
@@ -115,9 +95,9 @@ export default function LocalDashboardPage() {
         <LocalStatsCard
           title="Turnos hoy"
           value={dashboardStats.todayAppointments}
-          icon={<IconCalendar />}
+          icon={<CalendarDays className="size-5" />}
         >
-          <span className="text-[0.75rem] text-white/40">
+          <span className="text-xs text-muted-foreground">
             {new Date().toLocaleDateString("es-AR", {
               day: "numeric",
               month: "short",
@@ -128,71 +108,71 @@ export default function LocalDashboardPage() {
         <LocalStatsCard
           title="Esta semana"
           value={dashboardStats.weekAppointments}
-          icon={<IconClock />}
+          icon={<Clock className="size-5" />}
         />
 
         <LocalStatsCard
           title="Ingresos del mes"
           value={formatCurrency(dashboardStats.monthlyRevenue)}
-          icon={<IconDollar />}
+          icon={<DollarSign className="size-5" />}
         />
 
         <LocalStatsCard
           title="Total clientes"
           value={dashboardStats.totalClients}
-          icon={<IconUsers />}
+          icon={<Users className="size-5" />}
         />
       </section>
 
       <section>
         <div className="flex justify-between gap-4 items-start mb-3">
           <div>
-            <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary">
               Proximo turno
             </p>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-foreground">
               {nextAppointment
                 ? "Siguiente reserva"
                 : "Sin turnos proximos"}
             </h3>
           </div>
           {isLoading && (
-            <span className="text-[0.78rem] uppercase tracking-[0.08em] text-white/52">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">
               Actualizando...
             </span>
           )}
         </div>
 
         {nextAppointment ? (
-          <article className="border border-[#00f068]/25 bg-[linear-gradient(135deg,rgba(0,240,104,0.08),rgba(0,240,104,0.02))] rounded-[28px] p-6 shadow-[0_8px_32px_rgba(0,240,104,0.15)]">
+          <article className="border border-primary/25 bg-primary/[0.04] rounded-xl p-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-[0.8rem] text-white/50 uppercase tracking-wider mb-1">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
                   Cliente
                 </p>
-                <p className="text-xl font-bold text-white">
+                <p className="text-xl font-bold text-foreground">
                   {nextAppointment.clientName}
                 </p>
-                <p className="text-[#00f068] mt-1">
+                <p className="text-primary mt-1">
                   {nextAppointment.serviceName}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-[0.8rem] text-white/50 uppercase tracking-wider mb-1">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
                   Hora
                 </p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-lg font-bold text-foreground">
                   {formatTime(nextAppointment.startDateTime)}
                 </p>
-                <p className="text-white/60 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {formatDateLong(nextAppointment.startDateTime)}
                 </p>
               </div>
             </div>
           </article>
         ) : (
-          <div className="min-h-[120px] grid place-items-center text-center text-white/50 rounded-[28px] border border-white/10 bg-white/[0.02] p-8">
-            <p>No hay reservas proximas programadas.</p>
+          <div className="min-h-[120px] grid place-items-center text-center rounded-xl border border-border bg-card p-8">
+            <p className="text-muted-foreground">No hay reservas proximas programadas.</p>
           </div>
         )}
       </section>
@@ -200,14 +180,14 @@ export default function LocalDashboardPage() {
       <section>
         <div className="flex justify-between gap-4 items-start mb-3">
           <div>
-            <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary">
               Hoy
             </p>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-foreground">
               Turnos del dia
             </h3>
           </div>
-          <span className="text-[0.8rem] text-white/50">
+          <span className="text-sm text-muted-foreground">
             {todayAppointments.length} turno
             {todayAppointments.length !== 1 ? "s" : ""}
           </span>
@@ -218,15 +198,15 @@ export default function LocalDashboardPage() {
             {todayAppointments.slice(0, 8).map((appt) => (
               <article
                 key={appt.id}
-                className="flex items-center justify-between p-4 rounded-2xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                className="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-1 h-10 rounded-full bg-[#00f068]/40" />
+                  <div className="w-1 h-10 rounded-full bg-primary/40" />
                   <div>
-                    <p className="font-semibold text-white">
+                    <p className="font-semibold text-foreground">
                       {appt.clientName}
                     </p>
-                    <p className="text-sm text-white/60">{appt.serviceName}</p>
+                    <p className="text-sm text-muted-foreground">{appt.serviceName}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -242,10 +222,10 @@ export default function LocalDashboardPage() {
                           : "Cancelado"}
                   </span>
                   <div className="text-right">
-                    <p className="font-semibold text-white">
+                    <p className="font-semibold text-foreground">
                       {formatTime(appt.startDateTime)}
                     </p>
-                    <p className="text-sm text-white/50">
+                    <p className="text-sm text-muted-foreground">
                       {formatCurrency(appt.price)}
                     </p>
                   </div>
@@ -255,15 +235,15 @@ export default function LocalDashboardPage() {
             {todayAppointments.length > 8 && (
               <Link
                 href="/local/calendar"
-                className="text-center py-3 text-[#00f068] text-sm hover:underline"
+                className="text-center py-3 text-primary text-sm hover:underline"
               >
                 Ver todos los {todayAppointments.length} turnos
               </Link>
             )}
           </div>
         ) : (
-          <div className="min-h-[80px] grid place-items-center text-center text-white/50 rounded-[28px] border border-white/10 bg-white/[0.02] p-6">
-            <p>No hay turnos programados para hoy.</p>
+          <div className="min-h-[80px] grid place-items-center text-center rounded-xl border border-border bg-card p-6">
+            <p className="text-muted-foreground">No hay turnos programados para hoy.</p>
           </div>
         )}
       </section>
@@ -273,39 +253,37 @@ export default function LocalDashboardPage() {
           to="/local/calendar"
           title="Turnos"
           description="Ver y gestionar todos los turnos del local"
-          icon={<IconCalendar />}
+          icon={<CalendarDays className="size-5" />}
         />
         <LocalNavCard
           to="/local/schedules"
           title="Horarios"
           description="Configurar plantilla de horarios semanal"
-          icon={<IconClock />}
+          icon={<Clock className="size-5" />}
         />
         <LocalNavCard
           to="/local/blockings"
           title="Bloqueos"
           description="Bloquear dias y franjas horarias"
-          icon={
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 5.69C8.45 4.63 10.15 4 12 4c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9z" />
-            </svg>
-          }
+          icon={<Ban className="size-5" />}
         />
         <LocalNavCard
           to="/local/images"
           title="Fotos"
           description="Gestionar fotos del local"
-          icon={
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-            </svg>
-          }
+          icon={<ImageIcon className="size-5" />}
         />
         <LocalNavCard
           to="/local/payment-methods"
           title="Metodos de cobro"
           description="Configura MercadoPago, Talo, reserva y efectivo"
-          icon={<IconPayment />}
+          icon={<DollarSign className="size-5" />}
+        />
+        <LocalNavCard
+          to="/local/premium"
+          title="Planes"
+          description="Gestiona tu suscripción y desbloquea features"
+          icon={<Crown className="size-5" />}
         />
       </section>
     </section>

@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Check } from "lucide-react";
 import { Button } from "@/components/Button";
+import { Card } from "@/components/ui/card";
 import { useTaloStatusQuery } from "@/hooks/queries/useTaloStatusQuery";
 import { useCreateAppointmentMutation } from "@/hooks/mutations/useCreateAppointmentMutation";
 import { useAuthStore } from "@/stores/auth";
@@ -178,15 +180,22 @@ export default function SelectPaymentPage() {
   const reservationAmount = serviceCost * (reservationPercentage / 100);
   const marketplaceFee = serviceCost * 0.03;
 
+  const methodCardBase =
+    "relative rounded-xl p-5 flex items-center gap-4 cursor-pointer text-left transition-all duration-[140ms]";
+  const methodCardInactive =
+    "border border-border bg-card shadow-sm hover:-translate-y-0.5 hover:border-primary/40";
+  const methodCardActive =
+    "border-2 border-primary/60 bg-primary/[0.06] shadow-sm";
+
   return (
     <section className="flex flex-col gap-6 p-8 min-h-screen items-center">
       <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch w-full">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+          <p className="text-xs font-bold uppercase tracking-widest text-primary">
             Reserva paso 4
           </p>
-          <h2>Metodo de pago</h2>
-          <p>Selecciona un metodo de pago.</p>
+          <h2 className="text-2xl font-bold text-foreground">Metodo de pago</h2>
+          <p className="text-muted-foreground">Selecciona un metodo de pago.</p>
         </div>
         <Button
           variant="secondary"
@@ -202,27 +211,13 @@ export default function SelectPaymentPage() {
           return (
             <button
               key={item.method}
-              className={`relative rounded-[28px] p-5 flex items-center gap-4 cursor-pointer text-left transition-[transform,border-color,background-color,box-shadow] duration-[140ms] ${
-                isActive
-                  ? "border border-[#00f068]/70 bg-[radial-gradient(circle_at_0%_0%,rgba(0,240,104,0.14),transparent_60%),linear-gradient(180deg,rgba(22,22,22,0.98),rgba(12,12,12,0.96))] shadow-[0_0_0_1px_rgba(0,240,104,0.22),0_20px_50px_rgba(0,240,104,0.08)]"
-                  : "border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] hover:-translate-y-0.5 hover:border-[#00f068]/45"
-              }`}
+              className={`${methodCardBase} ${isActive ? methodCardActive : methodCardInactive}`}
               onClick={() => setPaymentMethod(item.method)}
               type="button"
             >
               {isActive ? (
-                <span className="absolute top-4 right-4 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#00f068]">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#07150d"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-3 w-3"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                <span className="absolute top-4 right-4 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                  <Check className="h-3 w-3 text-primary-foreground" />
                 </span>
               ) : null}
               {PAYMENT_METHOD_ICONS[item.method] ? (
@@ -234,10 +229,10 @@ export default function SelectPaymentPage() {
                 />
               ) : null}
               <div>
-                <h3 className={isActive ? "text-[#00f068]" : ""}>
+                <h3 className={`font-semibold ${isActive ? "text-primary" : "text-foreground"}`}>
                   {item.title}
                 </h3>
-                <p>{item.description}</p>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
               </div>
             </button>
           );
@@ -245,62 +240,62 @@ export default function SelectPaymentPage() {
       </div>
 
       {paymentMethod === PaymentMethod.RESERVATION_PAYMENT ? (
-        <div className="w-full border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
-          <h3>Detalle de reserva parcial</h3>
-          <p>
+        <Card className="w-full p-5 grid gap-3">
+          <h3 className="font-semibold text-foreground">Detalle de reserva parcial</h3>
+          <p className="text-sm text-muted-foreground">
             Reserva: ${reservationAmount.toFixed(2)}. Fee app: $
             {marketplaceFee.toFixed(2)}. Resto en el local: $
             {(serviceCost - reservationAmount).toFixed(2)}.
           </p>
-        </div>
+        </Card>
       ) : null}
 
       {paymentMethod === PaymentMethod.MERCADO_PAGO ||
       paymentMethod === PaymentMethod.TALO ? (
-        <div className="w-full border border-white/12 rounded-[28px] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
-          <h3>Detalle de pago online</h3>
-          <p>
+        <Card className="w-full p-5 grid gap-3">
+          <h3 className="font-semibold text-foreground">Detalle de pago online</h3>
+          <p className="text-sm text-muted-foreground">
             Servicio: ${serviceCost.toFixed(2)}. Fee app: $
             {marketplaceFee.toFixed(2)}.
           </p>
           {paymentMethod === PaymentMethod.MERCADO_PAGO && (
-            <p className="text-white/68">
+            <p className="text-sm text-muted-foreground">
               El fee se informa en el checkout de Mercado Pago al confirmar el
               pago.
             </p>
           )}
-        </div>
+        </Card>
       ) : null}
 
       {!user && (
-        <div className="w-full border border-white/12 m-4 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] backdrop-blur-[12px] p-5 grid gap-[0.85rem]">
-          <h3>Datos de contacto</h3>
-          <label className="block text-sm font-semibold mb-1">
+        <Card className="w-full p-5 grid gap-3">
+          <h3 className="font-semibold text-foreground">Datos de contacto</h3>
+          <label className="text-sm font-medium text-foreground">
             Email (si quieres que te lleguen las notificaciones)
           </label>
           <input
-            className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="tu@email.com"
           />
           {isGuestEmailMissing ? (
-            <p className="text-sm !text-red-300">
+            <p className="text-sm text-destructive">
               Falta completar un campo obligatorio: email.
             </p>
           ) : null}
-          <label className="block text-sm font-semibold mb-1 mt-3">
+          <label className="text-sm font-medium text-foreground mt-1">
             Nombre
           </label>
           <input
-            className="w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-white"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
             type="text"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
             placeholder="Tu nombre"
           />
-        </div>
+        </Card>
       )}
 
       <Button

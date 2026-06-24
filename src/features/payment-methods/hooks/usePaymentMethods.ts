@@ -139,13 +139,13 @@ export function usePaymentMethods(
   // 2) Acciones de OAuth.
 
   const startMercadoPagoOAuth = useCallback(() => {
-    // El backend (`backend/src/mercadopago/mercadopago.controller.ts:104`)
-    // expone `GET /mercadopago/oauth/start` que inicia el flow usando la
-    // sesión de cookies httpOnly (que ya tiene el middleware de Next).
-    // Top-level redirect — la SPA pierde el contexto, pero al volver
-    // el local-owner tendrá `user.mercadoPagoLiveMode === true`.
     options.onBeforeRedirect?.();
-    window.location.href = "/mercadopago/oauth/start";
+    const appRedirectUri =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/local/payment-methods/mp/callback`
+        : "";
+    const params = new URLSearchParams({ app_redirect_uri: appRedirectUri });
+    window.location.href = `/mercadopago/oauth/start?${params.toString()}`;
   }, [options]);
 
   const startTaloOAuth = useCallback(async () => {

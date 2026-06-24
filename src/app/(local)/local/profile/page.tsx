@@ -1,18 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Save, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useAuthStore } from "@/stores/auth";
 import { localService } from "@/features/local/services/local.service";
 import type { Local } from "@/lib/types/local";
-
-function IconSave() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-      <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
-    </svg>
-  );
-}
 
 export default function LocalProfilePage() {
   const { user, updateUserProfile } = useAuthStore();
@@ -219,13 +212,7 @@ export default function LocalProfilePage() {
 
         {saveSuccess && (
           <div className="rounded-2xl border border-[#00f068]/40 bg-[rgba(0,240,104,0.1)] px-4 py-[0.95rem] text-[#00f068] flex items-center gap-2">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-5 h-5"
-            >
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-            </svg>
+            <CheckCircle2 className="w-5 h-5" />
             Cambios guardados exitosamente
           </div>
         )}
@@ -233,7 +220,7 @@ export default function LocalProfilePage() {
         <div className="flex justify-end">
           <Button type="submit" disabled={isSaving}>
             <span className="flex items-center gap-2">
-              <IconSave /> {isSaving ? "Guardando..." : "Guardar cambios"}
+              <Save className="w-5 h-5" /> {isSaving ? "Guardando..." : "Guardar cambios"}
             </span>
           </Button>
         </div>

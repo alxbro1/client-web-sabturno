@@ -24,6 +24,18 @@ interface MutationContext {
   localId: string;
 }
 
+async function syncSessionWithBackend(data: Record<string, unknown>) {
+  try {
+    await fetch("/api/auth/update-session", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+  } catch {
+    /* swallow: session sync is best-effort */
+  }
+}
+
 export function useUpdatePaymentMethodsMutation() {
   const queryClient = useQueryClient();
   const { user, updateUserProfile } = useAuthStore();
@@ -35,22 +47,23 @@ export function useUpdatePaymentMethodsMutation() {
   >({
     mutationFn: ({ localId, ...payload }) =>
       localService.updateLocal(localId, payload),
-    onSuccess: (updated, variables) => {
-      // 1) Refrescar el query del "home" del local (si está cacheado).
+    onSuccess: async (updated, variables) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.localHome(variables.localId),
       });
 
-      // 2) Refrescar el `user` del store de auth si el local actualizado
-      //    es el del usuario logueado.
       if (user?.id === variables.localId) {
-        updateUserProfile({
+        const patch = {
           mercadoPagoLiveMode: updated.mercadoPagoLiveMode,
           payWithTalo: updated.payWithTalo,
           payWithReservation: updated.payWithReservation,
           reservationPercentage: updated.reservationPercentage,
           payWithCashInFront: updated.payWithCashInFront,
-        });
+        };
+
+        await syncSessionWithBackend(patch);
+
+        updateUserProfile(patch);
       }
     },
   });

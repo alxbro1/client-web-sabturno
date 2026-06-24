@@ -1,32 +1,66 @@
-import type { ButtonHTMLAttributes, PropsWithChildren } from "react";
+import type { ButtonHTMLAttributes } from "react";
+import { Button as ShadcnButton, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-type ButtonProps = PropsWithChildren<
-  ButtonHTMLAttributes<HTMLButtonElement> & {
-    variant?: "primary" | "secondary" | "danger" | "ghost";
-    fullWidth?: boolean;
-  }
->;
+/**
+ * Wrapper retrocompatible sobre el Button de shadcn/ui.
+ *
+ * Mapea la API legacy (variant: primary | secondary | danger | ghost) a las
+ * variants de shadcn para no tocar los 32 imports esparcidos por el proyecto.
+ *
+ * - `primary`  → `default`     (verde neón, brand color)
+ * - `secondary`→ `secondary`   (gris)
+ * - `danger`   → `destructive` (rojo)
+ * - `ghost`    → `ghost`       (transparente, hover sutil)
+ *
+ * `fullWidth` se traduce a `w-full`.
+ *
+ * Si necesitás las variants nativas de shadcn (`outline`, `link`) o `size`,
+ * importá directamente desde `@/components/ui/button`.
+ */
+export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
 
-const BASE =
-  "border rounded-2xl px-[1.15rem] py-[0.9rem] cursor-pointer font-semibold transition-[opacity,transform,border-color,background-color,color,box-shadow] duration-[140ms] ease-in-out hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00f068]/50";
-
-const VARIANTS: Record<NonNullable<ButtonProps["variant"]>, string> = {
-  primary:
-    "text-[#07150d] border-transparent bg-[linear-gradient(180deg,#6bffb0_0%,#00f068_100%)] hover:shadow-[0_16px_34px_rgba(0,240,104,0.26)]",
-  secondary:
-    "text-white border-white/15 bg-white/[0.04] hover:border-[#00f068]/35 hover:bg-[#00f068]/8",
-  danger: "text-white border-[#ff5678]/35 bg-red/85 hover:bg-[#ff5678] rounded-full",
-  ghost:
-    "text-[#aafad0] border-[#00f068]/30 bg-transparent hover:border-[#00f068]/55 hover:bg-[#00f068]/8",
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: ButtonVariant;
+  fullWidth?: boolean;
 };
 
-export function Button({ children, className = "", variant = "primary", fullWidth, ...props }: ButtonProps) {
+const VARIANT_MAP: Record<ButtonVariant, "default" | "secondary" | "destructive" | "ghost"> = {
+  primary: "default",
+  secondary: "secondary",
+  danger: "destructive",
+  ghost: "ghost",
+};
+
+export function Button({
+  children,
+  className,
+  variant = "primary",
+  fullWidth = false,
+  type,
+  ...props
+}: ButtonProps) {
   return (
-    <button
-      className={`${BASE} ${VARIANTS[variant]} ${fullWidth ? "w-full" : ""} ${className}`.trim()}
+    <ShadcnButton
+      type={type ?? "button"}
+      variant={VARIANT_MAP[variant]}
+      className={cn(
+        // Radios más generosos que el default de shadcn para mantener el
+        // lenguaje visual del brand (ver :root --radius: 0.75rem).
+        "rounded-xl px-5 py-2.5 font-semibold cursor-pointer",
+        // Sutil lift en hover, igual al Button custom original.
+        "hover:-translate-y-px transition-transform",
+        fullWidth && "w-full",
+        className,
+      )}
       {...props}
     >
       {children}
-    </button>
+    </ShadcnButton>
   );
 }
+
+// Re-export para quien quiera usar el Button shadcn nativo (variants outline,
+// link, size, asChild, etc.) desde este mismo barrel.
+export { ShadcnButton, buttonVariants };
+export type { VariantProps } from "class-variance-authority";

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { TriangleAlert } from "lucide-react";
 import { useMyReportsQuery } from "@/hooks/queries/useReportsQuery";
 import {
   REPORT_REASON_LABELS,
@@ -46,13 +47,7 @@ export default function ReportsPage() {
       ) : reports.length === 0 ? (
         <div className="min-h-[200px] grid place-items-center text-center">
           <div className="grid gap-4">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-12 h-12 mx-auto text-white/24"
-            >
-              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
-            </svg>
+            <TriangleAlert className="w-12 h-12 mx-auto text-white/24" />
             <p className="text-white/48">No has enviado reportes</p>
             <Link
               href="/home"
