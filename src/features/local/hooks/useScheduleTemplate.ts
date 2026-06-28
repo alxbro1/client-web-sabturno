@@ -131,7 +131,7 @@ export const useScheduleTemplate = (loadedTemplate?: ScheduleTemplate | null) =>
         return await scheduleService.createTemplate({
           name: templateName,
           localId: user.id,
-          timeStockTemplates,
+          schedule,
         });
       }
     } catch (error) {

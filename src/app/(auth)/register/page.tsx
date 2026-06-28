@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/Button";
 import { InputField, SelectField } from "@/components/Field";
+import { LocationFields, type LocationFieldsValue } from "@/components/LocationFields";
+import { UserTypeToggle } from "@/components/UserTypeToggle";
 import {
   Card,
   CardContent,
@@ -21,9 +23,11 @@ import {
 import {
   type RegisterFormData,
   validateRegisterForm,
+  validateLocalRegisterForm,
 } from "@/lib/utils/validation";
 import { authService } from "@/services/auth";
 import { LogoMark } from "@/components/Logo";
+import { useClientTypeStore } from "@/stores/clientType";
 
 const INITIAL_FORM: RegisterFormData = {
   name: "",
@@ -35,6 +39,16 @@ const INITIAL_FORM: RegisterFormData = {
   countryCode: DEFAULT_COUNTRY_CODE,
   timezone: getDeviceTimezone(),
   acceptTerms: false,
+  province: "",
+  city: "",
+  address: "",
+};
+
+const INITIAL_LOCATION: LocationFieldsValue = {
+  province: "",
+  city: "",
+  address: "",
+  emergencyPhone: "",
 };
 
 const INITIAL_TOUCHED: Record<keyof RegisterFormData, boolean> = {
@@ -47,6 +61,9 @@ const INITIAL_TOUCHED: Record<keyof RegisterFormData, boolean> = {
   countryCode: false,
   timezone: false,
   acceptTerms: false,
+  province: false,
+  city: false,
+  address: false,
 };
 
 const ALL_TOUCHED: Record<keyof RegisterFormData, boolean> = {
@@ -59,25 +76,45 @@ const ALL_TOUCHED: Record<keyof RegisterFormData, boolean> = {
   countryCode: true,
   timezone: true,
   acceptTerms: true,
+  province: true,
+  city: true,
+  address: true,
 };
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState(INITIAL_FORM);
+  const { isBusiness, reset: resetClientType } = useClientTypeStore();
+  const [formData, setFormData] = useState<RegisterFormData>(INITIAL_FORM);
+  const [location, setLocation] = useState<LocationFieldsValue>(INITIAL_LOCATION);
   const [touched, setTouched] =
     useState<Record<keyof RegisterFormData, boolean>>(INITIAL_TOUCHED);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const validation = useMemo(() => validateRegisterForm(formData), [formData]);
+  // Limpia el toggle de cliente/local al desmontar la pantalla.
+  useEffect(() => {
+    return () => resetClientType();
+  }, [resetClientType]);
+
+  const validation = useMemo(
+    () =>
+      isBusiness
+        ? validateLocalRegisterForm({ ...formData, ...location })
+        : validateRegisterForm(formData),
+    [formData, location, isBusiness],
+  );
+
   const isFormValid =
-    Object.values(validation).every((errors) => errors.length === 0) &&
+    Object.values(validation).every(
+      (errors) => !errors || errors.length === 0,
+    ) &&
     formData.name.trim().length > 0 &&
     formData.email.trim().length > 0 &&
     formData.password.length > 0 &&
     formData.phone.trim().length > 0 &&
     formData.birthDate.trim().length > 0 &&
-    formData.acceptTerms;
+    formData.acceptTerms &&
+    (!isBusiness || (location.province && location.city && location.address.trim()));
 
   const timezones = getTimezonesForCountry(formData.countryCode);
 
@@ -119,10 +156,17 @@ export default function RegisterPage() {
         email: formData.email.trim(),
         password: formData.password,
         phone: formData.phone.trim(),
-        isLocal: false,
+        isLocal: isBusiness,
+        ...(isBusiness && {
+          province: location.province,
+          city: location.city,
+          address: location.address.trim(),
+          emergencyPhone: location.emergencyPhone.trim() || undefined,
+        }),
         countryCode: formData.countryCode,
         timezone: formData.timezone,
       });
+      resetClientType();
       router.replace("/login?emailVerificationPending=true");
     } catch (caughtError: any) {
       setError(
@@ -141,33 +185,30 @@ export default function RegisterPage() {
         </div>
         <div className="grid gap-1">
           <p className="text-xs font-bold uppercase tracking-widest text-primary">
-            Nuevo cliente
+            {isBusiness ? "Nuevo local" : "Nuevo cliente"}
           </p>
           <h2 className="text-[1.7rem] leading-none font-semibold">
             Crea tu cuenta
           </h2>
           <p className="text-muted-foreground text-sm">
-            Completa tus datos para reservar turnos desde la web.
+            {isBusiness
+              ? "Registra tu local para empezar a recibir reservas online."
+              : "Completa tus datos para reservar turnos desde la web."}
           </p>
         </div>
       </CardHeader>
 
       <CardContent>
+        <UserTypeToggle />
+
         <form className="grid gap-4" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-            <InputField
-              label="Nombre"
-              value={formData.name}
-              onChange={(event) => updateField("name", event.target.value)}
-              errors={touched.name ? validation.name : undefined}
-            />
-            <InputField
-              label="Telefono"
-              value={formData.phone}
-              onChange={(event) => updateField("phone", event.target.value)}
-              errors={touched.phone ? validation.phone : undefined}
-            />
-          </div>
+          <InputField
+            label={isBusiness ? "Nombre del local" : "Nombre"}
+            value={formData.name}
+            onChange={(event) => updateField("name", event.target.value)}
+            errors={touched.name ? validation.name : undefined}
+            placeholder={isBusiness ? "Nombre de tu negocio" : undefined}
+          />
 
           <InputField
             label="Correo electronico"
@@ -186,7 +227,7 @@ export default function RegisterPage() {
               errors={touched.password ? validation.password : undefined}
             />
             <InputField
-              label="Confirmar Contrasena"
+              label="Confirmar contrasena"
               type="password"
               value={formData.confirmPassword}
               onChange={(event) =>
@@ -200,12 +241,33 @@ export default function RegisterPage() {
 
           <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
             <InputField
-              label="Fecha de nacimiento"
+              label="Telefono"
+              value={formData.phone}
+              onChange={(event) => updateField("phone", event.target.value)}
+              errors={touched.phone ? validation.phone : undefined}
+            />
+            <InputField
+              label={isBusiness ? "Tu fecha de nacimiento" : "Fecha de nacimiento"}
               type="date"
               value={formData.birthDate}
               onChange={(event) => updateField("birthDate", event.target.value)}
               errors={touched.birthDate ? validation.birthDate : undefined}
             />
+          </div>
+
+          {isBusiness && (
+            <LocationFields
+              value={location}
+              onChange={setLocation}
+              errors={{
+                province: touched.province ? validation.province : undefined,
+                city: touched.city ? validation.city : undefined,
+                address: touched.address ? validation.address : undefined,
+              }}
+            />
+          )}
+
+          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
             <SelectField
               label="Pais"
               value={formData.countryCode}
@@ -219,19 +281,18 @@ export default function RegisterPage() {
                 </option>
               ))}
             </SelectField>
+            <SelectField
+              label="Zona horaria"
+              value={formData.timezone}
+              onChange={(event) => updateField("timezone", event.target.value)}
+            >
+              {timezones.map((timezone) => (
+                <option key={timezone.value} value={timezone.value}>
+                  {timezone.label}
+                </option>
+              ))}
+            </SelectField>
           </div>
-
-          <SelectField
-            label="Zona horaria"
-            value={formData.timezone}
-            onChange={(event) => updateField("timezone", event.target.value)}
-          >
-            {timezones.map((timezone) => (
-              <option key={timezone.value} value={timezone.value}>
-                {timezone.label}
-              </option>
-            ))}
-          </SelectField>
 
           <label className="flex gap-3 items-start">
             <input

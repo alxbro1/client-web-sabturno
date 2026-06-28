@@ -15,6 +15,12 @@ export type RegisterFormData = {
   countryCode: CountryCode;
   timezone: string;
   acceptTerms: boolean;
+  /** Solo se usa si isBusiness=true. */
+  province?: string;
+  /** Solo se usa si isBusiness=true. */
+  city?: string;
+  /** Solo se usa si isBusiness=true. */
+  address?: string;
 };
 
 export type RegisterValidation = {
@@ -25,6 +31,15 @@ export type RegisterValidation = {
   phone: string[];
   birthDate: string[];
   acceptTerms: string[];
+  province?: string[];
+  city?: string[];
+  address?: string[];
+};
+
+export type LocalRegisterValidation = RegisterValidation & {
+  province: string[];
+  city: string[];
+  address: string[];
 };
 
 export function validateEmail(email: string) {
@@ -128,4 +143,49 @@ export function validateRegisterForm(data: RegisterFormData): RegisterValidation
   }
 
   return validation;
+}
+
+/**
+ * Valida los 3 campos extra requeridos para registrar un local.
+ * Se compone encima de `validateRegisterForm` cuando `isBusiness === true`.
+ */
+export function validateLocalFields(data: RegisterFormData): {
+  province: string[];
+  city: string[];
+  address: string[];
+} {
+  const province: string[] = [];
+  const city: string[] = [];
+  const address: string[] = [];
+
+  if (!data.province || !data.province.trim()) {
+    province.push("La provincia es requerida");
+  }
+
+  if (!data.city || !data.city.trim()) {
+    city.push("La ciudad es requerida");
+  }
+
+  if (!data.address || !data.address.trim()) {
+    address.push("La direccion es requerida");
+  } else if (data.address.trim().length < 5) {
+    address.push("La direccion debe tener al menos 5 caracteres");
+  }
+
+  return { province, city, address };
+}
+
+/**
+ * Variante que combina las validaciones de cliente + los 3 campos de local.
+ * Usar cuando `isBusiness === true`.
+ */
+export function validateLocalRegisterForm(data: RegisterFormData): LocalRegisterValidation {
+  const base = validateRegisterForm(data);
+  const local = validateLocalFields(data);
+  return {
+    ...base,
+    province: local.province,
+    city: local.city,
+    address: local.address,
+  };
 }

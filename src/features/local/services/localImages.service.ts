@@ -76,4 +76,35 @@ export const localImagesService = {
       return false;
     }
   },
+
+  /**
+   * Sube el logo/imagen de perfil del local.
+   * Endpoint: `POST /local/:id/image` (singular, distinto al de galeria).
+   * Ver `backend/src/local/local.controller.ts:115-145`.
+   */
+  uploadLocalLogo: async (
+    localId: string,
+    imageData: ImageUploadRequest,
+  ): Promise<LocalImage | null> => {
+    try {
+      const formData = new FormData();
+      const blob = dataUrlToBlob(imageData.uri);
+      const file = new File([blob], 'logo.jpg', { type: 'image/jpeg' });
+      formData.append('image', file);
+
+      const response = await apiService.post<LocalImage>(
+        `/local/${localId}/image`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error uploading local logo:', error);
+      return null;
+    }
+  },
 };

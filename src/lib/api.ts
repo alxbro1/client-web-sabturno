@@ -30,6 +30,14 @@ apiClient.interceptors.request.use((config) => {
     config.headers["Cache-Control"] = "no-store, no-cache, max-age=0";
     config.headers.Pragma = "no-cache";
     config.headers.Expires = "0";
+
+    // Espejo del fix mobile (app/src/shared/services/api.service.ts:34-38):
+    // algunos runtimes / proxies agregan If-None-Match / If-Modified-Since
+    // y el backend responde 304 stale. Los removemos explícitamente.
+    delete config.headers["If-None-Match"];
+    delete config.headers["if-none-match"];
+    delete config.headers["If-Modified-Since"];
+    delete config.headers["if-modified-since"];
   }
 
   return config;

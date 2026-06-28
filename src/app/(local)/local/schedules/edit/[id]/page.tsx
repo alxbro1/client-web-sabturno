@@ -186,36 +186,65 @@ export default function LocalScheduleEditorPage() {
     setSaveError(null);
 
     try {
-      const timeStockTemplates = DAYS.flatMap((day) => {
-        const dayData = schedule[day.key];
-        if (!dayData.active || dayData.slots.length === 0) return [];
+      // Mapeo de dayNum (1=lunes..7=domingo) a DayKey del backend.
+      const dayNumToKey: Record<number, "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday"> = {
+        1: "monday",
+        2: "tuesday",
+        3: "wednesday",
+        4: "thursday",
+        5: "friday",
+        6: "saturday",
+        7: "sunday",
+      };
 
-        return dayData.slots.map((slot) => ({
-          id: "",
-          dayOfWeek: day.key,
-          startTime: slot.start,
-          endTime: slot.end,
-          isActive: true,
-          localId: localId,
-          scheduleTemplateId: isNew ? "" : id || "",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }));
-      });
+      const schedulePayload: Record<string, { active: boolean; timeSlots: { start: string; end: string }[] }> = {
+        monday: { active: false, timeSlots: [] },
+        tuesday: { active: false, timeSlots: [] },
+        wednesday: { active: false, timeSlots: [] },
+        thursday: { active: false, timeSlots: [] },
+        friday: { active: false, timeSlots: [] },
+        saturday: { active: false, timeSlots: [] },
+        sunday: { active: false, timeSlots: [] },
+      };
+
+      for (const day of DAYS) {
+        const dayData = schedule[day.key];
+        const key = dayNumToKey[day.key];
+        schedulePayload[key] = {
+          active: dayData.active,
+          timeSlots: dayData.slots.map((slot) => ({ start: slot.start, end: slot.end })),
+        };
+      }
 
       if (isNew) {
         await scheduleService.createTemplate({
           name,
           localId: localId,
-          timeStockTemplates,
+          schedule: schedulePayload as any,
         });
       } else if (id) {
+        // Para update, el backend acepta tanto `schedule` como `timeStockTemplates`.
+        // Enviamos `schedule` por consistencia con create.
         await scheduleService.updateTemplate(id, {
           id,
           name,
           isActive: true,
           localId: localId,
-          timeStockTemplates,
+          timeStockTemplates: DAYS.flatMap((day) => {
+            const dayData = schedule[day.key];
+            if (!dayData.active || dayData.slots.length === 0) return [];
+            return dayData.slots.map((slot) => ({
+              id: "",
+              dayOfWeek: day.key,
+              startTime: slot.start,
+              endTime: slot.end,
+              isActive: true,
+              localId: localId,
+              scheduleTemplateId: id || "",
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            }));
+          }),
           createdAt: "",
           updatedAt: new Date().toISOString(),
         });

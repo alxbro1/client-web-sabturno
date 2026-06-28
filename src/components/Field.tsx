@@ -1,4 +1,5 @@
-import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,19 +25,41 @@ export function InputField({
   trailing,
   className,
   id,
+  type,
   ...props
 }: SharedProps & InputHTMLAttributes<HTMLInputElement>) {
   const fieldId = id ?? label.toLowerCase().replace(/\s+/g, "-");
+  const isPassword = type === "password";
+  const [showPassword, setShowPassword] = useState(false);
+
+  const effectiveType = isPassword && showPassword ? "text" : type;
+
+  const passwordToggle = isPassword ? (
+    <button
+      type="button"
+      tabIndex={-1}
+      aria-label={showPassword ? "Ocultar contrasena" : "Mostrar contrasena"}
+      onClick={() => setShowPassword((v) => !v)}
+      className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+    >
+      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+    </button>
+  ) : null;
 
   return (
     <div className="grid gap-1.5">
       <Label htmlFor={fieldId}>{label}</Label>
 
       <div className="relative">
-        <Input id={fieldId} className={className} {...props} />
-        {trailing && (
+        <Input
+          id={fieldId}
+          type={effectiveType}
+          className={cn(className, (passwordToggle || trailing) && "pr-10")}
+          {...props}
+        />
+        {(passwordToggle || trailing) && (
           <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-            {trailing}
+            {passwordToggle || trailing}
           </div>
         )}
       </div>

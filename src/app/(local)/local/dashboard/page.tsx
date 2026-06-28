@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CalendarDays, Clock, Users, DollarSign, Ban, Image as ImageIcon, Crown } from "lucide-react";
 import { LocalStatsCard } from "@/components/local/LocalStatsCard";
 import { LocalNavCard } from "@/components/local/LocalNavCard";
@@ -10,6 +12,8 @@ import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
 import { useAuthStore } from "@/stores/auth";
 import { formatCurrency } from "@/lib/utils/date";
 import { Button } from "@/components/Button";
+import { useQuery } from "@tanstack/react-query";
+import { scheduleService } from "@/features/local/services/schedule.service";
 
 function formatTime(dateString: string): string {
   const date = new Date(dateString);
@@ -36,9 +40,44 @@ const statusColors: Record<string, string> = {
 };
 
 export default function LocalDashboardPage() {
-  const { user } = useAuthStore();
+  const { user, hasHydrated } = useAuthStore();
+  const router = useRouter();
   const { data, isLoading, error, refetch } = useLocalHomeQuery();
   const { data: premiumStatus } = usePremiumStatusQuery();
+
+  const localId = user?.id ?? "";
+
+  // Detecta si el local todavia no completo el wizard de onboarding
+  // (logo, plan, o al menos una plantilla de horarios). Si falta algo,
+  // redirige al step correspondiente. Esto corre solo una vez por sesion
+  // para no spamear al usuario.
+  const templatesQuery = useQuery({
+    queryKey: ["onboarding-check", "templates", localId],
+    queryFn: () => scheduleService.getTemplates(localId),
+    enabled: hasHydrated && !!user?.isLocal && !!localId,
+    staleTime: 60_000,
+    retry: 0,
+  });
+
+  useEffect(() => {
+    if (!hasHydrated || !user?.isLocal) return;
+    if (premiumStatus === undefined || templatesQuery.isLoading) return;
+
+    const hasLogo = !!user.imageProfile;
+    const hasPlan = !!premiumStatus?.currentPlanId;
+    const hasSchedule = !!templatesQuery.data && templatesQuery.data.length > 0;
+
+    if (hasLogo && hasPlan && hasSchedule) return;
+
+    router.replace("/local/onboarding");
+  }, [
+    hasHydrated,
+    user,
+    premiumStatus,
+    templatesQuery.data,
+    templatesQuery.isLoading,
+    router,
+  ]);
 
   const nextAppointment = data?.nextAppointment ?? null;
   const todayAppointments = data?.todayAppointments ?? [];

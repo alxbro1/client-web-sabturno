@@ -30,6 +30,14 @@ export interface RegisterRequest {
   password: string;
   phone: string;
   isLocal: boolean;
+  /** Provincia del local (requerido si isLocal=true) */
+  province?: string;
+  /** Ciudad del local (requerido si isLocal=true) */
+  city?: string;
+  /** Direccion del local (requerido si isLocal=true) */
+  address?: string;
+  /** Telefono de emergencia del local (opcional) */
+  emergencyPhone?: string;
   countryCode?: string;
   timezone?: string;
 }

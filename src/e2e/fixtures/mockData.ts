@@ -46,3 +46,81 @@ export const mockReports = [
   { id: 1, reason: "NO_ATTENDED", description: "No asistió", local: { id: 1, name: "Test Local" }, status: "PENDING", createdAt: new Date().toISOString() },
   { id: 2, reason: "BAD_SERVICE", description: "Mal servicio", local: { id: 1, name: "Test Local" }, status: "RESOLVED", createdAt: new Date().toISOString() },
 ];
+
+export const mockScheduleTemplate = {
+  id: "template-1",
+  name: "Horario regular",
+  isActive: true,
+  localId: "1",
+  timeStockTemplates: [
+    { id: "ts-1", dayOfWeek: 1, startTime: "09:00", endTime: "18:00", isActive: true, localId: "1", scheduleTemplateId: "template-1", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "ts-2", dayOfWeek: 2, startTime: "09:00", endTime: "18:00", isActive: true, localId: "1", scheduleTemplateId: "template-1", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "ts-3", dayOfWeek: 3, startTime: "09:00", endTime: "18:00", isActive: true, localId: "1", scheduleTemplateId: "template-1", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "ts-4", dayOfWeek: 4, startTime: "09:00", endTime: "18:00", isActive: true, localId: "1", scheduleTemplateId: "template-1", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "ts-5", dayOfWeek: 5, startTime: "09:00", endTime: "18:00", isActive: true, localId: "1", scheduleTemplateId: "template-1", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: "ts-6", dayOfWeek: 6, startTime: "09:00", endTime: "14:00", isActive: true, localId: "1", scheduleTemplateId: "template-1", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  ],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+export const mockScheduleTemplates = [mockScheduleTemplate];
+
+export const mockLocalImages = [
+  { id: 1, url: "https://via.placeholder.com/300", image: "https://via.placeholder.com/300", description: "Foto 1", localId: "1", uploadedAt: new Date().toISOString() },
+  { id: 2, url: "https://via.placeholder.com/300", image: "https://via.placeholder.com/300", description: "Foto 2", localId: "1", uploadedAt: new Date().toISOString() },
+];
+
+export const mockPremiumPlans = [
+  {
+    id: "plan-basic",
+    tier: "basic",
+    name: "Básico",
+    description: "Para empezar",
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    features: { mercadopago: true, talo: true, cashTurnsLimit: 0, loyalty: false, prioritySupport: false, advancedStats: false, unlimitedEmployees: false },
+  },
+  {
+    id: "plan-pro",
+    tier: "pro",
+    name: "Pro",
+    description: "Para negocios en crecimiento",
+    monthlyPrice: 8000,
+    yearlyPrice: 80000,
+    isPopular: true,
+    features: { mercadopago: true, talo: true, cashTurnsLimit: 500, loyalty: false, prioritySupport: true, advancedStats: true, unlimitedEmployees: false },
+  },
+  {
+    id: "plan-enterprise",
+    tier: "enterprise",
+    name: "Enterprise",
+    description: "Para cadenas",
+    monthlyPrice: 15000,
+    yearlyPrice: 150000,
+    features: { mercadopago: true, talo: true, cashTurnsLimit: null, loyalty: true, prioritySupport: true, advancedStats: true, unlimitedEmployees: true },
+  },
+];
+
+export const mockPremiumStatus = {
+  currentPlanId: "plan-basic",
+  tier: "basic",
+  planName: "Básico",
+  interval: "monthly",
+  status: "trial",
+  autoRenew: true,
+  nextBillingDate: null,
+  trialEndDate: new Date(Date.now() + 30 * 86400000).toISOString(),
+  cashTurnsUsed: 0,
+  checkoutUrl: null,
+};
+
+export const mockLocalProfile = {
+  id: 1,
+  name: "Test Local",
+  email: "local@test.com",
+  phone: "+541112345678",
+  province: "Buenos Aires",
+  city: "CABA",
+  address: "Av. Corrientes 1234",
+};

@@ -49,5 +49,11 @@ export interface ScheduleTemplate {
 export interface CreateScheduleTemplateRequest {
   name: string;
   localId: string;
-  timeStockTemplates: TimeStockTemplate[];
+  /**
+   * Formato preferido (matchea el `CreateScheduleTemplateDto` del backend
+   * en `backend/src/timestock-template/dto/create-schedule-template.dto.ts`).
+   * El backend acepta tambien un array `timeStockTemplates` como fallback
+   * legacy, pero el contrato canonico es este.
+   */
+  schedule: Schedule;
 }
