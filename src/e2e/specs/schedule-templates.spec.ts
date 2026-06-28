@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { setupAuth, mockApiRoute } from "../fixtures/helpers";
-import { mockScheduleTemplates, mockScheduleTemplate } from "../fixtures/mockData";
+import { setupAuth } from "../fixtures/helpers";
+import { mockScheduleTemplate } from "../fixtures/mockData";
 
 test.describe("Schedule templates CRUD", () => {
   test.beforeEach(async ({ page }) => {
@@ -8,7 +8,9 @@ test.describe("Schedule templates CRUD", () => {
   });
 
   test("shows empty state when no templates", async ({ page }) => {
-    await mockApiRoute(page, /time-stock-template/, []);
+    await page.route(/time-stock-template/, async (route) => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
+    });
 
     await page.goto("/local/schedules");
     await expect(page.getByText("No hay plantillas")).toBeVisible({ timeout: 10000 });
@@ -24,35 +26,40 @@ test.describe("Schedule templates CRUD", () => {
     });
 
     await page.goto("/local/schedules/edit/new");
-    await page.getByLabel(/Nombre de la plantilla/i).fill("Horario verano");
+    await page.getByPlaceholder("Ej: Horario regular de verano").fill("Horario verano");
     await page.getByRole("button", { name: "Guardar plantilla" }).click();
     await expect(page).toHaveURL(/\/local\/schedules/, { timeout: 10000 });
   });
 
   test("edits existing template", async ({ page }) => {
-    await page.route(/time-stock-template\/template\//, async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(mockScheduleTemplate) });
-    });
     await page.route(/time-stock-template/, async (route) => {
-      if (route.request().method() === "PUT") {
+      const method = route.request().method();
+      const url = route.request().url();
+      if (method === "GET" && url.includes("/template/")) {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(mockScheduleTemplate) });
+      } else if (method === "PUT") {
         await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ id: "template-1" }) });
+      } else {
+        await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
       }
     });
 
     await page.goto("/local/schedules/edit/template-1");
-    await expect(page.getByDisplayValue("Horario regular")).toBeVisible({ timeout: 10000 });
-    await page.getByLabel(/Nombre de la plantilla/i).fill("Horario actualizado");
+    await expect(page.getByPlaceholder("Ej: Horario regular de verano")).toHaveValue("Horario regular", { timeout: 10000 });
+    await page.getByPlaceholder("Ej: Horario regular de verano").fill("Horario actualizado");
     await page.getByRole("button", { name: "Guardar plantilla" }).click();
     await expect(page).toHaveURL(/\/local\/schedules/, { timeout: 10000 });
   });
 
   test("validates that at least one day is active", async ({ page }) => {
-    await mockApiRoute(page, /time-stock-template/, []);
+    await page.route(/time-stock-template/, async (route) => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
+    });
 
     await page.goto("/local/schedules/edit/new");
-    await page.getByLabel(/Nombre de la plantilla/i).fill("Test plantilla");
+    await page.getByPlaceholder("Ej: Horario regular de verano").fill("Test plantilla");
 
-    // Toggle all days off using the Switch components
+    // Toggle all days off
     const switches = page.locator('button[role="switch"]');
     const count = await switches.count();
     for (let i = 0; i < count; i++) {
