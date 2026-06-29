@@ -60,7 +60,7 @@ export default function ResetPasswordPage() {
           ? (err as { response?: { data?: { message?: string } } }).response
               ?.data?.message
           : undefined;
-      setError(message || "No se pudo restablecer la contrasena. Intenta nuevamente.");
+      setError(message || "No se pudo restablecer la contraseña. Intenta nuevamente.");
     } finally {
       setLoading(false);
     }
@@ -97,9 +97,9 @@ export default function ResetPasswordPage() {
           <p className="text-xs font-bold uppercase tracking-widest text-primary">
             Exito
           </p>
-          <CardTitle>Contrasena restablecida</CardTitle>
+          <CardTitle>Contraseña restablecida</CardTitle>
           <CardDescription className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3">
-            Tu contrasena fue actualizada correctamente.
+            Tu contraseña fue actualizada correctamente.
           </CardDescription>
         </CardHeader>
         <CardFooter>
@@ -117,23 +117,23 @@ export default function ResetPasswordPage() {
         <p className="text-xs font-bold uppercase tracking-widest text-primary">
           Restablecer
         </p>
-        <CardTitle>Nueva contrasena</CardTitle>
+        <CardTitle>Nueva contraseña</CardTitle>
         <CardDescription>
-          Ingresa tu nueva contrasena.
+          Ingresa tu nueva contraseña.
         </CardDescription>
       </CardHeader>
 
       <CardContent>
         <form className="grid gap-4" onSubmit={handleSubmit}>
           <InputField
-            label="Nueva contrasena"
+            label="Nueva contraseña"
             type="password"
             value={newPassword}
             onChange={(event) => setNewPassword(event.target.value)}
             errors={passwordErrors}
           />
           <InputField
-            label="Confirmar contrasena"
+            label="Confirmar contraseña"
             type="password"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
@@ -145,7 +145,7 @@ export default function ResetPasswordPage() {
             </div>
           ) : null}
           <Button type="submit" disabled={!isFormValid || loading} fullWidth>
-            {loading ? "Restableciendo..." : "Restablecer contrasena"}
+            {loading ? "Restableciendo..." : "Restablecer contraseña"}
           </Button>
         </form>
       </CardContent>

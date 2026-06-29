@@ -38,7 +38,7 @@ export function InputField({
     <button
       type="button"
       tabIndex={-1}
-      aria-label={showPassword ? "Ocultar contrasena" : "Mostrar contrasena"}
+      aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
       onClick={() => setShowPassword((v) => !v)}
       className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
     >
@@ -68,11 +68,11 @@ export function InputField({
         <p className="text-sm text-muted-foreground">{hint}</p>
       )}
 
-      {errors?.map((error) => (
+      {/* {errors?.map((error) => (
         <p key={error} className="text-sm text-destructive">
           {error}
         </p>
-      ))}
+      ))} */}
     </div>
   );
 }

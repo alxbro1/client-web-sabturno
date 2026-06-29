@@ -10,7 +10,7 @@ export interface LocationFieldsValue {
   province: string;
   city: string;
   address: string;
-  emergencyPhone: string;
+  // emergencyPhone: string;
 }
 
 interface LocationFieldsProps {
@@ -20,7 +20,7 @@ interface LocationFieldsProps {
     province?: string[];
     city?: string[];
     address?: string[];
-    emergencyPhone?: string[];
+    // emergencyPhone?: string[];
   };
 }
 
@@ -32,7 +32,7 @@ interface CityOption {
 type CityApiItem = { id: string | number; nombre: string };
 
 /**
- * Provincia -> Ciudad (cascada) + Direccion + Telefono de emergencia.
+ * Provincia -> Ciudad (cascada) + Direccion.
  *
  * - La cascada de ciudades consume el endpoint del backend
  *   `GET /location/cities_by_state/:stateId` (ver
@@ -163,7 +163,7 @@ export function LocationFields({ value, onChange, errors }: LocationFieldsProps)
         hint="La direccion donde los clientes te visitaran"
       />
 
-      <InputField
+      {/* <InputField
         label="Telefono de emergencia (opcional)"
         type="tel"
         value={value.emergencyPhone}
@@ -171,7 +171,7 @@ export function LocationFields({ value, onChange, errors }: LocationFieldsProps)
         errors={errors?.emergencyPhone}
         placeholder="+54 11 1234-5678"
         hint="Un segundo numero de contacto para clientes urgentes"
-      />
+      /> */}
     </div>
   );
 }

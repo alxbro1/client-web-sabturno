@@ -68,8 +68,8 @@ export async function registerLocalViaUI(
   await page.getByRole("tab", { name: "LOCAL" }).click();
   await page.getByLabel("Nombre del local").fill(data.name);
   await page.getByLabel("Correo electronico").fill(data.email);
-  await page.getByLabel("Contrasena", { exact: true }).fill(data.password);
-  await page.getByLabel("Confirmar contrasena").fill(data.password);
+  await page.getByLabel("Contraseña", { exact: true }).fill(data.password);
+  await page.getByLabel("Confirmar contraseña").fill(data.password);
   await page.getByRole("textbox", { name: "Telefono", exact: true }).fill(data.phone);
   await page.getByLabel("Tu fecha de nacimiento").fill(data.birthDate);
   await page.getByLabel("Provincia", { exact: true }).selectOption(data.province);
@@ -82,7 +82,7 @@ export async function registerLocalViaUI(
 export async function loginViaUI(page: Page, email: string, password: string) {
   await page.goto("/login");
   await page.getByLabel("Correo electronico").fill(email);
-  await page.getByLabel("Contrasena").fill(password);
+  await page.getByLabel("Contraseña").fill(password);
   await page.getByRole("button", { name: "Iniciar sesion" }).click();
 }
 

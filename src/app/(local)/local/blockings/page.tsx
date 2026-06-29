@@ -60,6 +60,9 @@ export default function LocalBlockingsPage() {
     isLoading,
     blockDate,
     unblockDate,
+    currentMonth,
+    currentYear,
+    setMonth,
   } = useLocalCalendarQuery();
 
   const [showForm, setShowForm] = useState(false);
@@ -72,7 +75,10 @@ export default function LocalBlockingsPage() {
   const [deleteId, setDeleteId] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [calendarView, setCalendarView] = useState<View>(Views.MONTH);
-  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
+  const calendarDate = useMemo(
+    () => new Date(currentYear, currentMonth, 1),
+    [currentMonth, currentYear],
+  );
 
   const events = useMemo<CalendarEvent[]>(() => {
     return blockedDates.map((block) => {
@@ -97,9 +103,9 @@ export default function LocalBlockingsPage() {
   }, []);
 
   const handleNavigate = useCallback((newDate: Date, view: View) => {
-    setCalendarDate(newDate);
+    setMonth(newDate);
     setCalendarView(view);
-  }, []);
+  }, [setMonth]);
 
   const handleViewChange = useCallback((view: View) => {
     setCalendarView(view);

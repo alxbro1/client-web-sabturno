@@ -10,6 +10,7 @@ import { PlanBadge, TrialCountdown } from "@/components/premium";
 import { useLocalHomeQuery } from "@/hooks/queries/useLocalHomeQuery";
 import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
 import { useAuthStore } from "@/stores/auth";
+import { useOnboardingStore } from "@/stores/onboarding";
 import { formatCurrency } from "@/lib/utils/date";
 import { Button } from "@/components/Button";
 import { useQuery } from "@tanstack/react-query";
@@ -44,23 +45,29 @@ export default function LocalDashboardPage() {
   const router = useRouter();
   const { data, isLoading, error, refetch } = useLocalHomeQuery();
   const { data: premiumStatus } = usePremiumStatusQuery();
+  const dismissed = useOnboardingStore((s) => s.dismissed);
+  const onboardingDone = !!user?.onboardingCompleted || dismissed;
 
   const localId = user?.id ?? "";
 
   // Detecta si el local todavia no completo el wizard de onboarding
   // (logo, plan, o al menos una plantilla de horarios). Si falta algo,
-  // redirige al step correspondiente. Esto corre solo una vez por sesion
-  // para no spamear al usuario.
+  // redirige al step correspondiente.
+  // Se saltea completamente si el onboarding ya esta marcado como completo
+  // en el backend (persistente entre dispositivos) o en localStorage (UX).
   const templatesQuery = useQuery({
     queryKey: ["onboarding-check", "templates", localId],
     queryFn: () => scheduleService.getTemplates(localId),
-    enabled: hasHydrated && !!user?.isLocal && !!localId,
+    enabled: hasHydrated && !!user?.isLocal && !!localId && !onboardingDone,
     staleTime: 60_000,
     retry: 0,
   });
 
   useEffect(() => {
     if (!hasHydrated || !user?.isLocal) return;
+    // Si el usuario ya completo o salto el onboarding (DB o localStorage),
+    // no volver a redirigir.
+    if (onboardingDone) return;
     if (premiumStatus === undefined || templatesQuery.isLoading) return;
 
     const hasLogo = !!user.imageProfile;
@@ -73,6 +80,7 @@ export default function LocalDashboardPage() {
   }, [
     hasHydrated,
     user,
+    onboardingDone,
     premiumStatus,
     templatesQuery.data,
     templatesQuery.isLoading,

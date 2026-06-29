@@ -11,7 +11,6 @@ export type RegisterFormData = {
   password: string;
   confirmPassword: string;
   phone: string;
-  birthDate: string;
   countryCode: CountryCode;
   timezone: string;
   acceptTerms: boolean;
@@ -29,7 +28,6 @@ export type RegisterValidation = {
   password: string[];
   confirmPassword: string[];
   phone: string[];
-  birthDate: string[];
   acceptTerms: string[];
   province?: string[];
   city?: string[];
@@ -58,51 +56,72 @@ export function validatePassword(password: string) {
   const errors: string[] = [];
 
   if (!password) {
-    errors.push("La contrasena es requerida");
+    errors.push("La contraseña es requerida");
   } else if (password.length < 6) {
-    errors.push("La contrasena debe tener al menos 6 caracteres");
+    errors.push("La contraseña debe tener al menos 6 caracteres");
   }
 
   return errors;
+}
+
+/** Validacion fuerte usada para registrar un local (match @IsStrongPassword del backend). */
+export function validateStrongPassword(password: string) {
+  const errors: string[] = [];
+
+  if (!password) {
+    errors.push("La contraseña es requerida");
+    return errors;
+  }
+
+  if (password.length < 8) {
+    errors.push("Debe tener al menos 8 caracteres");
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push("Debe incluir una mayuscula");
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push("Debe incluir una minuscula");
+  }
+  if (!/[0-9]/.test(password)) {
+    errors.push("Debe incluir un numero");
+  }
+  if (!/[^A-Za-z0-9]/.test(password)) {
+    errors.push("Debe incluir un simbolo (ej: !@#$%)");
+  }
+
+  return errors;
+}
+
+export const STRONG_PASSWORD_HINTS = [
+  "Al menos 8 caracteres",
+  "Una mayuscula",
+  "Una minuscula",
+  "Un numero",
+  "Un simbolo (ej: !@#$%)",
+];
+
+export interface PasswordRequirement {
+  met: boolean;
+  label: string;
+}
+
+export function checkStrongPasswordRequirements(password: string): PasswordRequirement[] {
+  return [
+    { met: password.length >= 8, label: "Al menos 8 caracteres" },
+    { met: /[A-Z]/.test(password), label: "Una mayuscula" },
+    { met: /[a-z]/.test(password), label: "Una minuscula" },
+    { met: /[0-9]/.test(password), label: "Un numero" },
+    { met: /[^A-Za-z0-9]/.test(password), label: "Un simbolo (ej: !@#$%)" },
+  ];
 }
 
 export function validateConfirmPassword(password: string, confirmPassword: string) {
   const errors: string[] = [];
 
   if (!confirmPassword) {
-    errors.push("Debes confirmar la contrasena");
+    errors.push("Debes confirmar la contraseña");
   } else if (password !== confirmPassword) {
     errors.push("Las contrasenas no coinciden");
-  }
-
-  return errors;
-}
-
-export function validateBirthDate(birthDate: string) {
-  const errors: string[] = [];
-
-  if (!birthDate.trim()) {
-    errors.push("La fecha de nacimiento es requerida");
-    return errors;
-  }
-
-  const date = new Date(`${birthDate}T00:00:00`);
-  if (Number.isNaN(date.getTime())) {
-    errors.push("La fecha de nacimiento no es valida");
-    return errors;
-  }
-
-  const today = new Date();
-  let age = today.getFullYear() - date.getFullYear();
-  const monthDiff = today.getMonth() - date.getMonth();
-  const dayDiff = today.getDate() - date.getDate();
-
-  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-    age -= 1;
-  }
-
-  if (age < 13) {
-    errors.push("Debes tener al menos 13 anos para registrarte");
   }
 
   return errors;
@@ -122,7 +141,6 @@ export function validateRegisterForm(data: RegisterFormData): RegisterValidation
     password: validatePassword(data.password),
     confirmPassword: validateConfirmPassword(data.password, data.confirmPassword),
     phone: [],
-    birthDate: validateBirthDate(data.birthDate),
     acceptTerms: [],
   };
 
@@ -134,7 +152,7 @@ export function validateRegisterForm(data: RegisterFormData): RegisterValidation
 
   if (!data.phone.trim()) {
     validation.phone.push("El telefono es requerido");
-  } else if (!/^\d{8,15}$/.test(data.phone.replace(/\s/g, ""))) {
+  } else if (!/^\d{8,15}$/.test(data.phone.replace(/[\s\-\+\(\)]/g, ""))) {
     validation.phone.push("Formato de telefono invalido");
   }
 
@@ -184,6 +202,8 @@ export function validateLocalRegisterForm(data: RegisterFormData): LocalRegister
   const local = validateLocalFields(data);
   return {
     ...base,
+    // Los locales requieren password fuerte (match @IsStrongPassword del backend)
+    password: validateStrongPassword(data.password),
     province: local.province,
     city: local.city,
     address: local.address,

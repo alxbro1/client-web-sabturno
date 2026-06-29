@@ -52,20 +52,20 @@ describe("ResetPasswordPage", () => {
   it("renders password form when token is present", () => {
     render(<ResetPasswordPage />);
 
-    expect(screen.getByLabelText(/^Nueva contrasena/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Confirmar contrasena/)).toBeInTheDocument();
-    expect(screen.getByText("Restablecer contrasena")).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Nueva contraseña/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Confirmar contraseña/)).toBeInTheDocument();
+    expect(screen.getByText("Restablecer contraseña")).toBeInTheDocument();
   });
 
   it("shows validation error for short password", async () => {
     const user = userEvent.setup();
     render(<ResetPasswordPage />);
 
-    const passwordInput = screen.getByLabelText(/^Nueva contrasena/);
+    const passwordInput = screen.getByLabelText(/^Nueva contraseña/);
     await user.type(passwordInput, "ab");
 
     expect(
-      screen.getByText("La contrasena debe tener al menos 6 caracteres"),
+      screen.getByText("La contraseña debe tener al menos 6 caracteres"),
     ).toBeInTheDocument();
   });
 
@@ -73,8 +73,8 @@ describe("ResetPasswordPage", () => {
     const user = userEvent.setup();
     render(<ResetPasswordPage />);
 
-    const passwordInput = screen.getByLabelText(/^Nueva contrasena/);
-    const confirmInput = screen.getByLabelText(/^Confirmar contrasena/);
+    const passwordInput = screen.getByLabelText(/^Nueva contraseña/);
+    const confirmInput = screen.getByLabelText(/^Confirmar contraseña/);
 
     await user.type(passwordInput, "validpassword123");
     await user.type(confirmInput, "different");
@@ -89,13 +89,13 @@ describe("ResetPasswordPage", () => {
     mockResetPassword.mockResolvedValue(undefined);
     render(<ResetPasswordPage />);
 
-    const passwordInput = screen.getByLabelText(/^Nueva contrasena/);
-    const confirmInput = screen.getByLabelText(/^Confirmar contrasena/);
+    const passwordInput = screen.getByLabelText(/^Nueva contraseña/);
+    const confirmInput = screen.getByLabelText(/^Confirmar contraseña/);
 
     await user.type(passwordInput, "newpassword123");
     await user.type(confirmInput, "newpassword123");
 
-    const submitButton = screen.getByText("Restablecer contrasena");
+    const submitButton = screen.getByText("Restablecer contraseña");
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -112,17 +112,17 @@ describe("ResetPasswordPage", () => {
     mockResetPassword.mockResolvedValue(undefined);
     render(<ResetPasswordPage />);
 
-    const passwordInput = screen.getByLabelText(/^Nueva contrasena/);
-    const confirmInput = screen.getByLabelText(/^Confirmar contrasena/);
+    const passwordInput = screen.getByLabelText(/^Nueva contraseña/);
+    const confirmInput = screen.getByLabelText(/^Confirmar contraseña/);
 
     await user.type(passwordInput, "newpassword123");
     await user.type(confirmInput, "newpassword123");
 
-    const submitButton = screen.getByText("Restablecer contrasena");
+    const submitButton = screen.getByText("Restablecer contraseña");
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText("Contrasena restablecida")).toBeInTheDocument();
+      expect(screen.getByText("Contraseña restablecida")).toBeInTheDocument();
       expect(
         screen.getByText(/fue actualizada correctamente/i),
       ).toBeInTheDocument();
@@ -134,24 +134,24 @@ describe("ResetPasswordPage", () => {
     const user = userEvent.setup();
     mockResetPassword.mockRejectedValue(
       new Error(
-        "No se pudo restablecer la contrasena. Intenta nuevamente.",
+        "No se pudo restablecer la contraseña. Intenta nuevamente.",
       ),
     );
     render(<ResetPasswordPage />);
 
-    const passwordInput = screen.getByLabelText(/^Nueva contrasena/);
-    const confirmInput = screen.getByLabelText(/^Confirmar contrasena/);
+    const passwordInput = screen.getByLabelText(/^Nueva contraseña/);
+    const confirmInput = screen.getByLabelText(/^Confirmar contraseña/);
 
     await user.type(passwordInput, "newpassword123");
     await user.type(confirmInput, "newpassword123");
 
-    const submitButton = screen.getByText("Restablecer contrasena");
+    const submitButton = screen.getByText("Restablecer contraseña");
     await user.click(submitButton);
 
     await waitFor(() => {
       expect(
         screen.getByText(
-          "No se pudo restablecer la contrasena. Intenta nuevamente.",
+          "No se pudo restablecer la contraseña. Intenta nuevamente.",
         ),
       ).toBeInTheDocument();
     });
@@ -162,13 +162,13 @@ describe("ResetPasswordPage", () => {
     mockResetPassword.mockImplementation(() => new Promise(() => {}));
     render(<ResetPasswordPage />);
 
-    const passwordInput = screen.getByLabelText(/^Nueva contrasena/);
-    const confirmInput = screen.getByLabelText(/^Confirmar contrasena/);
+    const passwordInput = screen.getByLabelText(/^Nueva contraseña/);
+    const confirmInput = screen.getByLabelText(/^Confirmar contraseña/);
 
     await user.type(passwordInput, "newpassword123");
     await user.type(confirmInput, "newpassword123");
 
-    const submitButton = screen.getByText("Restablecer contrasena");
+    const submitButton = screen.getByText("Restablecer contraseña");
     await user.click(submitButton);
 
     expect(screen.getByText("Restableciendo...")).toBeInTheDocument();

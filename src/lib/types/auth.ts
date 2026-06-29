@@ -17,6 +17,7 @@ export interface User {
   reservationPercentage?: number | null;
   payWithCashInFront?: boolean;
   payWithTalo?: boolean;
+  onboardingCompleted?: boolean;
 }
 
 export interface LoginRequest {
@@ -36,8 +37,7 @@ export interface RegisterRequest {
   city?: string;
   /** Direccion del local (requerido si isLocal=true) */
   address?: string;
-  /** Telefono de emergencia del local (opcional) */
-  emergencyPhone?: string;
+  // emergencyPhone?: string;
   countryCode?: string;
   timezone?: string;
 }
@@ -45,4 +45,9 @@ export interface RegisterRequest {
 export interface AuthResponse {
   user: User;
   token: string;
+}
+
+export interface RegisterResponse {
+  ok: boolean;
+  message: string;
 }

@@ -20,7 +20,6 @@ import {
   calculateOccupancyPercentage,
   isDateBlocked,
   isCurrentMonth,
-  utcToLocalDate,
 } from "@/features/local/utils/calendarUtils";
 
 interface CalendarData {
@@ -168,6 +167,11 @@ export function useLocalCalendarQuery() {
     setCurrentYear(today.getFullYear());
   }, []);
 
+  const setMonth = useCallback((date: Date) => {
+    setCurrentMonth(date.getMonth());
+    setCurrentYear(date.getFullYear());
+  }, []);
+
   const blockDate = useCallback(
     async (startDate: Date, endDate: Date, reason: string): Promise<boolean> => {
       if (!localId) return false;
@@ -180,19 +184,26 @@ export function useLocalCalendarQuery() {
         const endIsMidnight =
           endDate.getHours() === 0 && endDate.getMinutes() === 0;
 
+        const formatLocalTime = (d: Date) =>
+          `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+        const formatLocalDate = (d: Date) =>
+          `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
         if (startIsMidnight && endIsMidnight && !isSameDay) {
           const cursor = new Date(startDate);
           while (cursor <= endDate) {
-            const dateStr = cursor.toISOString().split("T")[0];
+            const dateStr = formatLocalDate(cursor);
             const created = await blockingService.createBlockedDate({
               localId,
               date: dateStr,
               notes: reason,
             });
+            const dayStart = new Date(cursor);
+            const dayEnd = new Date(cursor);
             createdRanges.push({
               id: created.id,
-              startDate: utcToLocalDate(created.date),
-              endDate: utcToLocalDate(created.date),
+              startDate: dayStart,
+              endDate: dayEnd,
               type: 'full-day',
               reason: created.notes || "",
               localId: created.localId,
@@ -202,30 +213,31 @@ export function useLocalCalendarQuery() {
             cursor.setDate(cursor.getDate() + 1);
           }
         } else if (isSameDay && (!startIsMidnight || !endIsMidnight)) {
-          const dateStr = startDate.toISOString().split("T")[0];
-          const startTime = startDate.toTimeString().substring(0, 5);
-          const endTime = endDate.toTimeString().substring(0, 5);
+          // Send UTC to backend (the server interprets HH:mm in UTC for time-slots)
+          const dateStrUtc = startDate.toISOString().split("T")[0];
+          const startTimeUtc = startDate.toISOString().slice(11, 16);
+          const endTimeUtc = endDate.toISOString().slice(11, 16);
           const created = await blockingService.createBlockedTimeSlot({
             localId,
-            date: dateStr,
-            startTime,
-            endTime,
+            date: dateStrUtc,
+            startTime: startTimeUtc,
+            endTime: endTimeUtc,
             notes: reason,
           });
           createdRanges.push({
             id: created.id,
-            startDate: utcToLocalDate(created.moduleStartTime),
-            endDate: utcToLocalDate(created.moduleEndTime),
+            startDate,
+            endDate,
             type: 'time-slot',
-            startTime,
-            endTime,
+            startTime: formatLocalTime(startDate),
+            endTime: formatLocalTime(endDate),
             reason: created.notes || "",
             localId: created.localId,
             createdAt: created.createdAt,
             updatedAt: created.updatedAt,
           });
         } else {
-          const dateStr = startDate.toISOString().split("T")[0];
+          const dateStr = formatLocalDate(startDate);
           const created = await blockingService.createBlockedDate({
             localId,
             date: dateStr,
@@ -233,8 +245,8 @@ export function useLocalCalendarQuery() {
           });
           createdRanges.push({
             id: created.id,
-            startDate: utcToLocalDate(created.date),
-            endDate: utcToLocalDate(created.date),
+            startDate,
+            endDate,
             type: 'full-day',
             reason: created.notes || "",
             localId: created.localId,
@@ -285,6 +297,7 @@ export function useLocalCalendarQuery() {
     goToNextMonth,
     goToPreviousMonth,
     goToToday,
+    setMonth,
     refreshCalendar: refetch,
     blockedDates: blockedDates.length > 0 ? blockedDates : (data?.blockedDates ?? []),
     blockDate,

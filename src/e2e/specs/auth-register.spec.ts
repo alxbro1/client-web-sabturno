@@ -17,10 +17,9 @@ test.describe("Auth registration flow", () => {
     await page.getByRole("tab", { name: "LOCAL" }).click();
     await page.getByLabel("Nombre del local").fill("Mi Local");
     await page.getByLabel("Correo electronico").fill("nuevo@test.com");
-    await page.getByLabel("Contrasena", { exact: true }).fill("Test1234!");
-    await page.getByLabel("Confirmar contrasena").fill("Test1234!");
+    await page.getByLabel("Contraseña", { exact: true }).fill("Test1234!");
+    await page.getByLabel("Confirmar contraseña").fill("Test1234!");
     await page.getByRole("textbox", { name: "Telefono", exact: true }).fill("1112345678");
-    await page.getByLabel("Tu fecha de nacimiento").fill("1990-01-15");
     await page.getByLabel("Provincia", { exact: true }).selectOption("Buenos Aires");
     await page.getByLabel("Ciudad", { exact: true }).selectOption("CABA");
     await page.getByLabel("Direccion del local").fill("Av. Corrientes 1234");

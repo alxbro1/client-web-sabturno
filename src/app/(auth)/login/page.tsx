@@ -13,6 +13,7 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") || "/home";
+  const emailVerificationPending = searchParams.get("emailVerificationPending") === "true";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -76,6 +77,12 @@ export default function LoginPage() {
         </div>
       </div>
 
+      {emailVerificationPending ? (
+        <div className="rounded-2xl border border-[#00f068]/40 bg-[rgba(0,240,104,0.08)] px-4 py-[0.95rem] text-sm text-[#b3ffcd]">
+          Revisa tu correo electronico para verificar tu cuenta antes de iniciar sesion.
+        </div>
+      ) : null}
+
       <form className="grid gap-4" onSubmit={handleSubmit}>
         <InputField
           label="Correo electronico"
@@ -89,11 +96,11 @@ export default function LoginPage() {
           placeholder="tu@email.com"
         />
         <InputField
-          label="Contrasena"
+          label="Contraseña"
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          placeholder="Tu contrasena"
+          placeholder="Tu contraseña"
         />
 
         {error ? (

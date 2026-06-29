@@ -6,6 +6,7 @@ import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/ui/card";
 import { usePaymentStatusQuery } from "@/hooks/queries/usePaymentStatusQuery";
+import { formatLocalDate } from "@/lib/utils/date";
 
 const STATUS_LABELS: Record<string, string> = {
   COMPLETED: "Aprobado",
@@ -77,7 +78,7 @@ export default function PaymentStatusPage() {
             <p className="text-sm text-muted-foreground">ID Pago: {data.data.id}</p>
             <p className="text-sm text-muted-foreground">
               Creado:{" "}
-              {new Date(data.data.createdAt).toLocaleString("es-AR")}
+              {formatLocalDate(data.data.createdAt, undefined, "dd/MM/yyyy HH:mm")}
             </p>
           </>
         ) : data?.type === "mercadopago" && data.data ? (
@@ -92,7 +93,7 @@ export default function PaymentStatusPage() {
             </p>
             <p className="text-sm text-muted-foreground">
               Actualizado:{" "}
-              {new Date(data.data.updatedAt).toLocaleString("es-AR")}
+              {formatLocalDate(data.data.updatedAt, undefined, "dd/MM/yyyy HH:mm")}
             </p>
           </>
         ) : null}

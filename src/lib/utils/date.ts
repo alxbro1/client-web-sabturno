@@ -50,3 +50,15 @@ export function formatCurrency(amount: number) {
 export function toDate(utcDateString: string, timezone = DEFAULT_TIMEZONE) {
   return toZonedTime(parseISO(utcDateString), timezone);
 }
+
+export function utcDateTimeToLocalParts(
+  utcDate: string,
+  utcTime: string,
+  timezone = DEFAULT_TIMEZONE,
+): { date: string; time: string } {
+  const utcDateTime = `${utcDate}T${utcTime}:00Z`;
+  return {
+    date: formatInTimeZone(utcDateTime, timezone, "yyyy-MM-dd"),
+    time: formatInTimeZone(utcDateTime, timezone, "HH:mm"),
+  };
+}

@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAuthStore } from "@/stores/auth";
 import { useOnboardingStore } from "@/stores/onboarding";
 import { scheduleService } from "@/features/local/services/schedule.service";
+import { localService } from "@/features/local/services/local.service";
 import { cn } from "@/lib/utils";
 import type { Schedule, DaySchedule } from "@/features/local/types/schedule.types";
 import type { DayKey } from "@/features/local/types/schedule.types";
@@ -68,7 +69,7 @@ function timeToMinutes(time: string): number {
 export default function OnboardingHoursPage() {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { setHasSchedule } = useOnboardingStore();
+  const { setHasSchedule, dismiss } = useOnboardingStore();
   const [schedule, setSchedule] = useState<ScheduleForm>(makeDefaultSchedule);
   const [errors, setErrors] = useState<Record<DayKey, string | null>>({
     monday: null,
@@ -146,6 +147,9 @@ export default function OnboardingHoursPage() {
     },
     onSuccess: () => {
       setHasSchedule(true);
+      dismiss();
+      // Persistir en DB para que funcione entre dispositivos.
+      localService.updateLocal(localId, { onboardingCompleted: true }).catch(console.error);
       toast.success("Horarios guardados correctamente");
       router.replace("/local/dashboard");
     },
@@ -163,6 +167,9 @@ export default function OnboardingHoursPage() {
 
   function handleSkip() {
     setHasSchedule(true);
+    dismiss();
+    // Persistir en DB para que funcione entre dispositivos.
+    localService.updateLocal(localId, { onboardingCompleted: true }).catch(console.error);
     router.replace("/local/dashboard");
   }
 

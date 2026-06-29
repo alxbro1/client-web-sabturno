@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/Button";
 import { InputField, SelectField } from "@/components/Field";
-import { LocationFields, type LocationFieldsValue } from "@/components/LocationFields";
+import {
+  LocationFields,
+  type LocationFieldsValue,
+} from "@/components/LocationFields";
 import { UserTypeToggle } from "@/components/UserTypeToggle";
 import {
   Card,
@@ -22,6 +25,7 @@ import {
 } from "@/lib/constants/countries";
 import {
   type RegisterFormData,
+  checkStrongPasswordRequirements,
   validateRegisterForm,
   validateLocalRegisterForm,
 } from "@/lib/utils/validation";
@@ -35,7 +39,6 @@ const INITIAL_FORM: RegisterFormData = {
   password: "",
   confirmPassword: "",
   phone: "",
-  birthDate: "",
   countryCode: DEFAULT_COUNTRY_CODE,
   timezone: getDeviceTimezone(),
   acceptTerms: false,
@@ -48,7 +51,7 @@ const INITIAL_LOCATION: LocationFieldsValue = {
   province: "",
   city: "",
   address: "",
-  emergencyPhone: "",
+  // emergencyPhone: "",
 };
 
 const INITIAL_TOUCHED: Record<keyof RegisterFormData, boolean> = {
@@ -57,7 +60,6 @@ const INITIAL_TOUCHED: Record<keyof RegisterFormData, boolean> = {
   password: false,
   confirmPassword: false,
   phone: false,
-  birthDate: false,
   countryCode: false,
   timezone: false,
   acceptTerms: false,
@@ -72,7 +74,6 @@ const ALL_TOUCHED: Record<keyof RegisterFormData, boolean> = {
   password: true,
   confirmPassword: true,
   phone: true,
-  birthDate: true,
   countryCode: true,
   timezone: true,
   acceptTerms: true,
@@ -85,11 +86,13 @@ export default function RegisterPage() {
   const router = useRouter();
   const { isBusiness, reset: resetClientType } = useClientTypeStore();
   const [formData, setFormData] = useState<RegisterFormData>(INITIAL_FORM);
-  const [location, setLocation] = useState<LocationFieldsValue>(INITIAL_LOCATION);
+  const [location, setLocation] =
+    useState<LocationFieldsValue>(INITIAL_LOCATION);
   const [touched, setTouched] =
     useState<Record<keyof RegisterFormData, boolean>>(INITIAL_TOUCHED);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [passwordFocus, setPasswordFocus] = useState(false);
 
   // Limpia el toggle de cliente/local al desmontar la pantalla.
   useEffect(() => {
@@ -112,9 +115,9 @@ export default function RegisterPage() {
     formData.email.trim().length > 0 &&
     formData.password.length > 0 &&
     formData.phone.trim().length > 0 &&
-    formData.birthDate.trim().length > 0 &&
     formData.acceptTerms &&
-    (!isBusiness || (location.province && location.city && location.address.trim()));
+    (!isBusiness ||
+      (location.province && location.city && location.address.trim()));
 
   const timezones = getTimezonesForCountry(formData.countryCode);
 
@@ -161,7 +164,7 @@ export default function RegisterPage() {
           province: location.province,
           city: location.city,
           address: location.address.trim(),
-          emergencyPhone: location.emergencyPhone.trim() || undefined,
+          // emergencyPhone: location.emergencyPhone.trim() || undefined,
         }),
         countryCode: formData.countryCode,
         timezone: formData.timezone,
@@ -202,32 +205,57 @@ export default function RegisterPage() {
         <UserTypeToggle />
 
         <form className="grid gap-4" onSubmit={handleSubmit}>
-          <InputField
-            label={isBusiness ? "Nombre del local" : "Nombre"}
-            value={formData.name}
-            onChange={(event) => updateField("name", event.target.value)}
-            errors={touched.name ? validation.name : undefined}
-            placeholder={isBusiness ? "Nombre de tu negocio" : undefined}
-          />
-
-          <InputField
-            label="Correo electronico"
-            type="email"
-            value={formData.email}
-            onChange={(event) => updateField("email", event.target.value)}
-            errors={touched.email ? validation.email : undefined}
-          />
-
-          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+          <div className="grid grid-cols-2 gap-4 items-start max-sm:grid-cols-1">
             <InputField
-              label="Contrasena"
-              type="password"
-              value={formData.password}
-              onChange={(event) => updateField("password", event.target.value)}
-              errors={touched.password ? validation.password : undefined}
+              label={isBusiness ? "Nombre del local" : "Nombre"}
+              value={formData.name}
+              onChange={(event) => updateField("name", event.target.value)}
+              errors={touched.name ? validation.name : undefined}
+              placeholder={isBusiness ? "Nombre de tu negocio" : undefined}
             />
+
             <InputField
-              label="Confirmar contrasena"
+              label="Correo electronico"
+              type="email"
+              value={formData.email}
+              onChange={(event) => updateField("email", event.target.value)}
+              errors={touched.email ? validation.email : undefined}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 items-start max-sm:grid-cols-1">
+            <div className="grid gap-1">
+              <InputField
+                label="Contraseña"
+                type="password"
+                value={formData.password}
+                onChange={(event) =>
+                  updateField("password", event.target.value)
+                }
+                onFocus={() => setPasswordFocus(true)}
+                onBlur={() => setPasswordFocus(false)}
+                errors={touched.password ? validation.password : undefined}
+              />
+              {isBusiness && passwordFocus ? (
+                <ul className="space-y-0.5 text-xs">
+                  {checkStrongPasswordRequirements(formData.password).map(
+                    (req) => (
+                      <li
+                        key={req.label}
+                        className={
+                          req.met ? "text-[#00f068]" : "text-muted-foreground"
+                        }
+                      >
+                        {req.met ? "✓ " : "• "}
+                        {req.label}
+                      </li>
+                    ),
+                  )}
+                </ul>
+              ) : null}
+            </div>
+            <InputField
+              label="Confirmar contraseña"
               type="password"
               value={formData.confirmPassword}
               onChange={(event) =>
@@ -239,21 +267,12 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-            <InputField
-              label="Telefono"
-              value={formData.phone}
-              onChange={(event) => updateField("phone", event.target.value)}
-              errors={touched.phone ? validation.phone : undefined}
-            />
-            <InputField
-              label={isBusiness ? "Tu fecha de nacimiento" : "Fecha de nacimiento"}
-              type="date"
-              value={formData.birthDate}
-              onChange={(event) => updateField("birthDate", event.target.value)}
-              errors={touched.birthDate ? validation.birthDate : undefined}
-            />
-          </div>
+          <InputField
+            label="Telefono"
+            value={formData.phone}
+            onChange={(event) => updateField("phone", event.target.value)}
+            errors={touched.phone ? validation.phone : undefined}
+          />
 
           {isBusiness && (
             <LocationFields

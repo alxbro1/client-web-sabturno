@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/Button";
 import { usePaymentsQuery } from "@/hooks/queries/usePaymentsQuery";
+import { formatLocalDate } from "@/lib/utils/date";
 import type { UserPayment } from "@/lib/types/user";
 
 const STATUS_LABEL: Record<UserPayment["status"], string> = {
@@ -103,9 +104,11 @@ export default function PaymentsPage() {
                 </span>
                 <strong>
                   {payment.appointment?.startDateTime
-                    ? new Date(
+                    ? formatLocalDate(
                         payment.appointment.startDateTime,
-                      ).toLocaleString("es-AR")
+                        undefined,
+                        "dd/MM/yyyy HH:mm",
+                      )
                     : "Sin fecha"}
                 </strong>
               </div>

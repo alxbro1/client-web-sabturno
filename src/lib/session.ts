@@ -24,6 +24,7 @@ export interface SessionData {
     reservationPercentage?: number | null;
     payWithCashInFront?: boolean;
     payWithTalo?: boolean;
+    onboardingCompleted?: boolean;
   };
 }
 

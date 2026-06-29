@@ -54,3 +54,23 @@ There is no lint or formatter configured (no eslint/prettier in `package.json`).
 ## Skills
 
 Repo-local skills under `.agents/skills/` (composition-patterns, react-best-practices, frontend-design, tailwind-css-patterns, vite, etc.) are auto-loaded by opencode via `skills-lock.json` — prefer them over generic advice for React composition, performance, and Tailwind work.
+
+## Time handling
+
+**Lee `docs/time-handling.md` antes de tocar fechas, horarios, time-stocks o
+availability.** Resumen no negociable:
+
+- Mostrar datetimes: usá `formatInTimeZone` / `toZonedTime` de
+  `src/lib/utils/date.ts`. **Nunca** `toTimeString()` / `toDateString()` /
+  `toLocaleString()` para formatear salida al usuario.
+- Enviar al backend:
+  - ISO datetime → `date.toISOString()`.
+  - Fecha `YYYY-MM-DD` → día local del usuario.
+  - `HH:mm` de time-slot → UTC (`date.toISOString().slice(11, 16)`).
+  - `HH:mm` de full-day → hora local + zona explícita en el body.
+- Comparar días: normalizar a string con TZ (`formatInTimeZone(d, tz, 'yyyy-MM-dd')`).
+- Helpers canónicos en `src/lib/utils/date.ts`:
+  `formatLocalDate`, `formatDateOnlyLocal`, `getFriendlyDateTime`,
+  `toDate`, `utcDateTimeToLocalParts`, `convertLocalToUTC`.
+- Endpoint `time_stock/*` mantiene cache-bust (`Cache-Control: no-store`).
+  No lo remuevas.

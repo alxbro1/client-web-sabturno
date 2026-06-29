@@ -25,11 +25,11 @@ test.describe("Password reset flow", () => {
     });
 
     await page.goto("/reset-password?token=valid-token");
-    await page.getByLabel("Nueva contrasena").fill("NewPass123!");
-    await page.getByLabel("Confirmar contrasena").fill("NewPass123!");
-    await page.getByRole("button", { name: "Restablecer contrasena" }).click();
+    await page.getByLabel("Nueva contraseña").fill("NewPass123!");
+    await page.getByLabel("Confirmar contraseña").fill("NewPass123!");
+    await page.getByRole("button", { name: "Restablecer contraseña" }).click();
 
-    await expect(page.getByText("Contrasena restablecida")).toBeVisible();
-    await expect(page.getByText("Tu contrasena fue actualizada correctamente")).toBeVisible();
+    await expect(page.getByText("Contraseña restablecida")).toBeVisible();
+    await expect(page.getByText("Tu contraseña fue actualizada correctamente")).toBeVisible();
   });
 });

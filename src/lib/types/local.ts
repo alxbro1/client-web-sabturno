@@ -22,4 +22,5 @@ export interface Local {
   subscriptionTier?: "basic" | "pro" | "enterprise" | null;
   /** Estado de la suscripción */
   subscriptionStatus?: "active" | "trial" | "cancelled" | "expired" | null;
+  onboardingCompleted?: boolean;
 }

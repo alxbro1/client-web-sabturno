@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuthStore } from '@/stores/auth';
+import { formatDateOnlyLocal } from '@/lib/utils/date';
 import { blockingService } from '../services/blocking.service';
 import { calendarService } from '../services/calendar.service';
 import {
@@ -16,7 +17,6 @@ import {
   getWorkingDayTemplate,
   isCurrentMonth,
   isDateBlocked,
-  utcToLocalDate
 } from '../utils/calendarUtils';
 
 interface UseLocalCalendarReturn {
@@ -190,36 +190,42 @@ export const useLocalCalendar = (): UseLocalCalendarReturn => {
       const startIsMidnight = startDate.getHours() === 0 && startDate.getMinutes() === 0;
       const endIsMidnight = endDate.getHours() === 0 && endDate.getMinutes() === 0;
 
+      const formatLocalTime = (d: Date) =>
+        `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+
       if (startIsMidnight && endIsMidnight && !isSameDay) {
-        const datesToBlock: string[] = [];
         const cursor = new Date(startDate);
         while (cursor <= endDate) {
-          datesToBlock.push(cursor.toISOString().split('T')[0]);
-          cursor.setDate(cursor.getDate() + 1);
-        }
-
-        for (const dateStr of datesToBlock) {
+          const dateStr = formatDateOnlyLocal(cursor);
           const created = await blockingService.createBlockedDate({ localId, date: dateStr, notes: reason });
+          const dayStart = new Date(cursor);
+          const dayEnd = new Date(cursor);
           const normalized: BlockedDateRange = {
             id: created.id,
-            startDate: utcToLocalDate(created.date),
-            endDate: utcToLocalDate(created.date),
+            startDate: dayStart,
+            endDate: dayEnd,
+            type: 'full-day',
             reason: created.notes || '',
             localId: created.localId,
             createdAt: created.createdAt,
             updatedAt: created.updatedAt
           };
           createdRanges.push(normalized);
+          cursor.setDate(cursor.getDate() + 1);
         }
       } else if (isSameDay && (!startIsMidnight || !endIsMidnight)) {
-        const dateStr = startDate.toISOString().split('T')[0];
-        const startTime = startDate.toTimeString().substring(0,5);
-        const endTime = endDate.toTimeString().substring(0,5);
-        const created = await blockingService.createBlockedTimeSlot({ localId, date: dateStr, startTime, endTime, notes: reason });
+        // Send UTC to backend (server interprets HH:mm in UTC for time-slots)
+        const dateStrUtc = startDate.toISOString().split('T')[0];
+        const startTimeUtc = startDate.toISOString().slice(11, 16);
+        const endTimeUtc = endDate.toISOString().slice(11, 16);
+        const created = await blockingService.createBlockedTimeSlot({ localId, date: dateStrUtc, startTime: startTimeUtc, endTime: endTimeUtc, notes: reason });
         const normalized: BlockedDateRange = {
           id: created.id,
-          startDate: utcToLocalDate(created.moduleStartTime),
-          endDate: utcToLocalDate(created.moduleEndTime),
+          startDate,
+          endDate,
+          type: 'time-slot',
+          startTime: formatLocalTime(startDate),
+          endTime: formatLocalTime(endDate),
           reason: created.notes || '',
           localId: created.localId,
           createdAt: created.createdAt,
@@ -227,12 +233,13 @@ export const useLocalCalendar = (): UseLocalCalendarReturn => {
         };
         createdRanges.push(normalized);
       } else {
-        const dateStr = startDate.toISOString().split('T')[0];
+        const dateStr = formatDateOnlyLocal(startDate);
         const created = await blockingService.createBlockedDate({ localId, date: dateStr, notes: reason });
         const normalized: BlockedDateRange = {
           id: created.id,
-          startDate: utcToLocalDate(created.date),
-          endDate: utcToLocalDate(created.date),
+          startDate,
+          endDate,
+          type: 'full-day',
           reason: created.notes || '',
           localId: created.localId,
           createdAt: created.createdAt,

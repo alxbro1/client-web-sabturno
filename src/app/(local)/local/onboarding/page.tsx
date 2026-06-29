@@ -9,6 +9,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useOnboardingStore, type OnboardingStep } from "@/stores/onboarding";
 import { premiumService } from "@/services/premium";
 import { scheduleService } from "@/features/local/services/schedule.service";
+import { localService } from "@/features/local/services/local.service";
 
 /**
  * Entry point del wizard de onboarding del local.
@@ -21,7 +22,7 @@ import { scheduleService } from "@/features/local/services/schedule.service";
 export default function OnboardingEntryPage() {
   const router = useRouter();
   const { user, hasHydrated } = useAuthStore();
-  const { setStep, reset: resetOnboarding } = useOnboardingStore();
+  const { setStep, dismiss: dismissOnboarding } = useOnboardingStore();
 
   const localId = user?.id ?? "";
 
@@ -66,7 +67,9 @@ export default function OnboardingEntryPage() {
     else if (!hasSchedule) nextStep = "hours";
 
     if (nextStep === "done") {
-      resetOnboarding();
+      dismissOnboarding();
+      // Persistir en DB para que funcione entre dispositivos.
+      localService.updateLocal(localId, { onboardingCompleted: true }).catch(console.error);
       router.replace("/local/dashboard");
       return;
     }
@@ -82,7 +85,7 @@ export default function OnboardingEntryPage() {
     templatesQuery.data,
     router,
     setStep,
-    resetOnboarding,
+    dismissOnboarding,
   ]);
 
   if (!hasHydrated || !user?.isLocal) {
@@ -109,7 +112,11 @@ export default function OnboardingEntryPage() {
         </Button>
         <Button
           variant="ghost"
-          onClick={() => router.replace("/local/dashboard")}
+          onClick={() => {
+            dismissOnboarding();
+            localService.updateLocal(localId, { onboardingCompleted: true }).catch(console.error);
+            router.replace("/local/dashboard");
+          }}
         >
           Ir al panel
         </Button>
@@ -121,7 +128,11 @@ export default function OnboardingEntryPage() {
     <div className="min-h-[400px] grid place-items-center text-center gap-4">
       <Loader2 className="size-8 text-primary animate-spin" />
       <p className="text-muted-foreground">Preparando tu local...</p>
-      <Button variant="ghost" onClick={() => router.replace("/local/dashboard")}>
+      <Button variant="ghost" onClick={() => {
+        dismissOnboarding();
+        localService.updateLocal(localId, { onboardingCompleted: true }).catch(console.error);
+        router.replace("/local/dashboard");
+      }}>
         Saltar al panel
       </Button>
     </div>

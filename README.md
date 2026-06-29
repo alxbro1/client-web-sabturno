@@ -18,7 +18,7 @@ VITE_API_URL=https://app-api.sabturno.com
 
 ## Alcance actual
 
-- Login, registro y recuperacion de contrasena.
+- Login, registro y recuperacion de contraseña.
 - Home cliente con proximo turno y metricas.
 - Reserva completa: local, servicio, fecha, horario, metodo de pago y estado del pago.
 - Mis turnos con cancelacion.

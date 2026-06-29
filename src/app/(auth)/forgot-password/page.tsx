@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
 
     try {
       await authService.forgotPassword(email.trim());
-      setMessage("Te enviamos un enlace para restablecer tu contrasena.");
+      setMessage("Te enviamos un enlace para restablecer tu contraseña.");
     } catch {
       setError("No se pudo enviar el email. Intenta nuevamente.");
     } finally {
@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
         <p className="text-xs font-bold uppercase tracking-widest text-primary">
           Recuperacion
         </p>
-        <CardTitle>Olvidaste tu contrasena?</CardTitle>
+        <CardTitle>Olvidaste tu contraseña?</CardTitle>
         <CardDescription>
           Te enviaremos un enlace para restablecerla.
         </CardDescription>

@@ -4,7 +4,7 @@ import {
   getValidTimezone,
 } from "@/lib/constants/countries";
 import { apiService } from "@/lib/api";
-import type { AuthResponse, LoginRequest, RegisterRequest } from "@/lib/types/auth";
+import type { AuthResponse, LoginRequest, RegisterRequest, RegisterResponse } from "@/lib/types/auth";
 
 export const authService = {
   async login(credentials: LoginRequest) {
@@ -13,7 +13,7 @@ export const authService = {
   },
 
   async register(userData: RegisterRequest) {
-    const response = await apiService.post<AuthResponse>("/auth/register", {
+    const response = await apiService.post<RegisterResponse>("/auth/register", {
       ...userData,
       countryCode: userData.countryCode || DEFAULT_COUNTRY_CODE,
       timezone: getValidTimezone(userData.timezone || getDeviceTimezone()),
