@@ -22,6 +22,6 @@ export const queryKeys = {
   employees: (localId: string) => ["employees", localId] as const,
   localServices: (localId: string) => ["local-services", localId] as const,
   myReports: () => ["my-reports"] as const,
-  premiumPlans: () => ["premium", "plans"] as const,
-  premiumStatus: () => ["premium", "status"] as const,
+  premiumPlans: () => ["premium", "plans", "v2"] as const,
+  premiumStatus: () => ["premium", "status", "v2"] as const,
 };

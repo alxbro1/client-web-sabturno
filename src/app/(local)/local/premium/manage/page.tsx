@@ -60,7 +60,9 @@ export default function PremiumManagePage() {
   async function handleChangePlan(newPlanId: string) {
     setIsChangingPlan(true);
     try {
-      const result = await premiumService.changePlan({ newPlanId });
+      const result = await premiumService.changePlan({
+        plan: newPlanId.toUpperCase() as "BASIC" | "PRO" | "ENTERPRISE",
+      });
       if (result.success) {
         toast.success(result.message || "Plan cambiado correctamente");
         refetch();

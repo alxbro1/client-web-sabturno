@@ -6,35 +6,19 @@ import type {
   SubscribeResponse,
   ChangePlanRequest,
   ChangePlanResponse,
-  PlanTier,
 } from "@/lib/types/premium";
-
-/** Normalize backend tier (BASIC/PRO/ENTERPRISE) to lowercase */
-function normalizeTier(tier: string): PlanTier {
-  const lower = tier.toLowerCase();
-  if (lower === "basic" || lower === "pro" || lower === "enterprise") {
-    return lower;
-  }
-  return "basic";
-}
 
 export const premiumService = {
   /** Obtener todos los planes disponibles */
   async getPlans(): Promise<PremiumPlan[]> {
     const response = await apiService.get<PremiumPlan[]>("/premium/plans");
-    return response.data.map((plan) => ({
-      ...plan,
-      tier: normalizeTier(plan.tier),
-    }));
+    return response.data;
   },
 
   /** Obtener estado de suscripción del local actual */
   async getStatus(): Promise<SubscriptionStatus> {
     const response = await apiService.get<SubscriptionStatus>("/premium/status");
-    return {
-      ...response.data,
-      tier: normalizeTier(response.data.tier),
-    };
+    return response.data;
   },
 
   /** Suscribirse a un plan (redirige a MercadoPago) */

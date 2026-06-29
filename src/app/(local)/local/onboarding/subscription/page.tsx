@@ -49,7 +49,7 @@ export default function OnboardingSubscriptionPage() {
     setSubscribingPlanId(planId);
     try {
       const result = await premiumService.subscribe({
-        planId,
+        plan: planId.toUpperCase() as "BASIC" | "PRO" | "ENTERPRISE",
         interval,
       });
 

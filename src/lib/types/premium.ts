@@ -54,7 +54,7 @@ export interface SubscriptionStatus {
 }
 
 export interface SubscribeRequest {
-  planId: string;
+  plan: "BASIC" | "PRO" | "ENTERPRISE";
   interval: PlanInterval;
 }
 
@@ -64,7 +64,7 @@ export interface SubscribeResponse {
 }
 
 export interface ChangePlanRequest {
-  newPlanId: string;
+  plan: "BASIC" | "PRO" | "ENTERPRISE";
 }
 
 export interface ChangePlanResponse {

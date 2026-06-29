@@ -5,7 +5,14 @@ import { queryKeys } from "@/lib/queryKeys";
 import { premiumService } from "@/services/premium";
 import type { PremiumPlan } from "@/lib/types/premium";
 
-/** Planes hardcodeados como fallback si el backend no responde */
+/**
+ * Planes hardcodeados como fallback si el backend no responde.
+ *
+ * Desde el deploy `premium-contract-alignment` (2026-06-28), el
+ * backend devuelve este mismo shape vía `GET /premium/plans` (ver
+ * `backend/src/premium/premium.service.ts:59 toPlanDto`). Este
+ * FALLBACK queda como red de seguridad para outages / cold start.
+ */
 export const FALLBACK_PLANS: PremiumPlan[] = [
   {
     id: "basic",
