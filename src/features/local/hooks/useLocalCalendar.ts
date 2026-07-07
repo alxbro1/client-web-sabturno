@@ -60,7 +60,7 @@ export const useLocalCalendar = (): UseLocalCalendarReturn => {
     const allDays = generateCalendarDays(currentMonth, currentYear);
 
     return allDays.map(date => {
-      const dateKey = date.toISOString().split('T')[0];
+      const dateKey = formatDateOnlyLocal(date);
       const appointmentCount = appointmentCounts[dateKey] || 0;
       const dayOfWeek = date.getDay();
 

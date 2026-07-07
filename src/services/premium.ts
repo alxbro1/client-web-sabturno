@@ -40,8 +40,8 @@ export const premiumService = {
   },
 
   /** Cancelar renovación automática */
-  async cancelSubscription(): Promise<{ success: boolean; message: string }> {
-    const response = await apiService.post<{ success: boolean; message: string }>(
+  async cancelSubscription(): Promise<{ message: string; expiresAt?: string | null }> {
+    const response = await apiService.post<{ message: string; expiresAt?: string | null }>(
       "/premium/cancel",
     );
     return response.data;

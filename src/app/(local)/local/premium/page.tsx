@@ -40,9 +40,8 @@ export default function PremiumPage() {
         // Redirigir a MercadoPago
         window.location.href = result.checkoutUrl;
       } else {
-        // Plan gratuito o sin checkout
-        toast.success("¡Plan activado correctamente!");
-        router.push("/local/premium/success");
+        // MercadoPago no respondió — no activar el plan
+        toast.error("No se pudo conectar con MercadoPago. Intentá de nuevo.");
       }
     } catch (error) {
       console.error("Error al suscribirse:", error);

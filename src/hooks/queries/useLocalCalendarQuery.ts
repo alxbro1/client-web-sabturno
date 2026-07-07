@@ -11,6 +11,7 @@ import type {
   CalendarDay,
   WorkingDayTemplate,
 } from "@/features/local/types/calendar.types";
+import { formatDateOnlyLocal } from "@/lib/utils/date";
 import {
   generateCalendarDays,
   getDateRange,
@@ -72,7 +73,7 @@ export function useLocalCalendarQuery() {
     const workingDayTemplates = data?.workingDayTemplates ?? [];
 
     return allDays.map((date) => {
-      const dateKey = date.toISOString().split("T")[0];
+      const dateKey = formatDateOnlyLocal(date);
       const appointmentCount = appointmentCounts[dateKey] || 0;
       const dayOfWeek = date.getDay();
       const isBlocked = isDateBlocked(date, effectiveBlockedDates);

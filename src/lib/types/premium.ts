@@ -40,7 +40,7 @@ export interface SubscriptionStatus {
   /** Intervalo de facturación */
   interval: PlanInterval;
   /** Estado de la suscripción */
-  status: "active" | "trial" | "cancelled" | "expired";
+  status: "active" | "trial" | "cancelled" | "expired" | "pending_payment";
   /** Si la suscripción se renueva automáticamente */
   autoRenew: boolean;
   /** Próxima fecha de facturación (ISO) */
@@ -59,7 +59,7 @@ export interface SubscribeRequest {
 }
 
 export interface SubscribeResponse {
-  checkoutUrl: string;
+  checkoutUrl: string | null;
   subscriptionId: string;
 }
 
@@ -68,6 +68,8 @@ export interface ChangePlanRequest {
 }
 
 export interface ChangePlanResponse {
-  success: boolean;
   message: string;
+  type?: "upgrade" | "downgrade";
+  checkoutUrl?: string | null;
+  subscriptionId?: string;
 }

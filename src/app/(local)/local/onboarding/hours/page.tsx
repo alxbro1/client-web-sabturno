@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/Button";
-import { InputField } from "@/components/Field";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useAuthStore } from "@/stores/auth";
 import { useOnboardingStore } from "@/stores/onboarding";
@@ -33,8 +33,7 @@ const DAYS: DayConfig[] = [
 
 interface DayState {
   active: boolean;
-  open: string;
-  close: string;
+  slots: { start: string; end: string }[];
 }
 
 type ScheduleForm = Record<DayKey, DayState>;
@@ -44,8 +43,7 @@ function makeDefaultSchedule(): ScheduleForm {
   for (const day of DAYS) {
     obj[day.key] = {
       active: day.key !== "sunday",
-      open: "09:00",
-      close: "18:00",
+      slots: [{ start: "09:00", end: "18:00" }],
     };
   }
   return obj;
@@ -84,7 +82,46 @@ export default function OnboardingHoursPage() {
   const localId = user?.id ?? "";
 
   function updateDay(day: DayKey, patch: Partial<DayState>) {
-    setSchedule((current) => ({ ...current, [day]: { ...current[day], ...patch } }));
+    setSchedule((current) => {
+      const updated = { ...current[day], ...patch };
+      if (patch.active === true && updated.slots.length === 0) {
+        updated.slots = [{ start: "09:00", end: "18:00" }];
+      }
+      return { ...current, [day]: updated };
+    });
+    setErrors((current) => ({ ...current, [day]: null }));
+  }
+
+  function handleAddSlot(day: DayKey) {
+    setSchedule((current) => ({
+      ...current,
+      [day]: {
+        ...current[day],
+        slots: [...current[day].slots, { start: "09:00", end: "18:00" }],
+      },
+    }));
+  }
+
+  function handleRemoveSlot(day: DayKey, slotIndex: number) {
+    setSchedule((current) => ({
+      ...current,
+      [day]: {
+        ...current[day],
+        slots: current[day].slots.filter((_, i) => i !== slotIndex),
+      },
+    }));
+  }
+
+  function handleSlotChange(day: DayKey, slotIndex: number, field: "start" | "end", value: string) {
+    setSchedule((current) => ({
+      ...current,
+      [day]: {
+        ...current[day],
+        slots: current[day].slots.map((slot, i) =>
+          i === slotIndex ? { ...slot, [field]: value } : slot,
+        ),
+      },
+    }));
     setErrors((current) => ({ ...current, [day]: null }));
   }
 
@@ -102,14 +139,23 @@ export default function OnboardingHoursPage() {
     for (const day of DAYS) {
       const cfg = schedule[day.key];
       if (!cfg.active) continue;
-      if (!cfg.open || !cfg.close) {
-        next[day.key] = "Definir horario de apertura y cierre";
+      if (cfg.slots.length === 0) {
+        next[day.key] = "Agregar al menos un horario";
         ok = false;
         continue;
       }
-      if (timeToMinutes(cfg.close) <= timeToMinutes(cfg.open)) {
-        next[day.key] = "La hora de cierre debe ser despues de la apertura";
-        ok = false;
+      for (let i = 0; i < cfg.slots.length; i++) {
+        const slot = cfg.slots[i];
+        if (!slot.start || !slot.end) {
+          next[day.key] = "Definir horario de apertura y cierre";
+          ok = false;
+          break;
+        }
+        if (timeToMinutes(slot.end) <= timeToMinutes(slot.start)) {
+          next[day.key] = `Horario ${i + 1}: la hora de cierre debe ser despues de la apertura`;
+          ok = false;
+          break;
+        }
       }
     }
     setErrors(next);
@@ -132,9 +178,7 @@ export default function OnboardingHoursPage() {
         const cfg = schedule[day.key];
         const daySchedule: DaySchedule = {
           active: cfg.active,
-          timeSlots: cfg.active
-            ? [{ start: cfg.open, end: cfg.close }]
-            : [],
+          timeSlots: cfg.active ? cfg.slots : [],
         };
         schedulePayload[day.key] = daySchedule;
       }
@@ -201,7 +245,7 @@ export default function OnboardingHoursPage() {
                   : "border-white/10 bg-white/[0.01] opacity-60",
               )}
             >
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
                   <Switch
                     checked={cfg.active}
@@ -215,30 +259,69 @@ export default function OnboardingHoursPage() {
                   </span>
                 </div>
 
-                {cfg.active ? (
-                  <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-                    <InputField
-                      label="Apertura"
-                      type="time"
-                      value={cfg.open}
-                      onChange={(event) =>
-                        updateDay(day.key, { open: event.target.value })
-                      }
-                    />
-                    <InputField
-                      label="Cierre"
-                      type="time"
-                      value={cfg.close}
-                      onChange={(event) =>
-                        updateDay(day.key, { close: event.target.value })
-                      }
-                      errors={errors[day.key] ? [errors[day.key]!] : undefined}
-                    />
-                  </div>
-                ) : (
-                  <span className="text-xs text-muted-foreground">Cerrado</span>
+                {cfg.active && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="text-primary border-primary/30"
+                    onClick={() => handleAddSlot(day.key)}
+                  >
+                    <span className="flex items-center gap-1">
+                      <Plus className="w-4 h-4" /> Agregar horario
+                    </span>
+                  </Button>
                 )}
               </div>
+
+              {cfg.active && cfg.slots.length > 0 && (
+                <div className="space-y-2 ml-9">
+                  {cfg.slots.map((slot, slotIdx) => (
+                    <div key={slotIdx} className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 flex-1">
+                        <Input
+                          type="time"
+                          value={slot.start}
+                          onChange={(e) =>
+                            handleSlotChange(day.key, slotIdx, "start", e.target.value)
+                          }
+                          className="w-auto"
+                        />
+                        <span className="text-muted-foreground text-sm">a</span>
+                        <Input
+                          type="time"
+                          value={slot.end}
+                          onChange={(e) =>
+                            handleSlotChange(day.key, slotIdx, "end", e.target.value)
+                          }
+                          className="w-auto"
+                        />
+                      </div>
+                      {cfg.slots.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSlot(day.key, slotIdx)}
+                          className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {errors[day.key] && (
+                    <p className="text-sm text-destructive">{errors[day.key]}</p>
+                  )}
+                </div>
+              )}
+
+              {cfg.active && cfg.slots.length === 0 && (
+                <p className="text-sm text-muted-foreground ml-9">
+                  Sin horarios configurados
+                </p>
+              )}
+
+              {!cfg.active && (
+                <span className="text-xs text-muted-foreground ml-9">Cerrado</span>
+              )}
             </div>
           );
         })}

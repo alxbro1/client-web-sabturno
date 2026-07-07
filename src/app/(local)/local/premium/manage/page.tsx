@@ -45,12 +45,10 @@ export default function PremiumManagePage() {
   async function handleCancelSubscription() {
     try {
       const result = await premiumService.cancelSubscription();
-      if (result.success) {
-        toast.success(
-          result.message || "Renovación automática cancelada correctamente",
-        );
-        refetch();
-      }
+      toast.success(
+        result.message || "Renovación automática cancelada correctamente",
+      );
+      refetch();
     } catch (error) {
       console.error("Error al cancelar:", error);
       toast.error("No se pudo cancelar la suscripción. Intentá de nuevo.");
@@ -63,7 +61,9 @@ export default function PremiumManagePage() {
       const result = await premiumService.changePlan({
         plan: newPlanId.toUpperCase() as "BASIC" | "PRO" | "ENTERPRISE",
       });
-      if (result.success) {
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      } else {
         toast.success(result.message || "Plan cambiado correctamente");
         refetch();
       }

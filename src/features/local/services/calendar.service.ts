@@ -1,7 +1,7 @@
 import { apiService } from '@/lib/api';
 import { BlockedDateRange, WorkingDayTemplate } from '../types/calendar.types';
 import { utcToLocalDate } from '../utils/calendarUtils';
-import { utcDateTimeToLocalParts } from '@/lib/utils/date';
+import { formatDateOnlyLocal, utcDateTimeToLocalParts } from '@/lib/utils/date';
 
 export interface Appointment {
   id: number;
@@ -29,8 +29,8 @@ export const calendarService = {
     const response = await apiService.get<{ [date: string]: number }>(
       `/local/calendar/${localId}/appointments`, {
         params: {
-          startDate: startDate.toISOString().split('T')[0],
-          endDate: endDate.toISOString().split('T')[0]
+          startDate: formatDateOnlyLocal(startDate),
+          endDate: formatDateOnlyLocal(endDate)
         }
       }
     );
@@ -38,7 +38,7 @@ export const calendarService = {
   },
   getAppointmentsByDate: async (localId: string, date: Date): Promise<Appointment[]> => {
     const response = await apiService.get<Appointment[]>(
-      `/local/calendar/${localId}/appointments/${date.toISOString().split('T')[0]}`
+      `/local/calendar/${localId}/appointments/${formatDateOnlyLocal(date)}`
     );
     return response.data;
   },
@@ -50,8 +50,8 @@ export const calendarService = {
     const response = await apiService.get<BlockedDateRange[]>(
       `/local/calendar/${localId}/blocked-dates`, {
         params: {
-          startDate: startDate.toISOString().split('T')[0],
-          endDate: endDate.toISOString().split('T')[0]
+          startDate: formatDateOnlyLocal(startDate),
+          endDate: formatDateOnlyLocal(endDate)
         }
       }
     );
