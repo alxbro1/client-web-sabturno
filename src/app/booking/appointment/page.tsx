@@ -187,6 +187,7 @@ export default function SelectSlotPage() {
       <Button
         disabled={!isFormValid}
         onClick={() => router.push("/booking/payment")}
+        className="mt-6 max-w-sm self-center bg-[#00f068] text-black hover:bg-[#00f068]/90 focus:ring-[#00f068]/50"
       >
         Continuar
       </Button>
