@@ -107,8 +107,8 @@ export default function SelectPaymentPage() {
     try {
       const timezone = user?.timezone || local?.timezone || DEFAULT_TIMEZONE;
       const [hours, minutes] = storedTime!.split(":").map(Number);
-      const localDateTime = new Date(storedDate!);
-      localDateTime.setHours(hours, minutes, 0, 0);
+      const [year, month, day] = storedDate!.split("-").map(Number);
+      const localDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0);
 
       const appointmentData = {
         startDateTime: convertLocalToUTC(localDateTime, timezone),
