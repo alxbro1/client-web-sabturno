@@ -10,7 +10,6 @@ export default function ProfilePage() {
   const router = useRouter();
 
   function handleLogout() {
-    fetch("/api/auth/logout", { method: "POST" }).catch(console.error);
     logout();
     router.replace("/login");
   }

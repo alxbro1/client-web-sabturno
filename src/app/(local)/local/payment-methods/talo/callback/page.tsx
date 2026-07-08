@@ -13,29 +13,19 @@
  *   4. El backend intercambia el `code` por el `taloPartnerToken`, persiste
  *      en el `Local` (incluyendo `payWithTalo: true`), y responde con HTML
  *      que contiene un redirect a esta página SPA.
- *   5. Esta página actualiza la cookie de sesión con `payWithTalo: true`,
+ *   5. Esta página actualiza el auth store con `payWithTalo: true`,
  *      muestra un mensaje de éxito/error, y tras 2s cierra el popup
  *      (recargando la ventana padre para que refleje el cambio).
  */
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, AlertCircle } from "lucide-react";
-
-async function syncSessionPayWithTalo() {
-  try {
-    await fetch("/api/auth/update-session", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ payWithTalo: true }),
-    });
-  } catch {
-    /* swallow */
-  }
-}
+import { useAuthStore } from "@/stores/auth";
 
 export default function TaloCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { updateUserProfile } = useAuthStore();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState<string>("Procesando conexion con Talo...");
 
@@ -46,7 +36,7 @@ export default function TaloCallbackPage() {
     if (statusParam === "success") {
       setStatus("success");
       setMessage("Tu cuenta de Talo fue conectada correctamente.");
-      syncSessionPayWithTalo();
+      updateUserProfile({ payWithTalo: true });
     } else if (statusParam === "error" || errorParam) {
       setStatus("error");
       setMessage(
@@ -75,7 +65,7 @@ export default function TaloCallbackPage() {
     }, 2500);
 
     return () => window.clearTimeout(timeout);
-  }, [searchParams, router]);
+  }, [searchParams, router, updateUserProfile]);
 
   return (
     <section className="grid gap-6 place-items-center min-h-[60vh]">

@@ -8,6 +8,7 @@ import { InputField } from "@/components/Field";
 import { validateEmail } from "@/lib/utils/validation";
 import { useAuthStore } from "@/stores/auth";
 import { LogoMark } from "@/components/Logo";
+import { authService } from "@/services/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,18 +37,7 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "No se pudo iniciar sesion");
-      }
-
-      const data = await response.json();
+      const data = await authService.login({ email: email.trim(), password });
       login(data.user, data.token);
 
       const redirectPath = data.user.isLocal ? "/local/dashboard" : from;

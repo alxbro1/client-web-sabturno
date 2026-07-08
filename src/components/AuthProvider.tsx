@@ -7,21 +7,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setHydrated } = useAuthStore();
 
   useEffect(() => {
-    async function hydrateAuth() {
-      try {
-        const response = await fetch("/api/auth/me");
-        if (response.ok) {
-          const data = await response.json();
-          useAuthStore.getState().login(data.user, data.token);
-        }
-      } catch {
-        // Not authenticated - that's okay
-      } finally {
-        setHydrated(true);
-      }
-    }
-
-    hydrateAuth();
+    // The auth store is persisted in localStorage via Zustand persist.
+    // It will automatically load the user and token from localStorage.
+    // We just need to set hasHydrated to true to signal that hydration is complete.
+    setHydrated(true);
   }, [setHydrated]);
 
   return <>{children}</>;

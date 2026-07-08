@@ -24,18 +24,6 @@ interface MutationContext {
   localId: string;
 }
 
-async function syncSessionWithBackend(data: Record<string, unknown>) {
-  try {
-    await fetch("/api/auth/update-session", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-  } catch {
-    /* swallow: session sync is best-effort */
-  }
-}
-
 export function useUpdatePaymentMethodsMutation() {
   const queryClient = useQueryClient();
   const { user, updateUserProfile } = useAuthStore();
@@ -60,8 +48,6 @@ export function useUpdatePaymentMethodsMutation() {
           reservationPercentage: updated.reservationPercentage,
           payWithCashInFront: updated.payWithCashInFront,
         };
-
-        await syncSessionWithBackend(patch);
 
         updateUserProfile(patch);
       }

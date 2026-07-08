@@ -1,55 +1,98 @@
 # AGENTS.md
 
-Repo: SabTurno client web (React 19 + Vite 7 + React Router 7, customer-facing SPA in Spanish).
+Repo: SabTurno client web (Next.js 16 App Router, customer-facing SPA in Spanish).
 Companion Expo app shares contracts; this repo consumes `https://app-api.sabturno.com`.
 
 ## Commands
 
-- `npm run dev` — Vite dev server.
-- `npm run build` — runs `tsc -b` then `vite build`. Use the same order for verification.
+- `npm run dev` — Next.js dev server (Turbopack).
+- `npm run build` — `next build`. Generates `.next/` directory.
+- `npm run start` — `next start` (production server).
 - `npm run typecheck` — `tsc --noEmit` only; use this for a fast check.
 - `npm run test` — `vitest` (watch). `npm run test:run` for single-run (CI-style).
+- `npm run lint` — `next lint` (ESLint).
+- `npm run clean` — `./clean.sh` (borra `.next/` y `node_modules/.cache/`).
+- `./deploy.sh` — Build + sync a S3 (`app.sabturno.com`). Amplify detecta cambios automáticamente.
 
-There is no lint or formatter configured (no eslint/prettier in `package.json`). Do not invent one without being asked.
+## Layout (Next.js 16 App Router)
 
-## Layout
+- `src/app/layout.tsx` — Root layout (providers, fonts, global styles).
+- `src/app/page.tsx` — Home page (`/`).
+- `src/app/(auth)/` — Auth routes group (login, register, forgot-password).
+- `src/app/(client)/` — Client routes group (home, booking, appointments, profile).
+- `src/app/(local)/` — Local-owner routes group (dashboard, calendar, employees, services).
+- `src/app/api/` — API routes (used in production).
+- `src/app/appointment/` — Public appointment links (`/appointment/[id]`, `/appointment/[id]/cancel`).
+- `src/app/booking/` — Booking flow (select-local, select-service, select-slot, payment, result).
+- `src/app/demo/` — Leftover dev demo (`/demo/timeline`).
 
-- `src/main.tsx` → `src/router.tsx` → shells in `src/shell/`. All pages are `lazy()` + `Suspense`; register new pages in `router.tsx` with the same pattern.
-- `src/lib/api.ts` — single axios instance. Sets `Authorization: Bearer <token>` from `useAuthStore` and `Cache-Control: no-store` for `/time_stock/available-days` and `/time_stock/availability` GETs.
-- `src/services/*` — thin wrappers over `apiService`; pages/hooks call these. Do not import `axios` outside `lib/api.ts`.
+### Shared code (still in `src/`)
+
+- `src/lib/api.ts` — Single axios instance. Sets `Authorization: Bearer <token>` from `useAuthStore` and `Cache-Control: no-store` for `/time_stock/available-days` and `/time_stock/availability` GETs.
+- `src/services/*` — Thin wrappers over `apiService`; pages/hooks call these. Do not import `axios` outside `lib/api.ts`.
 - `src/stores/auth.ts` — Zustand store, persisted under key `sabturno-client-auth` in `localStorage` via `src/lib/storage.ts` (SSR-safe noop fallback).
-- `src/stores/booking.ts` — booking flow state (local → service → date → time → payment). Setters cascade-reset later fields; `bumpAvailability()` invalidates slot data.
-- `src/components/*` — shared UI (Button, Field, Icons, TaloPaymentInfo, cards). `src/components/local/*` is local-owner-only.
-- `src/pages/` — client pages. `src/pages/local/*` is the local-owner dashboard (bookable-locals admin). `src/pages/demo/` is a leftover dev demo (`/demo/timeline`).
-- `src/features/<feature>/` — vertical slice folders with `index.ts` barrel exporting types/constants/services/hooks/utils. Two exist: `local` and `appointment-timeline`.
-- `src/hooks/*` — page-level composables. `useBookingFlow` is the canonical booking navigation helper.
+- `src/stores/booking.ts` — Booking flow state (local → service → date → time → payment). Setters cascade-reset later fields; `bumpAvailability()` invalidates slot data.
+- `src/components/*` — Shared UI (Button, Field, Icons, TaloPaymentInfo, cards). `src/components/local/*` is local-owner-only.
+- `src/features/<feature>/` — Vertical slice folders with `index.ts` barrel exporting types/constants/services/hooks/utils. Two exist: `local` and `appointment-timeline`.
+- `src/hooks/*` — Page-level composables. `useBookingFlow` is the canonical booking navigation helper.
 - `src/views/` is empty; ignore it.
 
 ## Conventions
 
-- Path alias `@/*` → `./src/*` is wired in `tsconfig.json`, `vite.config.ts`, and `vitest.config.ts`. Use it everywhere; don't add new relative `../../../` chains.
-- Tailwind v4 is loaded via `@tailwindcss/vite` and `@import "tailwindcss";` in `src/styles.css`. There is no `tailwind.config.js`; design tokens are CSS variables on `:root` in `styles.css` (brand neon `#00f068`, danger `#ff5678`, etc.). New tokens go in that file.
+- Path alias `@/*` → `./src/*` is wired in `tsconfig.json` and `vitest.config.ts`. Use it everywhere; don't add new relative `../../../` chains.
+- Tailwind v4 is loaded via `@tailwindcss/postcss` and `@import "tailwindcss";` in `src/styles.css`. There is no `tailwind.config.js`; design tokens are CSS variables on `:root` in `styles.css` (brand neon `#00f068`, danger `#ff5678`, etc.). New tokens go in that file.
 - Dark-only theme; UI strings are in Spanish ("Cargando...", "Mis turnos"). Match existing copy.
-- React Router v7 data APIs are not used — routing is `createBrowserRouter` + JSX `element` + lazy imports. `basename` is `import.meta.env.BASE_URL` (set via Vite `base`; default `/`).
-- Public appointment links (`/appointment/:id`, `/appointment/:id/cancel`) are outside `ProtectedShell` and use `hash` query param auth (`bookingService.getAppointmentPublic`/`cancelAppointmentPublic`).
-- Local-owner routes are gated indirectly in `AuthLayout` (redirects to `/home` if `user.isLocal` is false). `LocalOwnerShell` enforces auth; check both before adding local-only routes.
-- Always gate auth-gated UI on `useAuthStore().hasHydrated` (see `ProtectedShell`, `AuthLayout`, `RootRedirect`) — otherwise persisted state flickers through `/login` on reload.
+- Next.js App Router conventions: `page.tsx` for pages, `layout.tsx` for layouts, `loading.tsx` for loading states, `not-found.tsx` for 404.
+- Route groups `(auth)`, `(client)`, `(local)` for layout scoping (not URL segments).
+- Public appointment links (`/appointment/[id]`, `/appointment/[id]/cancel`) are outside protected layouts and use `hash` query param auth (`bookingService.getAppointmentPublic`/`cancelAppointmentPublic`).
+- Local-owner routes are gated indirectly in `(local)/layout.tsx` (redirects to `/home` if `user.isLocal` is false). Check both auth and ownership before adding local-only routes.
+- Always gate auth-gated UI on `useAuthStore().hasHydrated` (see layout files) — otherwise persisted state flickers through `/login` on reload.
 - Cache-busting on availability endpoints is intentional (slots change in real time). Don't remove the `withCacheBust` calls in `src/services/booking.ts` or the request interceptor headers in `api.ts`.
 
 ## Environment
 
-- Required: `VITE_API_URL` (e.g. `https://app-api.sabturno.com`). `.env.example` documents it; `lib/api.ts` falls back to the production URL when unset.
-- `.env` and `.env.production` are gitignored. Do not commit them.
-- `VITE_BASE_PATH` (or Vite `base`) controls the app subpath; `index.html` uses `%BASE_URL%` for asset URLs.
+- Required: `NEXT_PUBLIC_API_URL` (e.g. `https://app-api.sabturno.com`). Falls back to production URL when unset.
+- Optional: `NEXT_PUBLIC_BASE_PATH` (app subpath, default empty).
+- `.env`, `.env.local`, `.env.production` are gitignored. Do not commit them.
 
 ## Tests
 
-- No test files exist in the repo despite `vitest.config.ts` being present. Setup is at `src/test/setup.ts` (only imports `@testing-library/jest-dom/vitest`). The first `*.test.ts(x)` you add under `src/` will be picked up.
+- Vitest configured in `vitest.config.ts`. Setup at `src/test/setup.ts` (imports `@testing-library/jest-dom/vitest`).
+- Playwright configured in `playwright.config.ts` for E2E tests.
+- Test files: `*.test.ts(x)` under `src/`.
 
 ## Deploy
 
-- `./deploy.sh` (not `npm run deploy`). It expects `./dist` to already exist (`npm run build` first), then rsyncs to `ubuntu@54.210.182.128:/home/ubuntu/app` using a hardcoded PEM key path under `~/Desktop/Credentials/PEM/`. Fail loudly if the dist is missing or the key isn't on disk.
-- There is no CI; deploys are manual from a machine with the PEM key.
+- **Stack:** S3 + Amplify. Bucket: `app.sabturno.com`. CloudFront Distribution: `EPA4X8K2B4OH4`. Domain: `appweb.sabturno.io`.
+- **Flujo:** `./deploy.sh` ejecuta `npm run build` + `aws s3 sync .next s3://app.sabturno.com --delete --profile sabturno`. Amplify detecta cambios en S3 automáticamente y hace el deploy.
+- **Manual:** No hay CI/CD. Deploy bajo demanda.
+- **API routes:** Se usan en producción. No usar `output: 'export'` en `next.config.ts`.
+- **AWS Profile:** `sabturno` (credenciales en `~/.aws/credentials`). No usar el perfil default.
+
+## Troubleshooting
+
+### ENOTEMPTY: directory not empty, rmdir '.next/server'
+
+**Causa:** Procesos zombie de `next dev` (Turbopack) que mantienen handles abiertos en `.next/server/`.
+
+**Solución:**
+1. Matar procesos zombie: `lsof -ti:3000 | xargs kill -9` (o buscar PIDs con `ps aux | grep "next dev"`)
+2. Limpiar caché: `npm run clean` (ejecuta `./clean.sh` que borra `.next/` y `node_modules/.cache/`)
+3. Reconstruir: `npm run build`
+
+**Prevención:** Cerrar `next dev` con `Ctrl+C` antes de ejecutar `npm run build`. Si el build falla repetidamente, ejecutar `npm run clean` primero.
+
+### AccessDenied en S3 sync (deploy.sh)
+
+**Causa:** El perfil de AWS default no tiene permisos para el bucket `app.sabturno.com`.
+
+**Solución:** Usar el perfil `sabturno` configurado en `~/.aws/credentials`:
+```bash
+aws s3 ls --profile sabturno  # Verificar acceso al bucket
+./deploy.sh                    # El script usa --profile sabturno automáticamente
+```
+
+**Nota:** `deploy.sh` NO ejecuta `set -e` porque `aws s3 sync` puede fallar parcialmente (algunos archivos suben, otros no). Revisar el output manualmente para confirmar que todos los archivos subieron exitosamente.
 
 ## Skills
 

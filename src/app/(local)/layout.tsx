@@ -72,7 +72,6 @@ export default function LocalLayout({
   }, [hasHydrated, user, router]);
 
   function handleLogout() {
-    fetch("/api/auth/logout", { method: "POST" }).catch(console.error);
     logout();
   }
 

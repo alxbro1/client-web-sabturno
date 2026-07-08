@@ -13,28 +13,18 @@
  *   4. MercadoPago redirige a `/mercadopago/oauth/callback` en el backend.
  *   5. El backend intercambia el code por tokens, persiste en el `Local`
  *      (incluyendo `mercadoPagoLiveMode: true`), y redirige a esta página.
- *   6. Esta página actualiza la cookie de sesión con `mercadoPagoLiveMode: true`
+ *   6. Esta página actualiza el auth store con `mercadoPagoLiveMode: true`
  *      y redirige a la pantalla de métodos de cobro.
  */
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, AlertCircle } from "lucide-react";
-
-async function syncSessionMercadoPago() {
-  try {
-    await fetch("/api/auth/update-session", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mercadoPagoLiveMode: true }),
-    });
-  } catch {
-    /* swallow */
-  }
-}
+import { useAuthStore } from "@/stores/auth";
 
 export default function MercadoPagoCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { updateUserProfile } = useAuthStore();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState<string>("Procesando conexion con MercadoPago...");
 
@@ -45,7 +35,7 @@ export default function MercadoPagoCallbackPage() {
     if (statusParam === "success") {
       setStatus("success");
       setMessage("Tu cuenta de MercadoPago fue conectada correctamente.");
-      syncSessionMercadoPago();
+      updateUserProfile({ mercadoPagoLiveMode: true });
     } else if (statusParam === "error" || errorParam) {
       setStatus("error");
       setMessage(
@@ -63,7 +53,7 @@ export default function MercadoPagoCallbackPage() {
     }, 2500);
 
     return () => window.clearTimeout(timeout);
-  }, [searchParams, router]);
+  }, [searchParams, router, updateUserProfile]);
 
   return (
     <section className="grid gap-6 place-items-center min-h-[60vh]">

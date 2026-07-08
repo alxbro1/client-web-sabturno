@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+export function generateStaticParams() {
+  return [];
+}
+
 export default async function AppointmentPublicPage({
   params,
   searchParams,
