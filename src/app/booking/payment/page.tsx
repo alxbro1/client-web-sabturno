@@ -301,6 +301,7 @@ export default function SelectPaymentPage() {
       <Button
         onClick={handleConfirm}
         disabled={!paymentMethod || createAppointment.isPending || isGuestEmailMissing}
+        className="mt-6 max-w-sm self-center bg-[#00f068] text-black hover:bg-[#00f068]/90 focus:ring-[#00f068]/50"
       >
         {createAppointment.isPending ? "Confirmando reserva..." : "Confirmar turno"}
       </Button>
