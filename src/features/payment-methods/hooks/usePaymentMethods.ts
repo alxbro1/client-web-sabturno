@@ -7,19 +7,25 @@
  * Es el equivalente (adaptado a React + TanStack Query) del componente
  * `ReceiptMethods.tsx` de la app móvil. Centraliza:
  *
- *  - Estado del form (`methodsSelecteds`, `reservationPercentage`).
+ *  - Estado del form (`form`, derivado del `Local` actual).
  *  - Carga del estado de Talo (`useTaloStatusQuery`) y sync inicial.
  *  - Acciones de OAuth: `startMercadoPagoOAuth`, `startTaloOAuth`.
  *  - Lógica condicional al togglear (activar MP dispara OAuth, activar
  *    Reserva sin MP activo dispara OAuth de MP primero, etc.).
  *  - Validación + submit (`save`) vía `useUpdatePaymentMethodsMutation`.
  *
+ * **Source of truth**: `useLocalQuery` (no la session de NextAuth).
+ * La session no expone los flags de `Local` y leerlos de ahí daba siempre
+ * `undefined`, así que el form quedaba con todos los toggles en OFF
+ * aunque ya estuvieran configurados en el backend.
+ *
  * Mantener sincronizado con la app móvil
  * (`app/src/features/profile/screens/ReceiptMethods.tsx`).
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
+import { useLocalQuery } from "@/hooks/queries/useLocalQuery";
 import { useTaloStatusQuery } from "@/hooks/queries/useTaloStatusQuery";
 import { taloService } from "@/services/talo";
 import { useUpdatePaymentMethodsMutation } from "@/hooks/mutations/useUpdatePaymentMethodsMutation";
@@ -34,7 +40,9 @@ interface UsePaymentMethodsOptions {
 }
 
 export interface UsePaymentMethodsResult {
-  /** Estado editable del form. */
+  /** ¿Está cargando el `Local` actual? */
+  isLoading: boolean;
+  /** Estado editable del form (derivado del `Local`). */
   form: PaymentMethodsFormState;
   /** Setter tipado para togglear un flag. */
   toggle: (key: MethodKey) => void;
@@ -67,41 +75,59 @@ export interface UsePaymentMethodsResult {
   clearError: () => void;
 }
 
-const INITIAL_FORM = (user: ReturnType<typeof useAuthStore.getState>["user"]): PaymentMethodsFormState => ({
-  mercadoPagoLiveMode: !!user?.mercadoPagoLiveMode,
-  payWithTalo: !!user?.payWithTalo,
-  payWithReservation: !!user?.payWithReservation,
-  payWithCashInFront: !!user?.payWithCashInFront,
+const EMPTY_FORM: PaymentMethodsFormState = {
+  mercadoPagoLiveMode: false,
+  payWithTalo: false,
+  payWithReservation: false,
+  payWithCashInFront: false,
+  reservationPercentage: "",
+};
+
+const formFromLocal = (local: {
+  mercadoPagoLiveMode?: boolean;
+  payWithTalo?: boolean;
+  payWithReservation?: boolean;
+  payWithCashInFront?: boolean;
+  reservationPercentage?: number | null;
+} | undefined): PaymentMethodsFormState => ({
+  mercadoPagoLiveMode: !!local?.mercadoPagoLiveMode,
+  payWithTalo: !!local?.payWithTalo,
+  payWithReservation: !!local?.payWithReservation,
+  payWithCashInFront: !!local?.payWithCashInFront,
   reservationPercentage:
-    user?.reservationPercentage != null ? String(user.reservationPercentage) : "",
+    local?.reservationPercentage != null
+      ? String(local.reservationPercentage)
+      : "",
 });
 
 export function usePaymentMethods(
   options: UsePaymentMethodsOptions = {},
 ): UsePaymentMethodsResult {
   const router = useRouter();
-  const { user, hasHydrated } = useAuthStore();
+  const { user, hasHydrated } = useAuth();
   const localId = user?.id ?? null;
 
-  const [form, setForm] = useState<PaymentMethodsFormState>(() => INITIAL_FORM(user));
+  // Source of truth: el Local traído por React Query.
+  const localQuery = useLocalQuery();
+  const local = localQuery.data;
+
+  // `form` es el "draft" controlado por el usuario. Lo sincronizamos
+  // desde el `Local` en estos dos casos:
+  //   1. Primera vez que llega data del backend (post-hidratación).
+  //   2. Después de un save exitoso (el mutation hace `invalidateQueries`
+  //      → el query re-fetchea → `local` cambia → re-sincronizamos).
+  //
+  // Si el usuario está editando y el query re-fetchea por algún otro motivo
+  // (e.g. refetch en background), `isDirty` evita pisar sus cambios.
+  const [form, setForm] = useState<PaymentMethodsFormState>(EMPTY_FORM);
+  const [isDirty, setIsDirty] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // El `useState` solo corre en el primer render. En web el store de auth
-  // se rehidrata asincrónicamente, así que si el primer render ocurre con
-  // `user === null` (store aún no hidratado) el form queda con todos los
-  // flags en `false` para siempre — incluso después de la hidratación.
-  // Este effect re-sincroniza el form una sola vez cuando el store pasa
-  // a tener un user. Usamos un ref para no pisar ediciones del
-  // local-owner en renders posteriores.
-  const hasSyncedFromStoreRef = useRef(hasHydrated);
-
   useEffect(() => {
-    if (!hasHydrated) return;
-    if (hasSyncedFromStoreRef.current) return;
-    if (!user) return;
-    setForm(INITIAL_FORM(user));
-    hasSyncedFromStoreRef.current = true;
-  }, [hasHydrated, user]);
+    if (!local) return;
+    if (isDirty) return; // no pisar ediciones en curso
+    setForm(formFromLocal(local));
+  }, [local, isDirty]);
 
   // 1) Cargar estado de Talo al montar (o cuando el local cambie).
   const taloQuery = useTaloStatusQuery(localId);
@@ -178,6 +204,7 @@ export function usePaymentMethods(
   const toggle = useCallback(
     (key: MethodKey) => {
       setError(null);
+      setIsDirty(true);
 
       // Regla 1: activar MercadoPago → disparar OAuth de MP.
       if (key === "mercadoPagoLiveMode" && !form.mercadoPagoLiveMode) {
@@ -213,6 +240,11 @@ export function usePaymentMethods(
     [form.mercadoPagoLiveMode, form.payWithReservation, form.payWithTalo, startMercadoPagoOAuth, startTaloOAuth],
   );
 
+  const setReservationPercentage = useCallback((value: string) => {
+    setIsDirty(true);
+    setForm((prev) => ({ ...prev, reservationPercentage: value }));
+  }, []);
+
   // 4) Submit.
 
   const updateMutation = useUpdatePaymentMethodsMutation();
@@ -247,6 +279,9 @@ export function usePaymentMethods(
           ? Math.round(Number(form.reservationPercentage))
           : null,
       });
+      // El onSuccess de la mutación invalida `useLocalQuery`. Marcamos el
+      // form como "limpio" para que el re-sync (efecto arriba) no se bloquee.
+      setIsDirty(false);
       return true;
     } catch (err) {
       const message =
@@ -271,10 +306,10 @@ export function usePaymentMethods(
   }, [taloQuery.data]);
 
   return {
+    isLoading: localQuery.isLoading,
     form,
     toggle,
-    setReservationPercentage: (value) =>
-      setForm((prev) => ({ ...prev, reservationPercentage: value })),
+    setReservationPercentage,
     isTaloLoading: taloQuery.isLoading || isTaloSyncing,
     taloStatus,
     startMercadoPagoOAuth,

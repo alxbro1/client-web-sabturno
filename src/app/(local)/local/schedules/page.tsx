@@ -10,10 +10,10 @@ import { scheduleService } from "@/features/local/services/schedule.service";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LocalSchedulesPage() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const { data: templates = [], isLoading, error } = useScheduleTemplatesQuery();
   const [deleteId, setDeleteId] = useState<string | null>(null);

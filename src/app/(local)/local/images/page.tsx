@@ -5,7 +5,7 @@ import { Upload, Trash2, ImageIcon } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useLocalImagesQuery } from "@/hooks/queries/useLocalImagesQuery";
 import { imageUploadUtils } from "@/features/local/utils/imageUploadUtils";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -17,7 +17,7 @@ function readFileAsDataUrl(file: File): Promise<string> {
 }
 
 export default function LocalImagesPage() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const localId = user?.id || "";
   const {
     images,

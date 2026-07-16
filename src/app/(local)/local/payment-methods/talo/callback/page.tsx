@@ -13,19 +13,23 @@
  *   4. El backend intercambia el `code` por el `taloPartnerToken`, persiste
  *      en el `Local` (incluyendo `payWithTalo: true`), y responde con HTML
  *      que contiene un redirect a esta página SPA.
- *   5. Esta página actualiza el auth store con `payWithTalo: true`,
- *      muestra un mensaje de éxito/error, y tras 2s cierra el popup
- *      (recargando la ventana padre para que refleje el cambio).
+ *   5. Esta página invalida el query de `Local` y tras 2.5s cierra el popup
+ *      (recargando la ventana padre para que refleje el cambio). La pantalla
+ *      de métodos de cobro usa `useLocalQuery` (no la session) como source
+ *      of truth, así que el toggle se actualiza al re-fetchar.
  */
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, AlertCircle } from "lucide-react";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
+import { queryKeys } from "@/lib/queryKeys";
 
 export default function TaloCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { updateUserProfile } = useAuthStore();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState<string>("Procesando conexion con Talo...");
 
@@ -36,7 +40,12 @@ export default function TaloCallbackPage() {
     if (statusParam === "success") {
       setStatus("success");
       setMessage("Tu cuenta de Talo fue conectada correctamente.");
-      updateUserProfile({ payWithTalo: true });
+      // El backend ya persistió `payWithTalo: true` en el `Local`. Marcamos
+      // el query como stale para que la próxima lectura re-fetchee el
+      // `Local` actualizado.
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.local(user.id) });
+      }
     } else if (statusParam === "error" || errorParam) {
       setStatus("error");
       setMessage(
@@ -65,7 +74,7 @@ export default function TaloCallbackPage() {
     }, 2500);
 
     return () => window.clearTimeout(timeout);
-  }, [searchParams, router, updateUserProfile]);
+  }, [searchParams, router, queryClient, user?.id]);
 
   return (
     <section className="grid gap-6 place-items-center min-h-[60vh]">

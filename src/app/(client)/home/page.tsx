@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/ui/card";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function HomePage() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
 
   return (
     <section className="grid gap-6">

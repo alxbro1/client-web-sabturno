@@ -1,21 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/auth";
+import { useEffect } from "react";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, hasHydrated } = useAuthStore();
+  const { user, hasHydrated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (hasHydrated && user && !user.isLocal) {
-      router.replace("/home");
-    }
+    if (!hasHydrated || !user) return;
+    router.replace(user.isLocal ? "/local/dashboard" : "/home");
   }, [hasHydrated, user, router]);
 
   if (!hasHydrated) {
@@ -26,8 +25,12 @@ export default function AuthLayout({
     );
   }
 
-  if (user && !user.isLocal) {
-    return null;
+  if (user) {
+    return (
+      <div className="min-h-screen grid place-items-center text-center text-muted-foreground">
+        Redirigiendo...
+      </div>
+    );
   }
 
   return (

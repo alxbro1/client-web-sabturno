@@ -63,10 +63,12 @@ export const calendarService = {
       let endTime = item.endTime;
       if (isTimeSlot && item.startTime && item.endTime) {
         const startParts = utcDateTimeToLocalParts(item.startDate as unknown as string, item.startTime);
-        start = new Date(`${startParts.date}T00:00:00`);
+        const [sy, sm, sd] = startParts.date.split("-").map(Number);
+        start = new Date(sy, sm - 1, sd, 0, 0, 0, 0);
         startTime = startParts.time;
         const endParts = utcDateTimeToLocalParts(item.endDate as unknown as string, item.endTime);
-        end = new Date(`${endParts.date}T00:00:00`);
+        const [ey, em, ed] = endParts.date.split("-").map(Number);
+        end = new Date(ey, em - 1, ed, 0, 0, 0, 0);
         endTime = endParts.time;
       }
       if (start.toDateString() !== end.toDateString()) {

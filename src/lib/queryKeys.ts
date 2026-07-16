@@ -14,6 +14,7 @@ export const queryKeys = {
   paymentStatus: (externalReference: string, taloPaymentId: string) =>
     ["payment-status", externalReference, taloPaymentId] as const,
   localHome: (localId: string) => ["local-home", localId] as const,
+  local: (localId: string) => ["local", localId] as const,
   scheduleTemplates: (localId: string) => ["schedule-templates", localId] as const,
   localCalendar: (localId: string, month: number, year: number) =>
     ["local-calendar", localId, month, year] as const,

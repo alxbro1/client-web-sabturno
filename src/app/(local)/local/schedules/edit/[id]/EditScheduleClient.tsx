@@ -7,7 +7,7 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { scheduleService } from "@/features/local/services/schedule.service";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 
@@ -39,7 +39,7 @@ const emptySchedule: Record<number, DaySlots> = {
 export default function LocalScheduleEditorPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const isNew = id === "new";
 

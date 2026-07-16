@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useAuthStore } from '@/stores/auth';
+import { useAuth } from '@/hooks/useAuth';
 import { scheduleService } from '../services/schedule.service';
 import { ScheduleTemplateFromAPI } from '../types/schedule.types';
 
@@ -11,7 +11,7 @@ interface UseScheduleTemplateListState {
 }
 
 export const useScheduleTemplateList = () => {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const localId = user?.id;
 
   const [state, setState] = useState<UseScheduleTemplateListState>({

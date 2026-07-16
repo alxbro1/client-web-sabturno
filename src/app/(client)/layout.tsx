@@ -13,19 +13,22 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, hasHydrated, logout } = useAuthStore();
+  const { user, hasHydrated, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
-    // Auth guard disabled intentionally (commented out in original)
+    if (!hasHydrated) return;
+    if (!user) {
+      router.replace("/login");
+    }
   }, [hasHydrated, user, router]);
 
   function handleLogout() {

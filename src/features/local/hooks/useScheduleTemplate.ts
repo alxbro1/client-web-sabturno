@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useAuthStore } from '@/stores/auth';
+import { useAuth } from '@/hooks/useAuth';
 import { DEFAULT_TIME_SLOT, INITIAL_SCHEDULE } from '../constants/schedule.constants';
 import { scheduleService } from '../services/schedule.service';
 import { DayKey, Schedule, ScheduleTemplate, TimeStockTemplate } from '../types/schedule.types';
@@ -83,7 +83,7 @@ export const useScheduleTemplate = (loadedTemplate?: ScheduleTemplate | null) =>
   const [isEdit, setIsEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { user } = useAuthStore();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (loadedTemplate) {

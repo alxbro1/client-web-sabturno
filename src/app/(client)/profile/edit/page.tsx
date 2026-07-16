@@ -6,11 +6,11 @@ import { Button } from "@/components/Button";
 import { InputField } from "@/components/Field";
 import { validateEmail } from "@/lib/utils/validation";
 import { userProfileService } from "@/services/userProfile";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const { user, updateUserProfile } = useAuthStore();
+  const { user, updateUserProfile } = useAuth();
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",

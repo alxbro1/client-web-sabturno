@@ -28,14 +28,104 @@ Companion Expo app shares contracts; this repo consumes `https://app-api.sabturn
 
 ### Shared code (still in `src/`)
 
-- `src/lib/api.ts` — Single axios instance. Sets `Authorization: Bearer <token>` from `useAuthStore` and `Cache-Control: no-store` for `/time_stock/available-days` and `/time_stock/availability` GETs.
+- `src/lib/api.ts` — Single axios instance. Sets `Authorization: Bearer <token>` from `getSession()` (NextAuth) and `Cache-Control: no-store` for `/time_stock/available-days` and `/time_stock/availability` GETs.
 - `src/services/*` — Thin wrappers over `apiService`; pages/hooks call these. Do not import `axios` outside `lib/api.ts`.
-- `src/stores/auth.ts` — Zustand store, persisted under key `sabturno-client-auth` in `localStorage` via `src/lib/storage.ts` (SSR-safe noop fallback).
 - `src/stores/booking.ts` — Booking flow state (local → service → date → time → payment). Setters cascade-reset later fields; `bumpAvailability()` invalidates slot data.
+- `src/stores/auth.ts` — **OBSOLETO.** Zustand store viejo, ya no se usa. La autenticación ahora es via NextAuth (`src/hooks/useAuth.ts`).
 - `src/components/*` — Shared UI (Button, Field, Icons, TaloPaymentInfo, cards). `src/components/local/*` is local-owner-only.
 - `src/features/<feature>/` — Vertical slice folders with `index.ts` barrel exporting types/constants/services/hooks/utils. Two exist: `local` and `appointment-timeline`.
 - `src/hooks/*` — Page-level composables. `useBookingFlow` is the canonical booking navigation helper.
 - `src/views/` is empty; ignore it.
+
+## NextAuth v5 (auth layer)
+
+La autenticación usa NextAuth v5 (Auth.js) con JWT strategy y Credentials provider.
+
+### Archivos clave
+- `src/lib/auth.ts` — Config NextAuth (providers, callbacks, pages)
+- `src/app/api/auth/[...nextauth]/route.ts` — API route handler
+- `src/hooks/useAuth.ts` — Hook de compatibilidad (misma interfaz que tenía `useAuthStore`)
+
+### ⚠️ CRÍTICO: Callbacks de JWT y Session
+
+En `src/lib/auth.ts`, el callback `session` DEBE propagar `token.sub` como
+`session.user.id`. Sin esto, `user.id` queda como `""` y TODOS los endpoints
+que usan el ID en la URL fallan con 404 silencioso.
+
+```ts
+async session({ session, token }) {
+  (session as any).accessToken = token.accessToken;
+  if (session.user) {
+    (session.user as any).id = token.sub;  // ← OBLIGATORIO
+    (session.user as any).isLocal = token.isLocal;
+    (session.user as any).phone = token.phone;
+    (session.user as any).localName = token.localName;
+  }
+  return session;
+},
+```
+
+Campos custom que se propagan: `accessToken`, `isLocal`, `phone`, `localName`, `id`.
+
+### Checklist al modificar auth
+- [ ] `session.user.id` = `token.sub` en callback session
+- [ ] Actualizar mocks en `__tests__/` que referencien `useAuthStore` → `useAuth`
+- [ ] Verificar que `useAuth().user.id` no sea `""` antes de usar en URLs
+- [ ] Tests E2E: mockear AMBOS `/api/auth/callback/credentials` Y `/api/auth/session`
+- [ ] `signIn("credentials")` devuelve `{ url, error }`, NO `{ user, token, ok }`
+- [ ] Para obtener datos del usuario post-login: `getSession()` de `next-auth/react`
+
+### Mocking en tests E2E (Playwright)
+
+NextAuth requiere mockear DOS endpoints:
+
+```ts
+let signInAttempted = false;
+
+await page.route("**/api/auth/**", async (route, request) => {
+  const url = request.url();
+
+  if (url.includes("/api/auth/callback/credentials")) {
+    signInAttempted = true;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ url: "http://localhost:3001/redirect-path" }),
+    });
+    return;
+  }
+
+  if (url.includes("/api/auth/session") && signInAttempted) {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        user: { id: "user-id", name: "Test", email: "test@example.com", isLocal: true },
+        accessToken: "mock-token",
+        expires: new Date(Date.now() + 86400000).toISOString(),
+      }),
+    });
+    return;
+  }
+
+  await route.continue();
+});
+```
+
+### Mocking en tests unitarios (Vitest)
+
+```ts
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({
+    user: { id: "local-1", isLocal: true, name: "Test", email: "test@example.com" },
+    token: "mock-token",
+    hasHydrated: true,
+    isLoading: false,
+    logout: vi.fn(),
+    updateUserProfile: vi.fn(),
+  }),
+}));
+```
 
 ## Conventions
 
@@ -46,7 +136,7 @@ Companion Expo app shares contracts; this repo consumes `https://app-api.sabturn
 - Route groups `(auth)`, `(client)`, `(local)` for layout scoping (not URL segments).
 - Public appointment links (`/appointment/[id]`, `/appointment/[id]/cancel`) are outside protected layouts and use `hash` query param auth (`bookingService.getAppointmentPublic`/`cancelAppointmentPublic`).
 - Local-owner routes are gated indirectly in `(local)/layout.tsx` (redirects to `/home` if `user.isLocal` is false). Check both auth and ownership before adding local-only routes.
-- Always gate auth-gated UI on `useAuthStore().hasHydrated` (see layout files) — otherwise persisted state flickers through `/login` on reload.
+- Always gate auth-gated UI on `useAuth().hasHydrated` (see layout files) — otherwise the session loading state flickers through `/login` on reload.
 - Cache-busting on availability endpoints is intentional (slots change in real time). Don't remove the `withCacheBust` calls in `src/services/booking.ts` or the request interceptor headers in `api.ts`.
 
 ## Environment
@@ -96,7 +186,7 @@ aws s3 ls --profile sabturno  # Verificar acceso al bucket
 
 ## Skills
 
-Repo-local skills under `.agents/skills/` (composition-patterns, react-best-practices, frontend-design, tailwind-css-patterns, vite, etc.) are auto-loaded by opencode via `skills-lock.json` — prefer them over generic advice for React composition, performance, and Tailwind work.
+Repo-local skills under `.agents/skills/` (composition-patterns, react-best-practices, frontend-design, tailwind-css-patterns, vite, nextauth-migration, etc.) are auto-loaded by opencode via `skills-lock.json` — prefer them over generic advice for React composition, performance, and Tailwind work.
 
 ## Time handling
 

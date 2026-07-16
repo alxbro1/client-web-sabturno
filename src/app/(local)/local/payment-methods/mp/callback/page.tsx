@@ -13,18 +13,22 @@
  *   4. MercadoPago redirige a `/mercadopago/oauth/callback` en el backend.
  *   5. El backend intercambia el code por tokens, persiste en el `Local`
  *      (incluyendo `mercadoPagoLiveMode: true`), y redirige a esta página.
- *   6. Esta página actualiza el auth store con `mercadoPagoLiveMode: true`
- *      y redirige a la pantalla de métodos de cobro.
+ *   6. Esta página invalida el query de `Local` y redirige a la pantalla
+ *      de métodos de cobro. La pantalla usa `useLocalQuery` (no la session)
+ *      como source of truth, así que el toggle se actualiza al re-fetchar.
  */
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, AlertCircle } from "lucide-react";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
+import { queryKeys } from "@/lib/queryKeys";
 
 export default function MercadoPagoCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { updateUserProfile } = useAuthStore();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState<string>("Procesando conexion con MercadoPago...");
 
@@ -35,7 +39,13 @@ export default function MercadoPagoCallbackPage() {
     if (statusParam === "success") {
       setStatus("success");
       setMessage("Tu cuenta de MercadoPago fue conectada correctamente.");
-      updateUserProfile({ mercadoPagoLiveMode: true });
+      // El backend ya persistió `mercadoPagoLiveMode: true` en el `Local`.
+      // Marcamos el query como stale para que la próxima lectura
+      // (al regresar a /local/payment-methods) re-fetchee el `Local`
+      // actualizado.
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.local(user.id) });
+      }
     } else if (statusParam === "error" || errorParam) {
       setStatus("error");
       setMessage(
@@ -53,7 +63,7 @@ export default function MercadoPagoCallbackPage() {
     }, 2500);
 
     return () => window.clearTimeout(timeout);
-  }, [searchParams, router, updateUserProfile]);
+  }, [searchParams, router, queryClient, user?.id]);
 
   return (
     <section className="grid gap-6 place-items-center min-h-[60vh]">

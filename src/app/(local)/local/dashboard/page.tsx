@@ -9,7 +9,7 @@ import { LocalNavCard } from "@/components/local/LocalNavCard";
 import { PlanBadge, TrialCountdown } from "@/components/premium";
 import { useLocalHomeQuery } from "@/hooks/queries/useLocalHomeQuery";
 import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { useOnboardingStore } from "@/stores/onboarding";
 import { formatCurrency } from "@/lib/utils/date";
 import { Button } from "@/components/Button";
@@ -41,7 +41,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function LocalDashboardPage() {
-  const { user, hasHydrated } = useAuthStore();
+  const { user, hasHydrated } = useAuth();
   const router = useRouter();
   const { data, isLoading, error, refetch } = useLocalHomeQuery();
   const { data: premiumStatus } = usePremiumStatusQuery();

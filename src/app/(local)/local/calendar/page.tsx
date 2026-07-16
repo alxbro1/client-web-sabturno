@@ -11,7 +11,7 @@ import { es } from "date-fns/locale/es";
 import { CalendarDays, Ban } from "lucide-react";
 import { Button } from "@/components/Button";
 import { LocalNavCard } from "@/components/local/LocalNavCard";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { useTimelineData } from "@/features/appointment-timeline/hooks/useTimelineData";
 import { useEmployees } from "@/features/appointment-timeline/hooks/useEmployees";
 import type { Appointment, Block } from "@/features/appointment-timeline/types";
@@ -58,7 +58,7 @@ interface CalendarEvent {
 }
 
 export default function LocalCalendarPage() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const [date, setDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState<View>(Views.DAY);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(

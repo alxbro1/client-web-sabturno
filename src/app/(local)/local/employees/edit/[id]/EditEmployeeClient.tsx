@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import { InputField } from "@/components/Field";
 import { useEmployeesQuery } from "@/hooks/queries/useEmployeesQuery";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import type { Employee } from "@/lib/types/employee";
 
 const COLORS = [
@@ -24,7 +24,7 @@ const COLORS = [
 export default function EmployeeEditPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const localId = user?.id ?? "";
   const isNew = id === "new";
 

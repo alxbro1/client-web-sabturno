@@ -7,7 +7,7 @@ import { Button } from "@/components/Button";
 import { Card } from "@/components/ui/card";
 import { useTaloStatusQuery } from "@/hooks/queries/useTaloStatusQuery";
 import { useCreateAppointmentMutation } from "@/hooks/mutations/useCreateAppointmentMutation";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { useBookingStore } from "@/stores/booking";
 import { PaymentMethod } from "@/lib/types/booking";
 import { DEFAULT_TIMEZONE } from "@/lib/constants/countries";
@@ -24,7 +24,7 @@ const PAYMENT_METHOD_ICONS: Partial<Record<PaymentMethod, string>> = {
 
 export default function SelectPaymentPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const local = useBookingStore((s) => s.local);
   const service = useBookingStore((s) => s.service);
   const storedDate = useBookingStore((s) => s.date);

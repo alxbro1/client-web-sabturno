@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { localService } from "@/features/local/services/local.service";
 import type { LocalDashboardStats } from "@/features/local/types/local.types";
 import type { Appointment } from "@/features/local/services/calendar.service";
@@ -38,7 +38,7 @@ async function fetchLocalHome(localId: string): Promise<LocalHomeData> {
 }
 
 export function useLocalHomeQuery() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const localId = user?.id ?? "";
 
   return useQuery({

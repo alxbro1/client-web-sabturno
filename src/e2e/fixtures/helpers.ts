@@ -4,25 +4,76 @@ import { getVerificationToken } from "./dbHelper";
 
 const AUTH_STORAGE_KEY = "sabturno-client-auth";
 
+/**
+ * Local por defecto para tests E2E. Incluye los flags de payment methods
+ * que la pantalla `/local/payment-methods` consume vía `useLocalQuery`
+ * (ver `src/hooks/queries/useLocalQuery.ts`).
+ */
+const DEFAULT_LOCAL = {
+  ...mockLocal,
+  mercadoPagoLiveMode: false,
+  payWithTalo: false,
+  payWithReservation: false,
+  payWithCashInFront: false,
+  reservationPercentage: null,
+};
+
 export async function setupAuth(page: Page) {
+  // NextAuth v5 usa `next-auth.session-token` como cookie. La seteamos
+  // para que `useSession()` la reconozca.
   await page.context().addCookies([
-    { name: "sabturno_session", value: mockToken, domain: "localhost", path: "/" },
+    {
+      name: "authjs.session-token",
+      value: mockToken,
+      domain: "localhost",
+      path: "/",
+    },
   ]);
 
-  await page.addInitScript(() => {
-    const authData = {
-      state: {
-        user: { id: 1, name: "Test User", email: "test@example.com", isLocal: true, image: null, phone: null },
-        token: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.mock-token",
-        hasHydrated: true,
-      },
-      version: 0,
-    };
-    localStorage.setItem("sabturno-client-auth", JSON.stringify(authData));
+  // Mock del endpoint `/api/auth/session` (NextAuth v5). Este es el que
+  // `useSession()` consume para hidratar la session. Devolvemos un user
+  // con `isLocal: true` para que el (local) layout no redirija a /home.
+  await page.route("**/api/auth/session", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        user: { ...mockUser, id: String(mockUser.id) },
+        accessToken: mockToken,
+        expires: new Date(Date.now() + 86400000).toISOString(),
+      }),
+    });
   });
 
-  await page.route("**/api/auth/me", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ user: mockUser, token: mockToken }) });
+  // Mock por defecto de `GET /local/:id` (usado por `useLocalQuery`).
+  // IMPORTANTE: el patrón debe matchear la URL del API, NO las páginas
+  // del front (que también viven bajo `/local/*`). Discriminamos por el
+  // host del API (configurado en `NEXT_PUBLIC_API_URL`).
+  // Tests que necesiten un local distinto pueden re-mockear esta ruta
+  // después de llamar a `setupAuth`.
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  await page.route(`${apiBase}/local/*`, async (route, request) => {
+    if (request.method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(DEFAULT_LOCAL),
+      });
+      return;
+    }
+    await route.continue();
+  });
+
+  // Mock por defecto del sync de Talo (`GET /talo/partners/account/:id`).
+  // Lo llama `usePaymentMethods.refreshTaloStatus()` cuando el status
+  // inicial no es `ACTIVE`. Devolvemos un payload "no conectado" para
+  // que el hook no entre en loop de reintentos.
+  await page.route(`${apiBase}/talo/partners/account/*`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ connected: false, accountStatus: null }),
+    });
   });
 }
 

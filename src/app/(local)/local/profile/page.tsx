@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import { Save, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/Button";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { localService } from "@/features/local/services/local.service";
 import type { Local } from "@/lib/types/local";
 
 export default function LocalProfilePage() {
-  const { user, updateUserProfile } = useAuthStore();
+  const { user, updateUserProfile } = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",

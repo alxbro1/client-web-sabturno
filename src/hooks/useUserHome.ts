@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { userService } from "@/services/user";
 import type { Appointment } from "@/lib/types/booking";
 import type { UserDashboardStats, UserHomeData } from "@/lib/types/user";
@@ -13,7 +13,7 @@ const INITIAL_STATS: UserDashboardStats = {
 };
 
 export function useUserHome(): UserHomeData {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const [nextAppointment, setNextAppointment] = useState<Appointment | null>(null);
   const [dashboardStats, setDashboardStats] = useState<UserDashboardStats>(INITIAL_STATS);
   const [isLoading, setIsLoading] = useState(false);

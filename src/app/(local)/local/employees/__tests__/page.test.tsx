@@ -26,9 +26,10 @@ vi.mock("@/hooks/queries/useEmployeesQuery", () => ({
   }),
 }));
 
-vi.mock("@/stores/auth", () => ({
-  useAuthStore: () => ({
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({
     user: mockUser,
+    hasHydrated: true,
   }),
 }));
 

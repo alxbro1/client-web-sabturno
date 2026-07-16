@@ -26,7 +26,7 @@ import {
 } from "@/features/payment-methods";
 import { FeatureLockedOverlay } from "@/components/premium";
 import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import iconMercadoPago from "@/assets/payment-methods/mercado_pago.png";
 import iconTalo from "@/assets/payment-methods/talo.png";
 import iconReserved from "@/assets/payment-methods/reserved.png";
@@ -44,7 +44,7 @@ function MethodIcon({ src, alt }: { src: string; alt: string }) {
 }
 
 export default function PaymentMethodsPage() {
-  const { user, hasHydrated } = useAuthStore();
+  const { user, hasHydrated } = useAuth();
   const pm = usePaymentMethods();
   const { data: premiumStatus } = usePremiumStatusQuery();
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -59,7 +59,7 @@ export default function PaymentMethodsPage() {
     return () => window.clearTimeout(timeout);
   }, [saveSuccess]);
 
-  if (!hasHydrated) {
+  if (!hasHydrated || pm.isLoading) {
     return (
       <div className="min-h-[140px] grid place-items-center text-center text-[#dfe8f4]/70">
         Cargando...

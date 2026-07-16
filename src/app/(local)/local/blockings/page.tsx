@@ -185,8 +185,9 @@ export default function LocalBlockingsPage() {
         endDate = new Date(`${formData.date}T${formData.endTime}:00`);
       } else {
         // Día completo: solo fecha, sin horas específicas
-        startDate = new Date(formData.date);
-        endDate = new Date(formData.date);
+        const [y, m, d] = formData.date.split("-").map(Number);
+        startDate = new Date(y, m - 1, d, 0, 0, 0, 0);
+        endDate = new Date(y, m - 1, d, 0, 0, 0, 0);
       }
       await blockDate(startDate, endDate, formData.notes);
       setShowForm(false);

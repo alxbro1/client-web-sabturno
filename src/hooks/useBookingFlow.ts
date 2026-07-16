@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { DEFAULT_TIMEZONE } from "@/lib/constants/countries";
 import { convertLocalToUTC, formatDateOnlyLocal, parseDateOnlyToLocal } from "@/lib/utils/date";
 import { bookingService } from "@/services/booking";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { useBookingStore } from "@/stores/booking";
 import { PaymentMethod, type BookingDTO, type TimeSlot } from "@/lib/types/booking";
 
@@ -19,7 +19,7 @@ export function useBookingFlow() {
     availabilityRefreshToken,
     resetBooking,
   } = useBookingStore();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     storedDate ? parseDateOnlyToLocal(storedDate) : null,

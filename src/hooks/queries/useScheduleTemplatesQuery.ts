@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { scheduleService } from "@/features/local/services/schedule.service";
 import type { ScheduleTemplateFromAPI } from "@/features/local/types/schedule.types";
 
@@ -13,7 +13,7 @@ async function fetchScheduleTemplates(
 }
 
 export function useScheduleTemplatesQuery() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const localId = user?.id ?? "";
 
   return useQuery({

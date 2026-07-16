@@ -8,7 +8,7 @@ import { ArrowRight, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { useOnboardingStore } from "@/stores/onboarding";
 import { scheduleService } from "@/features/local/services/schedule.service";
 import { localService } from "@/features/local/services/local.service";
@@ -66,7 +66,7 @@ function timeToMinutes(time: string): number {
  */
 export default function OnboardingHoursPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const { setHasSchedule, dismiss } = useOnboardingStore();
   const [schedule, setSchedule] = useState<ScheduleForm>(makeDefaultSchedule);
   const [errors, setErrors] = useState<Record<DayKey, string | null>>({

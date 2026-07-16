@@ -6,7 +6,7 @@ import { Wrench } from "lucide-react";
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useLocalServicesQuery } from "@/hooks/queries/useLocalServicesQuery";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("es-AR", {
@@ -23,7 +23,7 @@ function formatDuration(minutes: number): string {
 }
 
 export default function ServicesPage() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const localId = user?.id ?? "";
   const { services, isLoading, error, deleteService } =
     useLocalServicesQuery(localId);

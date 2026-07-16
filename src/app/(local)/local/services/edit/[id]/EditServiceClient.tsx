@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import { InputField, TextareaField } from "@/components/Field";
 import { useLocalServicesQuery } from "@/hooks/queries/useLocalServicesQuery";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import type { LocalService } from "@/lib/types/service";
 
 const CATEGORIES = [
@@ -25,7 +25,7 @@ const CATEGORIES = [
 export default function ServiceEditPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const localId = user?.id ?? "";
   const isNew = id === "new";
 

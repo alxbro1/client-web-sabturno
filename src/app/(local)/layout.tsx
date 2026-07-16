@@ -26,7 +26,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
 
 interface NavItem {
@@ -57,7 +57,7 @@ export default function LocalLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, hasHydrated, logout } = useAuthStore();
+  const { user, hasHydrated, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const { data: premiumStatus } = usePremiumStatusQuery();

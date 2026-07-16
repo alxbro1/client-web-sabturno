@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ProfilePage() {
-  const { user, logout } = useAuthStore();
+  const { user, logout } = useAuth();
   const router = useRouter();
 
   function handleLogout() {

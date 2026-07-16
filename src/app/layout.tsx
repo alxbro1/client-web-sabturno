@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Manrope } from "next/font/google";
 import { Toaster } from "sonner";
-import { AuthProvider } from "@/components/AuthProvider";
+import { SessionProvider } from "next-auth/react";
 import { QueryProvider } from "@/components/QueryProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "@/styles.css";
@@ -46,7 +46,7 @@ export default function RootLayout({
     >
       <body>
         <QueryProvider>
-          <AuthProvider>
+          <SessionProvider>
             <TooltipProvider delayDuration={0}>
               {children}
               <Toaster
@@ -56,7 +56,7 @@ export default function RootLayout({
                 theme="dark"
               />
             </TooltipProvider>
-          </AuthProvider>
+          </SessionProvider>
         </QueryProvider>
       </body>
     </html>

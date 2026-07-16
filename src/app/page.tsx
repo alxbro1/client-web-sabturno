@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function HomePage() {
-  const { user, hasHydrated } = useAuthStore();
+  const { user, hasHydrated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {

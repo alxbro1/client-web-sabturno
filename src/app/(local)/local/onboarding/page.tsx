@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/Button";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { useOnboardingStore, type OnboardingStep } from "@/stores/onboarding";
 import { premiumService } from "@/services/premium";
 import { scheduleService } from "@/features/local/services/schedule.service";
@@ -21,7 +21,7 @@ import { localService } from "@/features/local/services/local.service";
  */
 export default function OnboardingEntryPage() {
   const router = useRouter();
-  const { user, hasHydrated } = useAuthStore();
+  const { user, hasHydrated } = useAuth();
   const { setStep, dismiss: dismissOnboarding } = useOnboardingStore();
 
   const localId = user?.id ?? "";

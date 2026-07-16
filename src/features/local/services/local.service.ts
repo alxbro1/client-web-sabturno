@@ -58,6 +58,21 @@ export const localService = {
       return [];
     }
   },
+  /**
+   * `GET /local/:id` — obtiene el `Local` actual (incluye flags de payment
+   * methods: `mercadoPagoLiveMode`, `payWithTalo`, `payWithReservation`,
+   * `payWithCashInFront`, `reservationPercentage`).
+   *
+   * Es el source of truth para la pantalla `/local/payment-methods` y para
+   * cualquier flujo que necesite los flags en tiempo real. La session de
+   * NextAuth no expone estos campos (son data de `Local`, no de `User`), así
+   * que leerlos de la session daba siempre `undefined` y el form arrancaba
+   * con todos los toggles en OFF.
+   */
+  getLocal: async (localId: string): Promise<Local> => {
+    const response = await apiService.get<Local>(`/local/${localId}`);
+    return response.data;
+  },
   getMyPayments: async (): Promise<LocalPayment[]> => {
     try {
       const response = await apiService.get<LocalPayment[] | { items?: LocalPayment[] }>('/payments/local');

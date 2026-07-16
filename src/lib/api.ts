@@ -1,5 +1,5 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
-import { useAuthStore } from "@/stores/auth";
+import { getSession } from "next-auth/react";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://app-api.sabturno.com";
@@ -13,8 +13,9 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
-apiClient.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
+apiClient.interceptors.request.use(async (config) => {
+  const session = await getSession();
+  const token = (session as any)?.accessToken;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

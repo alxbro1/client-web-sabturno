@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAuthStore } from '@/stores/auth';
+import { useAuth } from '@/hooks/useAuth';
 import { formatDateOnlyLocal } from '@/lib/utils/date';
 import { blockingService } from '../services/blocking.service';
 import { calendarService } from '../services/calendar.service';
@@ -44,7 +44,7 @@ interface UseLocalCalendarReturn {
 }
 
 export const useLocalCalendar = (): UseLocalCalendarReturn => {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const localId = user?.id;
 
   const [currentMonth, setCurrentMonth] = useState(() => new Date().getMonth());

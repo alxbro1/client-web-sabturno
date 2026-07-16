@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { bookingService } from "@/services/booking";
 import { userService } from "@/services/user";
 import type { Appointment } from "@/lib/types/booking";
+import type { User } from "@/lib/types/auth";
 
 type AppointmentFilter = "upcoming" | "past";
 
@@ -23,7 +24,7 @@ const STATUS_FILTERS: Record<AppointmentFilter, ("PENDING" | "CONFIRMED" | "COMP
   past: ["COMPLETED", "CANCELLED"],
 };
 
-function normalizeAppointments(items: any[], user: ReturnType<typeof useAuthStore.getState>["user"]): Appointment[] {
+function normalizeAppointments(items: any[], user: User | null): Appointment[] {
   if (!Array.isArray(items)) {
     return [];
   }
@@ -69,7 +70,7 @@ function normalizeAppointments(items: any[], user: ReturnType<typeof useAuthStor
 }
 
 export function useUserAppointments(activeFilter: AppointmentFilter = "upcoming", limit = 6) {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const [upcomingState, setUpcomingState] = useState(INITIAL_LIST_STATE);
   const [pastState, setPastState] = useState(INITIAL_LIST_STATE);
   const [isLoading, setIsLoading] = useState(true);

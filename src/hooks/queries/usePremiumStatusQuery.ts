@@ -3,10 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { premiumService } from "@/services/premium";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export function usePremiumStatusQuery() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
 
   return useQuery({
     queryKey: queryKeys.premiumStatus(),

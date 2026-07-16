@@ -22,7 +22,7 @@ import {
 import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
 import { usePremiumPlansQuery, FALLBACK_PLANS } from "@/hooks/queries/usePremiumPlansQuery";
 import { premiumService } from "@/services/premium";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Card,
   CardHeader,
@@ -33,7 +33,7 @@ import {
 
 export default function PremiumManagePage() {
   const router = useRouter();
-  const { hasHydrated, user } = useAuthStore();
+  const { hasHydrated, user } = useAuth();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [isChangingPlan, setIsChangingPlan] = useState(false);
 

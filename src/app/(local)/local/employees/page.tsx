@@ -6,10 +6,10 @@ import { Users } from "lucide-react";
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useEmployeesQuery } from "@/hooks/queries/useEmployeesQuery";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function EmployeesPage() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const localId = user?.id ?? "";
   const { employees, isLoading, error, deleteEmployee } =
     useEmployeesQuery(localId);

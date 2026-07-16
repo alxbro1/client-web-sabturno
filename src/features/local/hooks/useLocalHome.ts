@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/stores/auth';
+import { useAuth } from '@/hooks/useAuth';
 import { localService } from '../services/local.service';
 import { LocalDashboardStats } from '../types/local.types';
 import { Appointment } from '../services/calendar.service';
@@ -14,7 +14,7 @@ export interface LocalHomeData {
 }
 
 export const useLocalHome = (): LocalHomeData => {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const [nextAppointment, setNextAppointment] = useState<Appointment | null>(null);
   const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([]);
   const [dashboardStats, setDashboardStats] = useState<LocalDashboardStats>({

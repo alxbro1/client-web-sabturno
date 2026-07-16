@@ -15,7 +15,7 @@ import { premiumService } from "@/services/premium";
 import { useOnboardingStore } from "@/stores/onboarding";
 import { queryKeys } from "@/lib/queryKeys";
 import { useQueryClient } from "@tanstack/react-query";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { PricingCard } from "@/components/premium";
 import type { PlanInterval } from "@/lib/types/premium";
@@ -34,7 +34,7 @@ export default function OnboardingSubscriptionPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { setSelectedPlan } = useOnboardingStore();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const [interval, setInterval] = useState<PlanInterval>("monthly");
   const [subscribingPlanId, setSubscribingPlanId] = useState<string | null>(null);
 

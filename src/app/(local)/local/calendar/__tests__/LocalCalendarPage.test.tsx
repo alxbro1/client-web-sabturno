@@ -3,8 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import LocalCalendarPage from '../page';
 import type { Appointment, Block, Resource } from '@/features/appointment-timeline/types';
 
-vi.mock('@/stores/auth', () => ({
-  useAuthStore: vi.fn(),
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: vi.fn(),
 }));
 
 vi.mock('@/features/appointment-timeline/hooks/useTimelineData', () => ({
@@ -59,11 +59,11 @@ vi.mock('@/components/EmployeeSidebar', () => ({
   ),
 }));
 
-const { useAuthStore } = await import('@/stores/auth');
+const { useAuth } = await import('@/hooks/useAuth');
 const { useTimelineData } = await import('@/features/appointment-timeline/hooks/useTimelineData');
 const { useEmployees } = await import('@/features/appointment-timeline/hooks/useEmployees');
 
-const mockUseAuthStore = vi.mocked(useAuthStore);
+const mockUseAuth = vi.mocked(useAuth);
 const mockUseTimelineData = vi.mocked(useTimelineData);
 const mockUseEmployees = vi.mocked(useEmployees);
 
@@ -100,7 +100,7 @@ function makeBlock(overrides: Partial<Block> = {}): Block {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockUseAuthStore.mockReturnValue({ user: { id: LOCAL_ID, isLocal: true } } as any);
+  mockUseAuth.mockReturnValue({ user: { id: LOCAL_ID, isLocal: true }, hasHydrated: true } as any);
   mockUseEmployees.mockReturnValue({
     employees: [],
     isLoading: false,
@@ -119,7 +119,7 @@ beforeEach(() => {
 
 describe('LocalCalendarPage', () => {
   it('shows login prompt when user is not authenticated', () => {
-    mockUseAuthStore.mockReturnValue({ user: null } as any);
+    mockUseAuth.mockReturnValue({ user: null, hasHydrated: true } as any);
     render(<LocalCalendarPage />);
     expect(screen.getByText(/Iniciá sesion/)).toBeTruthy();
   });

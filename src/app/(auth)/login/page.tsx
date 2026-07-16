@@ -2,17 +2,16 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { signIn, getSession } from "next-auth/react";
 import { Button } from "@/components/Button";
 import { InputField } from "@/components/Field";
 import { validateEmail } from "@/lib/utils/validation";
-import { useAuthStore } from "@/stores/auth";
 import { LogoMark } from "@/components/Logo";
-import { authService } from "@/services/auth";
 
 export default function LoginPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const from = searchParams.get("from") || "/home";
   const emailVerificationPending = searchParams.get("emailVerificationPending") === "true";
 
@@ -21,7 +20,6 @@ export default function LoginPage() {
   const [emailDirty, setEmailDirty] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuthStore();
 
   const emailValidation = useMemo(() => validateEmail(email), [email]);
   const isFormValid =
@@ -37,17 +35,21 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const data = await authService.login({ email: email.trim(), password });
-      login(data.user, data.token);
+      const result = await signIn("credentials", {
+        email: email.trim(),
+        password,
+        redirect: false,
+      });
 
-      const redirectPath = data.user.isLocal ? "/local/dashboard" : from;
-      router.replace(redirectPath);
-    } catch (caughtError: unknown) {
-      const message =
-        caughtError instanceof Error
-          ? caughtError.message
-          : "No se pudo iniciar sesion";
-      setError(message);
+      if (result?.error) {
+        setError("Credenciales invalidas");
+      } else {
+        const session = await getSession();
+        const isLocal = (session?.user as any)?.isLocal;
+        router.push(isLocal ? "/local/dashboard" : from);
+      }
+    } catch {
+      setError("No se pudo iniciar sesion");
     } finally {
       setLoading(false);
     }

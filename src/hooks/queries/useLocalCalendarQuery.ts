@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { calendarService } from "@/features/local/services/calendar.service";
 import { blockingService } from "@/features/local/services/blocking.service";
 import type {
@@ -48,7 +48,7 @@ async function fetchCalendarData(
 }
 
 export function useLocalCalendarQuery() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const localId = user?.id ?? "";
   const [currentMonth, setCurrentMonth] = useState(() =>
     new Date().getMonth(),

@@ -35,27 +35,41 @@ test.describe("Payment methods", () => {
   });
 
   test("configures reservation percentage", async ({ page }) => {
-    // Mock user with mercadoPagoLiveMode enabled (required to activate reservation without OAuth redirect)
-    await page.route("**/api/auth/me", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ user: { ...mockUser, mercadoPagoLiveMode: true }, token: mockToken }),
-      });
+    // El source of truth de los flags de payment methods es `useLocalQuery`
+    // (no la session de NextAuth). Hay que mockear `GET /local/:id` con
+    // `mercadoPagoLiveMode: true` para poder activar Reserva sin disparar
+    // el OAuth de MP. El patrón usa el host del API para NO matchear las
+    // páginas del front (que también viven bajo `/local/*`).
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    await page.route(`${apiBase}/local/*`, async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            id: 1,
+            name: "Test Local",
+            slug: "test-local",
+            mercadoPagoLiveMode: true,
+            payWithTalo: false,
+            payWithReservation: false,
+            payWithCashInFront: false,
+            reservationPercentage: null,
+          }),
+        });
+        return;
+      }
+      if (route.request().method() === "PATCH") {
+        await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
+        return;
+      }
+      await route.continue();
     });
     await page.route(/premium\/status/, async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ...mockPremiumStatus, tier: "pro" }) });
     });
     await page.route(/talo\/status/, async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ connected: false }) });
-    });
-    // Mock PATCH to /local/{id} for saving
-    await page.route("**/local/*", async (route) => {
-      if (route.request().method() === "PATCH") {
-        await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
-      } else {
-        await route.continue();
-      }
     });
 
     await page.goto("/local/payment-methods");

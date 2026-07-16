@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Upload, ArrowRight, CheckCircle2, ImageIcon } from "lucide-react";
 import { Button } from "@/components/Button";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { useOnboardingStore } from "@/stores/onboarding";
 import { localImagesService } from "@/features/local/services/localImages.service";
 import { imageUploadUtils } from "@/features/local/utils/imageUploadUtils";
@@ -26,13 +26,13 @@ function readFileAsDataUrl(file: File): Promise<string> {
  *
  * - Usa el endpoint `POST /local/:id/image` (singular, no galeria).
  * - Si el usuario ya tiene logo, lo mantiene y permite "Saltar".
- * - Al guardar, actualiza `useAuthStore.user.imageProfile` y el cache
+ * - Al guardar, actualiza `useAuth.user.imageProfile` y el cache
  *   del local para que el resto de la UI se entere.
  */
 export default function OnboardingLogoPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user, updateUserProfile } = useAuthStore();
+  const { user, updateUserProfile } = useAuth();
   const { setHasLogo } = useOnboardingStore();
   const queryClient = useQueryClient();
 

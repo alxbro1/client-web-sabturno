@@ -5,16 +5,20 @@
  * métodos de cobro de un local vía `PATCH /local/:id`.
  *
  * Se usa desde la pantalla `/local/payment-methods` (feature
- * `payment-methods`). El `onSuccess` refresca el `useAuthStore.user` con
- * los flags devueltos por el backend, de modo que la UI del sidebar y otras
- * pantallas reflejen el cambio sin tener que re-loguear.
+ * `payment-methods`). El `onSuccess` invalida el query del `Local`
+ * (`useLocalQuery`) para que el form y el resto de la UI (sidebar, booking
+ * flow, etc.) reflejen el cambio sin tener que re-loguear.
+ *
+ * **Decisión arquitectónica**: la session de NextAuth no expone los flags
+ * de `Local`, así que antes se intentaba propagarlos vía
+ * `useSession().update(...)`, que era un no-op silencioso. Ahora el
+ * source of truth es `useLocalQuery` (ver `useLocalQuery.ts`).
  *
  * Sigue el patrón de `useCreateAppointmentMutation`
  * (`src/hooks/mutations/`) y el de mutaciones del mobile.
  */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { localService } from "@/features/local/services/local.service";
-import { useAuthStore } from "@/stores/auth";
 import { queryKeys } from "@/lib/queryKeys";
 import type { Local } from "@/lib/types/local";
 import type { UpdatePaymentMethodsPayload } from "@/features/payment-methods";
@@ -26,7 +30,6 @@ interface MutationContext {
 
 export function useUpdatePaymentMethodsMutation() {
   const queryClient = useQueryClient();
-  const { user, updateUserProfile } = useAuthStore();
 
   return useMutation<
     Local,
@@ -35,22 +38,23 @@ export function useUpdatePaymentMethodsMutation() {
   >({
     mutationFn: ({ localId, ...payload }) =>
       localService.updateLocal(localId, payload),
-    onSuccess: async (updated, variables) => {
+    onSuccess: (updated, variables) => {
+      // Source of truth: el `Local` traído por React Query. Invalida el
+      // query para que el form y el resto de la UI se re-sincronicen.
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.local(variables.localId),
+      });
+      // El `localHome` también se beneficia del refresh (podría mostrar
+      // contadores basados en flags de pago en el futuro).
       queryClient.invalidateQueries({
         queryKey: queryKeys.localHome(variables.localId),
       });
-
-      if (user?.id === variables.localId) {
-        const patch = {
-          mercadoPagoLiveMode: updated.mercadoPagoLiveMode,
-          payWithTalo: updated.payWithTalo,
-          payWithReservation: updated.payWithReservation,
-          reservationPercentage: updated.reservationPercentage,
-          payWithCashInFront: updated.payWithCashInFront,
-        };
-
-        updateUserProfile(patch);
-      }
+      // Seteamos el cache con la respuesta del backend para que el form
+      // se re-sincronice sin esperar al round-trip del refetch.
+      queryClient.setQueryData<Local>(
+        queryKeys.local(variables.localId),
+        updated,
+      );
     },
   });
 }

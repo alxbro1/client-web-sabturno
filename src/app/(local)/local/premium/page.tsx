@@ -11,13 +11,13 @@ import {
 import { usePremiumPlansQuery, FALLBACK_PLANS } from "@/hooks/queries/usePremiumPlansQuery";
 import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
 import { premiumService } from "@/services/premium";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import type { PlanInterval } from "@/lib/types/premium";
 
 export default function PremiumPage() {
   const router = useRouter();
-  const { hasHydrated, user } = useAuthStore();
+  const { hasHydrated, user } = useAuth();
   const [interval, setInterval] = useState<PlanInterval>("monthly");
   const [subscribingPlanId, setSubscribingPlanId] = useState<string | null>(null);
 
