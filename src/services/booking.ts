@@ -63,6 +63,17 @@ export const bookingService = {
     );
     return response.data;
   },
+  async getGuestPaymentStatusByExternalReference(
+    externalReference: string,
+    accessHash: string,
+  ) {
+    const encodedReference = encodeURIComponent(externalReference);
+    const response = await apiService.get<PaymentStatusResponse>(
+      `/payments/guest/by-external-reference/${encodedReference}`,
+      { params: { accessHash } },
+    );
+    return response.data;
+  },
   async getAppointmentPublic(id: string, hash: string) {
     const response = await apiService.get(`/appointments/${id}/public?hash=${encodeURIComponent(hash)}`);
     return response.data;

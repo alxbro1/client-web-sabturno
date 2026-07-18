@@ -119,6 +119,7 @@ export default function SelectPaymentPage() {
         email: user?.email || email,
         userName: user?.name || userName,
         phoneNumber: user?.phone,
+        checkoutReturnUrl: `${window.location.origin}/booking/payment-status`,
         ...(user?.id ? { userId: user.id } : {}),
       };
 
@@ -134,10 +135,7 @@ export default function SelectPaymentPage() {
         checkoutUrl &&
         externalReference
       ) {
-        window.open(checkoutUrl, "_blank", "noopener,noreferrer");
-        router.replace(
-          `/booking/payment-status?externalReference=${encodeURIComponent(externalReference)}&result=pending`,
-        );
+        window.location.assign(checkoutUrl);
         return;
       }
 

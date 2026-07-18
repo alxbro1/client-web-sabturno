@@ -74,6 +74,7 @@ export interface BookingDTO {
   paymentMethod?: PaymentMethod;
   email: string;
   userName?: string;
+  checkoutReturnUrl?: string;
 }
 
 export interface Appointment {

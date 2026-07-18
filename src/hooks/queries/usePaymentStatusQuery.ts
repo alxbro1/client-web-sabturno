@@ -12,11 +12,13 @@ type PaymentResult =
 export function usePaymentStatusQuery(
   externalReference: string | null,
   taloPaymentId: string | null,
+  accessHash: string | null,
 ) {
   return useQuery<PaymentResult, Error>({
     queryKey: queryKeys.paymentStatus(
       externalReference ?? "",
       taloPaymentId ?? "",
+      accessHash ?? "",
     ),
     queryFn: async () => {
       if (taloPaymentId) {
@@ -25,10 +27,14 @@ export function usePaymentStatusQuery(
       }
 
       if (externalReference) {
-        const data =
-          await bookingService.getPaymentStatusByExternalReference(
+        const data = accessHash
+          ? await bookingService.getGuestPaymentStatusByExternalReference(
             externalReference,
-          );
+              accessHash,
+            )
+          : await bookingService.getPaymentStatusByExternalReference(
+              externalReference,
+            );
         return { type: "mercadopago" as const, data };
       }
 

@@ -161,12 +161,19 @@ vi.mock("@/hooks/useAuth", () => ({
 
 ## Troubleshooting
 
+### Mercado Pago abre estado/401 en vez del checkout
+
+- Confirmar en la respuesta de `POST /appointments` que existe `mercadoPago.initPoint` y navegar a ese valor con `window.location.assign()`.
+- `externalReference` sólo identifica el pago; no es una URL. No llamar al endpoint de estado antes de volver de Mercado Pago.
+- Para invitados, propagar `accessHash` por el retorno y usar `/payments/guest/by-external-reference/:reference`; el endpoint sin `/guest` requiere JWT.
+- El backend valida el retorno web y lo limita a `/booking/payment-status`. Cambios en este flujo requieren la skill `backend/.agents/skills/mercadopago-checkout/SKILL.md`.
+
 ### ENOTEMPTY: directory not empty, rmdir '.next/server'
 
 **Causa:** Procesos zombie de `next dev` (Turbopack) que mantienen handles abiertos en `.next/server/`.
 
 **Solución:**
-1. Matar procesos zombie: `lsof -ti:3000 | xargs kill -9` (o buscar PIDs con `ps aux | grep "next dev"`)
+1. Identificar el proceso con `lsof -nP -iTCP:3001 -sTCP:LISTEN` y cerrarlo normalmente. Usar `kill -9` sólo si no responde.
 2. Limpiar caché: `npm run clean` (ejecuta `./clean.sh` que borra `.next/` y `node_modules/.cache/`)
 3. Reconstruir: `npm run build`
 

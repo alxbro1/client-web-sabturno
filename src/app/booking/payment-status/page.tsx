@@ -29,10 +29,12 @@ export default function PaymentStatusPage() {
   const externalReference = searchParams.get("externalReference") || "";
   const taloPaymentId = searchParams.get("taloPaymentId") || "";
   const result = searchParams.get("result");
+  const accessHash = searchParams.get("accessHash") || "";
 
   const { data, isLoading, error, refetch } = usePaymentStatusQuery(
     externalReference || null,
     taloPaymentId || null,
+    accessHash || null,
   );
 
   return (

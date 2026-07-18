@@ -11,8 +11,11 @@ export const queryKeys = {
     refreshToken: number,
   ) => ["time-slots", localId, date, serviceDuration, refreshToken] as const,
   taloStatus: (localId: string) => ["talo-status", localId] as const,
-  paymentStatus: (externalReference: string, taloPaymentId: string) =>
-    ["payment-status", externalReference, taloPaymentId] as const,
+  paymentStatus: (
+    externalReference: string,
+    taloPaymentId: string,
+    accessHash: string,
+  ) => ["payment-status", externalReference, taloPaymentId, accessHash] as const,
   localHome: (localId: string) => ["local-home", localId] as const,
   local: (localId: string) => ["local", localId] as const,
   scheduleTemplates: (localId: string) => ["schedule-templates", localId] as const,
