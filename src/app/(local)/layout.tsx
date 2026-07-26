@@ -15,6 +15,7 @@ import {
   Menu,
   CreditCard,
   Crown,
+  Gift,
 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { LogoMark } from "@/components/Logo";
@@ -44,6 +45,7 @@ const navItems: NavItem[] = [
   { to: "/local/blockings", label: "Bloqueos", icon: <Ban className="size-5" /> },
   { to: "/local/images", label: "Fotos", icon: <ImageIcon className="size-5" /> },
   { to: "/local/payment-methods", label: "Metodos de cobro", icon: <CreditCard className="size-5" /> },
+  { to: "/local/loyalty", label: "Fidelidad", icon: <Gift className="size-5" /> },
   { to: "/local/premium", label: "Planes", icon: <Crown className="size-5" /> },
   {
     to: "/local/profile",

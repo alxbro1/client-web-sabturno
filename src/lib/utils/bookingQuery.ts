@@ -1,6 +1,7 @@
 type BookingQueryPayload = {
   localId?: string | null;
   serviceId?: number | null;
+  coupon?: string | null;
 };
 
 function toBase64Url(value: string) {
@@ -37,7 +38,11 @@ export function parseBookingQuery(searchParams: URLSearchParams) {
           ? decoded.s
           : null;
 
-      return { localId, serviceId };
+      return {
+        localId,
+        serviceId,
+        coupon: searchParams.get("coupon")?.trim() || null,
+      };
     } catch {
       // Fall back to legacy params when token is malformed.
     }
@@ -46,6 +51,7 @@ export function parseBookingQuery(searchParams: URLSearchParams) {
   return {
     localId: searchParams.get("localId")?.trim() || null,
     serviceId: parseServiceId(searchParams.get("serviceId")),
+    coupon: searchParams.get("coupon")?.trim() || null,
   };
 }
 
@@ -55,8 +61,9 @@ export function buildBookingSearch(payload: BookingQueryPayload) {
     typeof payload.serviceId === "number" && Number.isInteger(payload.serviceId) && payload.serviceId > 0
       ? payload.serviceId
       : null;
+  const coupon = payload.coupon?.trim() || null;
 
-  if (!localId && !serviceId) {
+  if (!localId && !serviceId && !coupon) {
     return "";
   }
 
@@ -69,5 +76,6 @@ export function buildBookingSearch(payload: BookingQueryPayload) {
 
   const params = new URLSearchParams();
   params.set("bk", encoded);
+  if (coupon) params.set("coupon", coupon);
   return params.toString();
 }

@@ -17,11 +17,11 @@ export default function SelectLocalPage() {
   const setLocal = useBookingStore((s) => s.setLocal);
   const hasHandledDeepLinkRef = useRef(false);
 
-  const { localId: localIdQuery, serviceId: serviceIdQuery } =
+  const { localId: localIdQuery, serviceId: serviceIdQuery, coupon } =
     parseBookingQuery(searchParams);
 
   function buildSelectServiceUrl(localId: string) {
-    const query = buildBookingSearch({ localId, serviceId: serviceIdQuery });
+    const query = buildBookingSearch({ localId, serviceId: serviceIdQuery, coupon });
     return query ? `/booking/select-service?${query}` : "/booking/select-service";
   }
 

@@ -28,4 +28,11 @@ export const queryKeys = {
   myReports: () => ["my-reports"] as const,
   premiumPlans: () => ["premium", "plans", "v2"] as const,
   premiumStatus: () => ["premium", "status", "v2"] as const,
+  loyaltyOwner: (localId: string) => ["loyalty", "owner", localId] as const,
+  loyaltyLocalCards: (localId: string) => ["loyalty", "local-cards", localId] as const,
+  loyaltyDevelopmentAppointments: (localId: string) =>
+    ["loyalty", "development-appointments", localId] as const,
+  loyaltyMyCards: () => ["loyalty", "my-cards"] as const,
+  loyaltyBookingRewards: (localId: string, serviceId: number, userId?: string) =>
+    ["loyalty", "booking-rewards", localId, serviceId, userId] as const,
 };

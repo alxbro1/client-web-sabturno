@@ -46,4 +46,15 @@ export const premiumService = {
     );
     return response.data;
   },
+
+  async reconcilePreapproval(preapprovalId: string): Promise<{
+    reconciled: boolean;
+    mpStatus: string;
+  }> {
+    const response = await apiService.post<{
+      reconciled: boolean;
+      mpStatus: string;
+    }>("/premium/reconcile", { preapprovalId });
+    return response.data;
+  },
 };

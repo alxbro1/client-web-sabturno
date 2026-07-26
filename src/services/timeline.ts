@@ -8,6 +8,7 @@ export interface BackendAppointment {
   userName?: string;
   email?: string;
   phoneNumber?: string;
+  paymentMethodSelected?: string;
   serviceId: number;
   localId: string;
   userId?: string;
@@ -103,6 +104,18 @@ export const timelineService = {
     const url = withCacheBust(`/appointments/by-entity/${entityId}${query ? `?${query}` : ''}`);
 
     const response = await apiService.get<PaginatedResponse<BackendAppointment>>(url);
+    return response.data;
+  },
+
+  async cancelAppointment(appointmentId: string) {
+    const response = await apiService.patch(`/appointments/cancel/${appointmentId}`);
+    return response.data;
+  },
+
+  async confirmCashInFrontAppointment(appointmentId: string) {
+    const response = await apiService.patch(
+      `/appointments/confirm-cash-in-front/${appointmentId}`,
+    );
     return response.data;
   },
 

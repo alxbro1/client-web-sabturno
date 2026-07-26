@@ -19,9 +19,14 @@ export function mapBackendAppointment(raw: BackendAppointment, localId: string):
     endAt: new Date(raw.endDateTime),
     title: raw.service?.name || raw.userName || 'Sin título',
     status: mapState(raw.state),
-    customerName: raw.userName,
-    customerEmail: raw.email,
+    customerName: raw.user?.name || raw.userName,
+    customerEmail: raw.user?.email || raw.email,
+    customerPhone: raw.user?.phone || raw.phoneNumber,
     serviceName: raw.service?.name,
+    serviceDuration: raw.service?.duration,
+    price: raw.service?.cost,
+    paymentMethod: raw.paymentMethodSelected,
+    timezone: raw.timezone,
   };
 }
 

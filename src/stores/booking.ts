@@ -10,12 +10,16 @@ type BookingStoreState = {
   availabilityRefreshToken: number;
   paymentMethod: PaymentMethod | null;
   taloPaymentData: TaloPaymentData | null;
+  loyaltyRewardId: string | null;
+  loyaltyCouponCode: string;
   setLocal: (local: Local | null) => void;
   setService: (service: Service | null) => void;
   setDate: (date: string | null) => void;
   setTime: (time: string | null) => void;
   setPaymentMethod: (paymentMethod: PaymentMethod | null) => void;
   setTaloPaymentData: (data: TaloPaymentData | null) => void;
+  setLoyaltyRewardId: (rewardId: string | null) => void;
+  setLoyaltyCouponCode: (code: string) => void;
   bumpAvailability: () => void;
   resetBooking: () => void;
 };
@@ -27,16 +31,20 @@ export const useBookingStore = create<BookingStoreState>((set) => ({
   time: null,
   paymentMethod: null,
   taloPaymentData: null,
+  loyaltyRewardId: null,
+  loyaltyCouponCode: "",
   availabilityRefreshToken: 0,
   setLocal: (local) =>
-    set({ local, service: null, date: null, time: null, paymentMethod: null, taloPaymentData: null }),
-  setService: (service) => set({ service, date: null, time: null, paymentMethod: null, taloPaymentData: null }),
-  setDate: (date) => set({ date, time: null, paymentMethod: null, taloPaymentData: null }),
-  setTime: (time) => set({ time, paymentMethod: null, taloPaymentData: null }),
+    set({ local, service: null, date: null, time: null, paymentMethod: null, taloPaymentData: null, loyaltyRewardId: null }),
+  setService: (service) => set({ service, date: null, time: null, paymentMethod: null, taloPaymentData: null, loyaltyRewardId: null }),
+  setDate: (date) => set({ date, time: null, paymentMethod: null, taloPaymentData: null, loyaltyRewardId: null }),
+  setTime: (time) => set({ time, paymentMethod: null, taloPaymentData: null, loyaltyRewardId: null }),
   setPaymentMethod: (paymentMethod) => set({ paymentMethod }),
   setTaloPaymentData: (data) => set({ taloPaymentData: data }),
+  setLoyaltyRewardId: (loyaltyRewardId) => set({ loyaltyRewardId }),
+  setLoyaltyCouponCode: (loyaltyCouponCode) => set({ loyaltyCouponCode }),
   bumpAvailability: () =>
     set((state) => ({ availabilityRefreshToken: state.availabilityRefreshToken + 1 })),
   resetBooking: () =>
-    set({ local: null, service: null, date: null, time: null, paymentMethod: null, taloPaymentData: null, availabilityRefreshToken: 0 }),
+    set({ local: null, service: null, date: null, time: null, paymentMethod: null, taloPaymentData: null, loyaltyRewardId: null, loyaltyCouponCode: "", availabilityRefreshToken: 0 }),
 }));

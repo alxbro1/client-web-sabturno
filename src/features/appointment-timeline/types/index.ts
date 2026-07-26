@@ -28,7 +28,12 @@ export interface Appointment {
   status: AppointmentStatus;
   customerName?: string;
   customerEmail?: string;
+  customerPhone?: string;
   serviceName?: string;
+  serviceDuration?: number;
+  price?: number;
+  paymentMethod?: string;
+  timezone?: string;
 }
 
 export interface TimelineConfig {

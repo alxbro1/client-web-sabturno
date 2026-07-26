@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -33,14 +33,49 @@ import {
 
 export default function PremiumManagePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { hasHydrated, user } = useAuth();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [isChangingPlan, setIsChangingPlan] = useState(false);
+  const [isReconciling, setIsReconciling] = useState(false);
+  const reconciledPreapprovalRef = useRef<string | null>(null);
 
   const { data: status, isLoading: statusLoading, refetch } = usePremiumStatusQuery();
   const { data: plans } = usePremiumPlansQuery();
 
   const displayPlans = plans ?? FALLBACK_PLANS;
+
+  useEffect(() => {
+    const preapprovalId = searchParams.get("preapproval_id");
+    if (
+      !hasHydrated ||
+      !user?.isLocal ||
+      !preapprovalId ||
+      reconciledPreapprovalRef.current === preapprovalId
+    ) {
+      return;
+    }
+
+    reconciledPreapprovalRef.current = preapprovalId;
+    setIsReconciling(true);
+
+    void premiumService
+      .reconcilePreapproval(preapprovalId)
+      .then(async (result) => {
+        await refetch();
+        if (result.mpStatus === "authorized") {
+          toast.success("Tu suscripción fue activada correctamente.");
+        } else {
+          toast.info("Mercado Pago todavía está procesando la suscripción.");
+        }
+        router.replace("/local/premium/manage");
+      })
+      .catch((error) => {
+        console.error("Error al verificar la suscripción:", error);
+        toast.error("No se pudo verificar la suscripción con Mercado Pago.");
+      })
+      .finally(() => setIsReconciling(false));
+  }, [hasHydrated, refetch, router, searchParams, user?.isLocal]);
 
   async function handleCancelSubscription() {
     try {
@@ -75,7 +110,7 @@ export default function PremiumManagePage() {
     }
   }
 
-  if (!hasHydrated || statusLoading) {
+  if (!hasHydrated || statusLoading || isReconciling) {
     return (
       <div className="min-h-[400px] grid place-items-center">
         <Loader2 className="size-8 text-primary animate-spin" />

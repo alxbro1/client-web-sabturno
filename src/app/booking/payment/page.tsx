@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { Button } from "@/components/Button";
@@ -10,6 +11,9 @@ import { useCreateAppointmentMutation } from "@/hooks/mutations/useCreateAppoint
 import { useAuth } from "@/hooks/useAuth";
 import { useBookingStore } from "@/stores/booking";
 import { PaymentMethod } from "@/lib/types/booking";
+import { queryKeys } from "@/lib/queryKeys";
+import { loyaltyService } from "@/services/loyalty";
+import type { LoyaltyReward } from "@/lib/types/loyalty";
 import { DEFAULT_TIMEZONE } from "@/lib/constants/countries";
 import { convertLocalToUTC, formatDateOnlyLocal } from "@/lib/utils/date";
 import iconMercadoPago from "@/assets/payment-methods/mercado_pago.png";
@@ -30,7 +34,11 @@ export default function SelectPaymentPage() {
   const storedDate = useBookingStore((s) => s.date);
   const storedTime = useBookingStore((s) => s.time);
   const paymentMethod = useBookingStore((s) => s.paymentMethod);
+  const loyaltyRewardId = useBookingStore((s) => s.loyaltyRewardId);
+  const loyaltyCouponCode = useBookingStore((s) => s.loyaltyCouponCode);
   const setPaymentMethod = useBookingStore((s) => s.setPaymentMethod);
+  const setLoyaltyRewardId = useBookingStore((s) => s.setLoyaltyRewardId);
+  const setLoyaltyCouponCode = useBookingStore((s) => s.setLoyaltyCouponCode);
 
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
@@ -41,6 +49,44 @@ export default function SelectPaymentPage() {
   const taloEnabled = taloStatus?.connected ?? false;
 
   const isGuestEmailMissing = !user && !email.trim();
+  const { data: loyaltyRewards = [] } = useQuery({
+    queryKey: queryKeys.loyaltyBookingRewards(
+      local?.id || "",
+      service?.id || 0,
+      user?.id,
+    ),
+    queryFn: () =>
+      loyaltyService.getBookingRewards({
+        localId: local!.id,
+        serviceId: service!.id,
+      }),
+    enabled: !!local?.id && !!service?.id && !!user?.id,
+  });
+
+  const normalizedCouponCode = loyaltyCouponCode.trim().toLowerCase();
+  const hasCompleteCouponCode =
+    normalizedCouponCode.length === 16 || normalizedCouponCode.length === 32;
+  const { data: couponValidation, isFetching: isValidatingCoupon } = useQuery({
+    queryKey: [
+      "loyalty",
+      "coupon",
+      local?.id,
+      service?.id,
+      normalizedCouponCode,
+    ],
+    queryFn: () =>
+      loyaltyService.validateBookingCoupon({
+        localId: local!.id,
+        serviceId: service!.id,
+        code: normalizedCouponCode,
+      }),
+    enabled:
+      !user &&
+      !!local?.id &&
+      !!service?.id &&
+      hasCompleteCouponCode,
+    retry: false,
+  });
 
   const methods = useMemo(() => {
     if (!local || !service) return [];
@@ -102,7 +148,10 @@ export default function SelectPaymentPage() {
   }, [local, router, storedDate, storedTime, service, methods.length, setPaymentMethod]);
 
   async function handleConfirm() {
-    if (!paymentMethod || isGuestEmailMissing) return;
+    const couponMakesServiceFree =
+      !user && couponValidation?.valid === true && couponValidation.finalAmount === 0;
+    const effectivePaymentMethod = paymentMethod || methods[0]?.method;
+    if ((!effectivePaymentMethod && !couponMakesServiceFree) || isGuestEmailMissing) return;
 
     try {
       const timezone = user?.timezone || local?.timezone || DEFAULT_TIMEZONE;
@@ -115,12 +164,16 @@ export default function SelectPaymentPage() {
         serviceId: service!.id,
         countryCode: user?.countryCode || local?.countryCode,
         timezone,
-        paymentMethod: paymentMethod,
+        paymentMethod: effectivePaymentMethod || PaymentMethod.CASH_IN_FRONT,
         email: user?.email || email,
         userName: user?.name || userName,
         phoneNumber: user?.phone,
         checkoutReturnUrl: `${window.location.origin}/booking/payment-status`,
         ...(user?.id ? { userId: user.id } : {}),
+        ...(loyaltyRewardId ? { loyaltyRewardId } : {}),
+        ...(!user && couponValidation?.valid && normalizedCouponCode
+          ? { loyaltyCouponCode: normalizedCouponCode }
+          : {}),
       };
 
       const createdAppointment = await createAppointment.mutateAsync(appointmentData);
@@ -175,8 +228,17 @@ export default function SelectPaymentPage() {
 
   const reservationPercentage = Number(local.reservationPercentage || 0);
   const serviceCost = Number(service.cost || 0);
-  const reservationAmount = serviceCost * (reservationPercentage / 100);
-  const marketplaceFee = serviceCost * 0.03;
+  const selectedReward = loyaltyRewards.find((reward) => reward.id === loyaltyRewardId);
+  const loyaltyDiscount =
+    !user && couponValidation?.valid
+      ? couponValidation.discountAmount
+      : selectedReward
+        ? calculateRewardDiscount(serviceCost, selectedReward)
+        : 0;
+  const finalServiceCost = Math.max(0, serviceCost - loyaltyDiscount);
+  const isFullyDiscounted = finalServiceCost === 0 && loyaltyDiscount > 0;
+  const reservationAmount = finalServiceCost * (reservationPercentage / 100);
+  const marketplaceFee = finalServiceCost * 0.03;
 
   const methodCardBase =
     "relative rounded-xl p-5 flex items-center gap-4 cursor-pointer text-left transition-all duration-[140ms]";
@@ -203,6 +265,14 @@ export default function SelectPaymentPage() {
         </Button>
       </header>
 
+      {isFullyDiscounted ? (
+        <Card className="w-full border-[#00f068]/40 bg-[#00f068]/10 p-5">
+          <h3 className="font-semibold text-foreground">Tu turno queda cubierto</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            No necesitás elegir un medio de pago. El turno se confirmará al reservar.
+          </p>
+        </Card>
+      ) : (
       <div className="grid grid-cols-3 gap-4 max-lg:grid-cols-1 w-full">
         {methods.map((item) => {
           const isActive = paymentMethod === item.method;
@@ -236,24 +306,108 @@ export default function SelectPaymentPage() {
           );
         })}
       </div>
+      )}
 
-      {paymentMethod === PaymentMethod.RESERVATION_PAYMENT ? (
+      {!user ? (
+        <Card className="w-full p-5 grid gap-3">
+          <div>
+            <h3 className="font-semibold text-foreground">¿Tenés un cupón?</h3>
+            <p className="text-sm text-muted-foreground">
+              Ingresá el código que recibiste por correo.
+            </p>
+          </div>
+          <input
+            value={loyaltyCouponCode}
+            onChange={(event) =>
+              setLoyaltyCouponCode(event.target.value.toUpperCase().replace(/\s/g, ""))
+            }
+            placeholder="Ej. A1B2C3D4E5F6"
+            autoComplete="off"
+            className="h-11 rounded-lg border border-input bg-background px-3 font-mono uppercase tracking-wider"
+          />
+          {isValidatingCoupon ? (
+            <p className="text-sm text-muted-foreground">Validando cupón...</p>
+          ) : normalizedCouponCode && !hasCompleteCouponCode ? (
+            <p className="text-sm text-destructive">
+              Revisá el código: está incompleto o tiene un formato inválido.
+            </p>
+          ) : couponValidation?.valid ? (
+            <div className="rounded-lg border border-[#00f068]/30 bg-[#00f068]/10 p-3 text-sm">
+              <p className="font-semibold text-[#00b94f]">Cupón válido</p>
+              <p className="text-muted-foreground">
+                {couponValidation.benefit}. Ahorrás ${couponValidation.discountAmount.toFixed(2)}.
+              </p>
+            </div>
+          ) : couponValidation ? (
+            <p className="text-sm text-destructive">
+              {couponErrorLabel(couponValidation.reason)}
+            </p>
+          ) : null}
+        </Card>
+      ) : null}
+
+      {user && loyaltyRewards.length > 0 ? (
+        <Card className="w-full p-5 grid gap-3">
+          <h3 className="font-semibold text-foreground">Usar recompensa</h3>
+          <div className="grid gap-2 md:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setLoyaltyRewardId(null)}
+              className={`rounded-lg border p-3 text-left text-sm ${
+                !loyaltyRewardId
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground"
+              }`}
+            >
+              No usar recompensa
+            </button>
+            {loyaltyRewards.map((reward) => (
+              <button
+                key={reward.id}
+                type="button"
+                onClick={() => setLoyaltyRewardId(reward.id)}
+                className={`rounded-lg border p-3 text-left text-sm ${
+                  loyaltyRewardId === reward.id
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground"
+                }`}
+              >
+                <span className="block font-semibold text-foreground">
+                  {rewardLabel(reward)}
+                </span>
+                {reward.expiresAt ? (
+                  <span>Vence {new Date(reward.expiresAt).toLocaleDateString("es-AR")}</span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+          {selectedReward ? (
+            <p className="text-sm text-muted-foreground">
+              Descuento estimado: ${loyaltyDiscount.toFixed(2)}. Total servicio: $
+              {finalServiceCost.toFixed(2)}.
+            </p>
+          ) : null}
+        </Card>
+      ) : null}
+
+      {!isFullyDiscounted && paymentMethod === PaymentMethod.RESERVATION_PAYMENT ? (
         <Card className="w-full p-5 grid gap-3">
           <h3 className="font-semibold text-foreground">Detalle de reserva parcial</h3>
           <p className="text-sm text-muted-foreground">
             Reserva: ${reservationAmount.toFixed(2)}. Fee app: $
             {marketplaceFee.toFixed(2)}. Resto en el local: $
-            {(serviceCost - reservationAmount).toFixed(2)}.
+            {(finalServiceCost - reservationAmount).toFixed(2)}.
           </p>
         </Card>
       ) : null}
 
-      {paymentMethod === PaymentMethod.MERCADO_PAGO ||
-      paymentMethod === PaymentMethod.TALO ? (
+      {!isFullyDiscounted &&
+      (paymentMethod === PaymentMethod.MERCADO_PAGO ||
+        paymentMethod === PaymentMethod.TALO) ? (
         <Card className="w-full p-5 grid gap-3">
           <h3 className="font-semibold text-foreground">Detalle de pago online</h3>
           <p className="text-sm text-muted-foreground">
-            Servicio: ${serviceCost.toFixed(2)}. Fee app: $
+            Servicio: ${finalServiceCost.toFixed(2)}. Fee app: $
             {marketplaceFee.toFixed(2)}.
           </p>
           {paymentMethod === PaymentMethod.MERCADO_PAGO && (
@@ -298,11 +452,41 @@ export default function SelectPaymentPage() {
 
       <Button
         onClick={handleConfirm}
-        disabled={!paymentMethod || createAppointment.isPending || isGuestEmailMissing}
+        disabled={
+          (!paymentMethod && !isFullyDiscounted) ||
+          createAppointment.isPending ||
+          isGuestEmailMissing ||
+          isValidatingCoupon
+        }
         className="mt-6 max-w-sm self-center bg-[#00f068] text-black hover:bg-[#00f068]/90 focus:ring-[#00f068]/50"
       >
         {createAppointment.isPending ? "Confirmando reserva..." : "Confirmar turno"}
       </Button>
     </section>
   );
+}
+
+function rewardLabel(reward: LoyaltyReward) {
+  if (reward.type === "FREE_SERVICE") return "Servicio gratis";
+  if (reward.type === "PERCENTAGE_DISCOUNT") return `${Number(reward.value || 0)}% de descuento`;
+  return `$${Number(reward.value || 0).toFixed(2)} de descuento`;
+}
+
+function calculateRewardDiscount(serviceCost: number, reward: LoyaltyReward) {
+  if (reward.type === "FREE_SERVICE") return serviceCost;
+  if (reward.type === "PERCENTAGE_DISCOUNT") {
+    return serviceCost * (Math.min(100, Math.max(0, Number(reward.value || 0))) / 100);
+  }
+  return Math.min(serviceCost, Number(reward.value || 0));
+}
+
+function couponErrorLabel(
+  reason: "NOT_FOUND" | "UNAVAILABLE" | "EXPIRED" | "INCOMPATIBLE_SERVICE",
+) {
+  if (reason === "EXPIRED") return "Este cupón está vencido.";
+  if (reason === "UNAVAILABLE") return "Este cupón ya fue usado o está reservado.";
+  if (reason === "INCOMPATIBLE_SERVICE") {
+    return "Este cupón no aplica al servicio seleccionado.";
+  }
+  return "No encontramos un cupón válido con ese código.";
 }

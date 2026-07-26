@@ -51,6 +51,9 @@ export interface CreateAppointmentResponse {
   mercadoPago?: MercadoPagoCheckoutData;
   talo?: TaloPaymentData;
   accessHash?: string;
+  originalAmount?: string | number;
+  discountAmount?: string | number;
+  finalAmount?: string | number;
 }
 
 export type MercadoPagoPaymentStatus = "PENDING" | "COMPLETED" | "FAILED";
@@ -75,6 +78,8 @@ export interface BookingDTO {
   email: string;
   userName?: string;
   checkoutReturnUrl?: string;
+  loyaltyRewardId?: string;
+  loyaltyCouponCode?: string;
 }
 
 export interface Appointment {

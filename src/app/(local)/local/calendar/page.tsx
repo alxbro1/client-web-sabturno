@@ -8,7 +8,7 @@ import {
 } from "react-big-calendar";
 import { format, parse, startOfWeek, endOfWeek, getDay } from "date-fns";
 import { es } from "date-fns/locale/es";
-import { CalendarDays, Ban } from "lucide-react";
+import { CalendarDays, Ban, CalendarRange, List } from "lucide-react";
 import { Button } from "@/components/Button";
 import { LocalNavCard } from "@/components/local/LocalNavCard";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +19,9 @@ import ShadcnBigCalendar from "@/components/shadcn-big-calendar/shadcn-big-calen
 import "@/components/shadcn-big-calendar/shadcn-big-calendar.css";
 import { EmployeeSidebar } from "@/components/EmployeeSidebar";
 import { CalendarEventComponent } from "@/components/CalendarEventComponent";
+import { AppointmentList } from "@/components/local/AppointmentList";
+import { AppointmentDetailsDialog } from "@/components/local/AppointmentDetailsDialog";
+import { timelineService } from "@/services/timeline";
 
 const locales = { es };
 
@@ -59,11 +62,17 @@ interface CalendarEvent {
 
 export default function LocalCalendarPage() {
   const { user } = useAuth();
+  const [displayMode, setDisplayMode] = useState<"calendar" | "list">("calendar");
   const [date, setDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState<View>(Views.DAY);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(
     null
   );
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
+  const [isMutating, setIsMutating] = useState(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
+  const [listRefreshKey, setListRefreshKey] = useState(0);
 
   const entityId = user?.id ?? "";
 
@@ -189,17 +198,112 @@ export default function LocalCalendarPage() {
     setCalendarView(view);
   }, []);
 
+  const handleSelectEvent = useCallback((event: CalendarEvent) => {
+    if (event.isBlock || !event.resource || !("status" in event.resource)) {
+      return;
+    }
+    setMutationError(null);
+    setSelectedAppointment(event.resource);
+  }, []);
+
+  const refreshAllAppointments = useCallback(async () => {
+    await refetch();
+    setListRefreshKey((key) => key + 1);
+  }, [refetch]);
+
+  const handleConfirmAppointment = useCallback(
+    async (appointment: Appointment) => {
+      if (isMutating) return;
+      setIsMutating(true);
+      setMutationError(null);
+      try {
+        await timelineService.confirmCashInFrontAppointment(appointment.id);
+        setSelectedAppointment((current) =>
+          current?.id === appointment.id
+            ? { ...current, status: "CONFIRMED" }
+            : current,
+        );
+        await refreshAllAppointments();
+      } catch (error) {
+        console.error("Error al confirmar el turno:", error);
+        setMutationError("No se pudo confirmar el turno. Intentá nuevamente.");
+        throw error;
+      } finally {
+        setIsMutating(false);
+      }
+    },
+    [isMutating, refreshAllAppointments],
+  );
+
+  const handleCancelAppointment = useCallback(
+    async (appointment: Appointment) => {
+      if (isMutating) return;
+      setIsMutating(true);
+      setMutationError(null);
+      try {
+        await timelineService.cancelAppointment(appointment.id);
+        setSelectedAppointment((current) =>
+          current?.id === appointment.id
+            ? { ...current, status: "CANCELLED" }
+            : current,
+        );
+        await refreshAllAppointments();
+      } catch (error) {
+        console.error("Error al cancelar el turno:", error);
+        setMutationError("No se pudo cancelar el turno. Intentá nuevamente.");
+        throw error;
+      } finally {
+        setIsMutating(false);
+      }
+    },
+    [isMutating, refreshAllAppointments],
+  );
+
   const min = new Date(2025, 0, 1, 8, 0);
   const max = new Date(2025, 0, 1, 20, 0);
 
   return (
     <section className="grid gap-6">
-      <header className="flex justify-between items-center">
+      <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
             Calendario
           </p>
           <h2 className="text-2xl font-bold text-white">Turnos del local</h2>
+        </div>
+        <div
+          className="grid grid-cols-2 gap-1 rounded-2xl border border-white/10 bg-white/[0.035] p-1"
+          role="tablist"
+          aria-label="Modo de visualización"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={displayMode === "calendar"}
+            onClick={() => setDisplayMode("calendar")}
+            className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00f068] ${
+              displayMode === "calendar"
+                ? "bg-[#00f068] text-black"
+                : "text-white/60 hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            <CalendarRange className="size-4" />
+            Calendario
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={displayMode === "list"}
+            onClick={() => setDisplayMode("list")}
+            className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00f068] ${
+              displayMode === "list"
+                ? "bg-[#00f068] text-black"
+                : "text-white/60 hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            <List className="size-4" />
+            Lista
+          </button>
         </div>
       </header>
 
@@ -222,30 +326,43 @@ export default function LocalCalendarPage() {
               onSelect={setSelectedEmployeeId}
               appointmentCounts={appointmentCounts}
             />
-            <div className="flex-1 min-w-0 min-h-0">
-              <ShadcnBigCalendar
-                localizer={localizer}
-                events={events}
-                startAccessor="start"
-                endAccessor="end"
-                allDayAccessor="allDay"
-                views={[Views.DAY, Views.WEEK]}
-                view={calendarView}
-                date={date}
-                onNavigate={handleNavigate}
-                onView={handleViewChange}
-                messages={messages}
-                culture="es"
-                eventPropGetter={eventPropGetter}
-                components={{
-                  event: CalendarEventComponent,
-                }}
-                min={min}
-                max={max}
-                step={30}
-                timeslots={1}
-                style={{ height: "100%" }}
-              />
+            <div className="flex min-w-0 min-h-0 flex-1">
+              {displayMode === "calendar" ? (
+                <ShadcnBigCalendar
+                  localizer={localizer}
+                  events={events}
+                  startAccessor="start"
+                  endAccessor="end"
+                  allDayAccessor="allDay"
+                  views={[Views.DAY, Views.WEEK]}
+                  view={calendarView}
+                  date={date}
+                  onNavigate={handleNavigate}
+                  onView={handleViewChange}
+                  onSelectEvent={handleSelectEvent}
+                  messages={messages}
+                  culture="es"
+                  eventPropGetter={eventPropGetter}
+                  components={{
+                    event: CalendarEventComponent,
+                  }}
+                  min={min}
+                  max={max}
+                  step={30}
+                  timeslots={1}
+                  style={{ height: "100%", width: "100%" }}
+                />
+              ) : (
+                <AppointmentList
+                  localId={entityId}
+                  selectedEmployeeId={selectedEmployeeId}
+                  refreshKey={listRefreshKey}
+                  onSelect={(appointment) => {
+                    setMutationError(null);
+                    setSelectedAppointment(appointment);
+                  }}
+                />
+              )}
             </div>
           </div>
         )}
@@ -267,6 +384,19 @@ export default function LocalCalendarPage() {
           }
         />
       </section>
+
+      <AppointmentDetailsDialog
+        appointment={selectedAppointment}
+        resources={resources}
+        isMutating={isMutating}
+        mutationError={mutationError}
+        onClose={() => {
+          setSelectedAppointment(null);
+          setMutationError(null);
+        }}
+        onConfirm={handleConfirmAppointment}
+        onCancel={handleCancelAppointment}
+      />
     </section>
   );
 }

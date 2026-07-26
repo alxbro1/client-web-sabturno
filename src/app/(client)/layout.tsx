@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, CalendarDays, User, LogOut, CreditCard, Menu } from "lucide-react";
+import { Home, CalendarDays, User, LogOut, CreditCard, Menu, Gift } from "lucide-react";
 import { Button } from "@/components/Button";
 import { LogoMark } from "@/components/Logo";
 import {
@@ -93,6 +93,10 @@ export default function ClientLayout({
           <CreditCard className="size-5" />
           <span>Ver Pagos</span>
         </Link>
+        <Link className={navLinkClass("/rewards")} href="/rewards">
+          <Gift className="size-5" />
+          <span>Recompensas</span>
+        </Link>
       </nav>
 
       <div className="grid gap-3">
@@ -148,6 +152,13 @@ export default function ClientLayout({
       >
         <CreditCard className="size-5" />
         <span>Ver pagos</span>
+      </Link>
+      <Link
+        className={navLinkClass("/rewards")}
+        href="/rewards"
+      >
+        <Gift className="size-5" />
+        <span>Recompensas</span>
       </Link>
     </nav>
   );

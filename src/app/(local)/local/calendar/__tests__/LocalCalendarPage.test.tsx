@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import LocalCalendarPage from '../page';
 import type { Appointment, Block, Resource } from '@/features/appointment-timeline/types';
 
@@ -15,8 +15,15 @@ vi.mock('@/features/appointment-timeline/hooks/useEmployees', () => ({
   useEmployees: vi.fn(),
 }));
 
+vi.mock('@/services/timeline', () => ({
+  timelineService: {
+    confirmCashInFrontAppointment: vi.fn(),
+    cancelAppointment: vi.fn(),
+  },
+}));
+
 vi.mock('@/components/shadcn-big-calendar/shadcn-big-calendar', () => ({
-  default: ({ events, eventPropGetter, components }: any) => (
+  default: ({ events, eventPropGetter, components, onSelectEvent }: any) => (
     <div data-testid="mock-calendar">
       <span data-testid="event-count">{events?.length ?? 0}</span>
       {events?.map((evt: any) => {
@@ -28,6 +35,7 @@ vi.mock('@/components/shadcn-big-calendar/shadcn-big-calendar', () => ({
             data-event-id={evt.id}
             className={propResult.className}
             style={propResult.style}
+            onClick={() => onSelectEvent?.(evt)}
           >
             {components?.event ? (
               <components.event event={evt} />
@@ -39,6 +47,27 @@ vi.mock('@/components/shadcn-big-calendar/shadcn-big-calendar', () => ({
       })}
     </div>
   ),
+}));
+
+vi.mock('@/components/local/AppointmentList', () => ({
+  AppointmentList: ({ onSelect, selectedEmployeeId }: any) => (
+    <div data-testid="appointment-list">
+      <span>{selectedEmployeeId ?? 'all-employees'}</span>
+      <button onClick={() => onSelect(makeAppointment())}>Seleccionar turno de lista</button>
+    </div>
+  ),
+}));
+
+vi.mock('@/components/local/AppointmentDetailsDialog', () => ({
+  AppointmentDetailsDialog: ({ appointment, onClose, onConfirm, onCancel }: any) =>
+    appointment ? (
+      <div data-testid="appointment-dialog">
+        <span>{appointment.customerName}</span>
+        <button onClick={onClose}>Cerrar detalle</button>
+        <button onClick={() => onConfirm(appointment)}>Confirmar detalle</button>
+        <button onClick={() => onCancel(appointment)}>Cancelar detalle</button>
+      </div>
+    ) : null,
 }));
 
 vi.mock('@/components/EmployeeSidebar', () => ({
@@ -62,10 +91,13 @@ vi.mock('@/components/EmployeeSidebar', () => ({
 const { useAuth } = await import('@/hooks/useAuth');
 const { useTimelineData } = await import('@/features/appointment-timeline/hooks/useTimelineData');
 const { useEmployees } = await import('@/features/appointment-timeline/hooks/useEmployees');
+const { timelineService } = await import('@/services/timeline');
 
 const mockUseAuth = vi.mocked(useAuth);
 const mockUseTimelineData = vi.mocked(useTimelineData);
 const mockUseEmployees = vi.mocked(useEmployees);
+const mockConfirmAppointment = vi.mocked(timelineService.confirmCashInFrontAppointment);
+const mockCancelAppointment = vi.mocked(timelineService.cancelAppointment);
 
 const LOCAL_ID = 'local-1';
 
@@ -100,6 +132,8 @@ function makeBlock(overrides: Partial<Block> = {}): Block {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockConfirmAppointment.mockResolvedValue({});
+  mockCancelAppointment.mockResolvedValue({});
   mockUseAuth.mockReturnValue({ user: { id: LOCAL_ID, isLocal: true }, hasHydrated: true } as any);
   mockUseEmployees.mockReturnValue({
     employees: [],
@@ -157,6 +191,85 @@ describe('LocalCalendarPage', () => {
 
     expect(screen.getByTestId('mock-calendar')).toBeTruthy();
     expect(screen.getByTestId('event-count').textContent).toBe('3');
+  });
+
+  it('keeps calendar as default and switches to the appointment list', () => {
+    render(<LocalCalendarPage />);
+
+    expect(screen.getByTestId('mock-calendar')).toBeTruthy();
+    fireEvent.click(screen.getByRole('tab', { name: 'Lista' }));
+
+    expect(screen.getByTestId('appointment-list')).toBeTruthy();
+    expect(screen.queryByTestId('mock-calendar')).toBeNull();
+  });
+
+  it('opens the same appointment dialog from calendar and list', () => {
+    mockUseTimelineData.mockReturnValue({
+      appointments: [makeAppointment({ customerName: 'Juan' })],
+      blocks: [],
+      resources: [makeResource()],
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+
+    render(<LocalCalendarPage />);
+    fireEvent.click(screen.getByTestId('appointment-event'));
+    expect(screen.getByTestId('appointment-dialog').textContent).toContain('Juan');
+
+    fireEvent.click(screen.getByText('Cerrar detalle'));
+    fireEvent.click(screen.getByRole('tab', { name: 'Lista' }));
+    fireEvent.click(screen.getByText('Seleccionar turno de lista'));
+
+    expect(screen.getByTestId('appointment-dialog')).toBeTruthy();
+  });
+
+  it('does not open appointment details for a blocked event', () => {
+    mockUseTimelineData.mockReturnValue({
+      appointments: [],
+      blocks: [makeBlock()],
+      resources: [makeResource()],
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+
+    render(<LocalCalendarPage />);
+    fireEvent.click(screen.getByTestId('block-event'));
+
+    expect(screen.queryByTestId('appointment-dialog')).toBeNull();
+  });
+
+  it('confirms and cancels appointments, then refreshes calendar data', async () => {
+    const refetch = vi.fn().mockResolvedValue(undefined);
+    mockUseTimelineData.mockReturnValue({
+      appointments: [makeAppointment({ id: 'apt-1', customerName: 'Juan' })],
+      blocks: [],
+      resources: [makeResource()],
+      isLoading: false,
+      error: null,
+      refetch,
+    });
+
+    render(<LocalCalendarPage />);
+    fireEvent.click(screen.getByTestId('appointment-event'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Confirmar detalle'));
+    });
+
+    await vi.waitFor(() => {
+      expect(mockConfirmAppointment).toHaveBeenCalledWith('apt-1');
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Cancelar detalle'));
+    });
+
+    await vi.waitFor(() => {
+      expect(mockCancelAppointment).toHaveBeenCalledWith('apt-1');
+      expect(refetch).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('renders appointment events with HH:mm title format', () => {

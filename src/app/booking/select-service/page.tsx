@@ -17,9 +17,10 @@ export default function SelectServicePage() {
   const service = useBookingStore((s) => s.service);
   const setLocal = useBookingStore((s) => s.setLocal);
   const setService = useBookingStore((s) => s.setService);
+  const setLoyaltyCouponCode = useBookingStore((s) => s.setLoyaltyCouponCode);
   const hasHandledServiceDeepLinkRef = useRef(false);
 
-  const { localId: localIdQuery, serviceId: serviceIdQuery } =
+  const { localId: localIdQuery, serviceId: serviceIdQuery, coupon } =
     parseBookingQuery(searchParams);
 
   const { locals, isLoading: isLoadingLocals } = useLocalsQuery();
@@ -33,6 +34,10 @@ export default function SelectServicePage() {
     }
   }, [localIdQuery, locals, local?.id, setLocal]);
 
+  useEffect(() => {
+    if (coupon) setLoyaltyCouponCode(coupon.toUpperCase());
+  }, [coupon, setLoyaltyCouponCode]);
+
   const localId = local?.id ? String(local.id) : localIdQuery;
 
   const {
@@ -42,7 +47,7 @@ export default function SelectServicePage() {
   } = useServicesQuery(localId);
 
   function buildAppointmentUrl(serviceId: number) {
-    const query = buildBookingSearch({ localId, serviceId });
+    const query = buildBookingSearch({ localId, serviceId, coupon });
     return query ? `/booking/appointment?${query}` : "/booking/appointment";
   }
 
