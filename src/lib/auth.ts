@@ -6,6 +6,7 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://app-api.sabturno.com";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   providers: [
     Credentials({
       name: "credentials",
