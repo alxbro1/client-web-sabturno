@@ -5,6 +5,7 @@ import type { User } from "@/lib/types/auth";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://app-api.sabturno.com";
 console.log("AUTH_SECRET disponible:", Boolean(process.env.AUTH_SECRET));
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   secret: process.env.AUTH_SECRET,
