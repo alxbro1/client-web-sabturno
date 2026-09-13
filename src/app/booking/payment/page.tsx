@@ -33,12 +33,14 @@ export default function SelectPaymentPage() {
   const service = useBookingStore((s) => s.service);
   const storedDate = useBookingStore((s) => s.date);
   const storedTime = useBookingStore((s) => s.time);
+  const phoneNumber = useBookingStore((s) => s.phoneNumber);
   const paymentMethod = useBookingStore((s) => s.paymentMethod);
   const loyaltyRewardId = useBookingStore((s) => s.loyaltyRewardId);
   const loyaltyCouponCode = useBookingStore((s) => s.loyaltyCouponCode);
   const setPaymentMethod = useBookingStore((s) => s.setPaymentMethod);
   const setLoyaltyRewardId = useBookingStore((s) => s.setLoyaltyRewardId);
   const setLoyaltyCouponCode = useBookingStore((s) => s.setLoyaltyCouponCode);
+  const setPhoneNumber = useBookingStore((s) => s.setPhoneNumber);
 
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
@@ -49,6 +51,8 @@ export default function SelectPaymentPage() {
   const taloEnabled = taloStatus?.connected ?? false;
 
   const isGuestEmailMissing = !user && !email.trim();
+  const phoneDigits = phoneNumber.replace(/\D/g, "");
+  const isPhoneValid = phoneDigits.length >= 10 && phoneDigits.length <= 15;
   const { data: loyaltyRewards = [] } = useQuery({
     queryKey: queryKeys.loyaltyBookingRewards(
       local?.id || "",
@@ -147,11 +151,21 @@ export default function SelectPaymentPage() {
     }
   }, [local, router, storedDate, storedTime, service, methods.length, setPaymentMethod]);
 
+  useEffect(() => {
+    if (!phoneNumber && user?.phone) {
+      setPhoneNumber(user.phone);
+    }
+  }, [phoneNumber, setPhoneNumber, user?.phone]);
+
   async function handleConfirm() {
     const couponMakesServiceFree =
       !user && couponValidation?.valid === true && couponValidation.finalAmount === 0;
     const effectivePaymentMethod = paymentMethod || methods[0]?.method;
-    if ((!effectivePaymentMethod && !couponMakesServiceFree) || isGuestEmailMissing) return;
+    if (
+      (!effectivePaymentMethod && !couponMakesServiceFree) ||
+      isGuestEmailMissing ||
+      !isPhoneValid
+    ) return;
 
     try {
       const timezone = user?.timezone || local?.timezone || DEFAULT_TIMEZONE;
@@ -167,7 +181,7 @@ export default function SelectPaymentPage() {
         paymentMethod: effectivePaymentMethod || PaymentMethod.CASH_IN_FRONT,
         email: user?.email || email,
         userName: user?.name || userName,
-        phoneNumber: user?.phone,
+        phoneNumber: phoneNumber.trim(),
         checkoutReturnUrl: `${window.location.origin}/booking/payment-status`,
         ...(user?.id ? { userId: user.id } : {}),
         ...(loyaltyRewardId ? { loyaltyRewardId } : {}),
@@ -419,6 +433,38 @@ export default function SelectPaymentPage() {
         </Card>
       ) : null}
 
+      <Card className="w-full p-5 grid gap-3">
+        <div>
+          <h3 className="font-semibold text-foreground">WhatsApp</h3>
+          <p className="text-sm text-muted-foreground">
+            Te enviaremos la confirmación y el recordatorio del turno a este número.
+          </p>
+        </div>
+        <label className="text-sm font-medium text-foreground" htmlFor="booking-phone">
+          Teléfono
+        </label>
+        <input
+          id="booking-phone"
+          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          value={phoneNumber}
+          onChange={(event) => setPhoneNumber(event.target.value)}
+          placeholder="Ej. +54 9 351 123 4567"
+          aria-invalid={phoneNumber.length > 0 && !isPhoneValid}
+          aria-describedby="booking-phone-help"
+        />
+        <p
+          id="booking-phone-help"
+          className={`text-sm ${phoneNumber.length > 0 && !isPhoneValid ? "text-destructive" : "text-muted-foreground"}`}
+        >
+          {phoneNumber.length > 0 && !isPhoneValid
+            ? "Ingresá un teléfono válido de entre 10 y 15 dígitos."
+            : "Podés incluir el código de país, por ejemplo +54 9 para Argentina."}
+        </p>
+      </Card>
+
       {!user && (
         <Card className="w-full p-5 grid gap-3">
           <h3 className="font-semibold text-foreground">Datos de contacto</h3>
@@ -456,6 +502,7 @@ export default function SelectPaymentPage() {
           (!paymentMethod && !isFullyDiscounted) ||
           createAppointment.isPending ||
           isGuestEmailMissing ||
+          !isPhoneValid ||
           isValidatingCoupon
         }
         className="mt-6 max-w-sm self-center bg-[#00f068] text-black hover:bg-[#00f068]/90 focus:ring-[#00f068]/50"
