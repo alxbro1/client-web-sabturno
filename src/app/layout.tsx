@@ -31,6 +31,9 @@ export const metadata: Metadata = {
     locale: "es_AR",
     siteName: "SabTurno",
   },
+  other: {
+    "facebook-domain-verification": "npgv531bcjfxb0v8m1x63jdcakp7ou",
+  },
 };
 
 export default function RootLayout({
