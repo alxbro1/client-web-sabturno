@@ -243,7 +243,7 @@ export default function RegisterPage() {
                       <li
                         key={req.label}
                         className={
-                          req.met ? "text-[#00f068]" : "text-muted-foreground"
+                          req.met ? "text-primary" : "text-muted-foreground"
                         }
                       >
                         {req.met ? "✓ " : "• "}
@@ -268,7 +268,7 @@ export default function RegisterPage() {
           </div>
 
           <InputField
-            label="Telefono"
+            label="Teléfono"
             value={formData.phone}
             onChange={(event) => updateField("phone", event.target.value)}
             errors={touched.phone ? validation.phone : undefined}
@@ -369,7 +369,7 @@ export default function RegisterPage() {
           className="text-sm text-info underline decoration-info/30 underline-offset-2 transition-colors hover:text-info/80 hover:decoration-info/70"
           href="/login"
         >
-          Ya tienes cuenta? Inicia sesion
+          Ya tienes cuenta? Iniciá sesión
         </Link>
       </CardFooter>
     </Card>

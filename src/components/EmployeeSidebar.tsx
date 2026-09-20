@@ -19,15 +19,15 @@ export function EmployeeSidebar({
 }: EmployeeSidebarProps) {
   return (
     <nav
-      className={`flex md:flex-col gap-1 md:w-48 shrink-0 overflow-x-auto md:overflow-x-visible p-3 ${className}`}
+      className={`flex md:flex-col gap-1 md:w-48 shrink-0 overflow-x-auto md:overflow-x-visible rounded-xl border border-border bg-card p-3 ${className}`}
     >
       <button
         type="button"
         onClick={() => onSelect(null)}
-        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+        className={`flex min-h-11 items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
           selectedId === null
-            ? "bg-[#00f068]/10 text-[#00f068]"
-            : "text-white/70 hover:bg-white/5 hover:text-white"
+            ? "bg-primary/10 text-primary"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground"
         }`}
       >
         <span
@@ -39,7 +39,7 @@ export function EmployeeSidebar({
         />
         Todos
         {appointmentCounts && (
-          <span className="ml-auto text-xs text-white/40">
+          <span className="ml-auto text-xs text-muted-foreground/70">
             {Object.values(appointmentCounts).reduce((a, b) => a + b, 0)}
           </span>
         )}
@@ -52,10 +52,10 @@ export function EmployeeSidebar({
             type="button"
             key={resource.id}
             onClick={() => onSelect(resource.id)}
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+            className={`flex min-h-11 items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
               selectedId === resource.id
-                ? "bg-[#00f068]/10 text-[#00f068]"
-                : "text-white/70 hover:bg-white/5 hover:text-white"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground"
             }`}
           >
             <span
@@ -64,7 +64,7 @@ export function EmployeeSidebar({
             />
             {resource.name}
             {count !== undefined && (
-              <span className="ml-auto text-xs text-white/40">{count}</span>
+              <span className="ml-auto text-xs text-muted-foreground/70">{count}</span>
             )}
           </button>
         );

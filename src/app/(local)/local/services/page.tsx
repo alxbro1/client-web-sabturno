@@ -47,7 +47,7 @@ export default function ServicesPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-[1.5rem] font-bold">Servicios</h1>
-          <p className="text-white/54 text-[0.9rem]">
+          <p className="text-muted-foreground text-[0.9rem]">
             Gestiona los servicios de tu local
           </p>
         </div>
@@ -67,8 +67,8 @@ export default function ServicesPage() {
       ) : services.length === 0 ? (
         <div className="min-h-[200px] grid place-items-center text-center">
           <div className="grid gap-4">
-            <Wrench className="w-12 h-12 mx-auto text-white/24" />
-            <p className="text-white/48">No hay servicios registrados</p>
+            <Wrench className="w-12 h-12 mx-auto text-muted-foreground/70" />
+            <p className="text-muted-foreground">No hay servicios registrados</p>
             <Link href="/local/services/edit/new">
               <Button variant="secondary">Agregar primer servicio</Button>
             </Link>
@@ -85,17 +85,17 @@ export default function ServicesPage() {
                 <div className="flex items-center gap-3 mb-1">
                   <p className="font-medium truncate">{service.name}</p>
                   {!service.isActive && (
-                    <span className="text-[0.72rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/8 text-white/40">
+                    <span className="text-[0.72rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/8 text-muted-foreground/70">
                       Inactivo
                     </span>
                   )}
                 </div>
                 {service.description && (
-                  <p className="text-[0.82rem] text-white/48 truncate mb-1">
+                  <p className="text-[0.82rem] text-muted-foreground truncate mb-1">
                     {service.description}
                   </p>
                 )}
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[0.82rem] text-white/54">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[0.82rem] text-muted-foreground">
                   <span>{formatCurrency(service.cost)}</span>
                   <span>{formatDuration(service.duration)}</span>
                   {service.category && <span>{service.category}</span>}

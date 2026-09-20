@@ -17,7 +17,7 @@ export default function ProfilePage() {
   return (
     <section className="grid gap-6">
       <div>
-        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-primary">
           Perfil
         </p>
         <h2>Mi perfil</h2>
@@ -25,11 +25,11 @@ export default function ProfilePage() {
 
       <div className="grid gap-4">
         <div className="p-4 rounded-[18px] border border-white/10 bg-white/[0.02]">
-          <p className="text-white/48 text-sm">Nombre</p>
+          <p className="text-muted-foreground text-sm">Nombre</p>
           <p className="font-semibold">{user?.name || "No disponible"}</p>
         </div>
         <div className="p-4 rounded-[18px] border border-white/10 bg-white/[0.02]">
-          <p className="text-white/48 text-sm">Email</p>
+          <p className="text-muted-foreground text-sm">Email</p>
           <p className="font-semibold">{user?.email || "No disponible"}</p>
         </div>
       </div>
@@ -41,7 +41,7 @@ export default function ProfilePage() {
           </Button>
         </Link>
         <Button variant="ghost" onClick={handleLogout} fullWidth>
-          Cerrar sesion
+          Cerrar sesión
         </Button>
       </div>
     </section>

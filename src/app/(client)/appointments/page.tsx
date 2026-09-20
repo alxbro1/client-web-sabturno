@@ -4,7 +4,7 @@ export default function AppointmentsPage() {
   return (
     <section className="grid gap-6">
       <div>
-        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-primary">
           Mis turnos
         </p>
         <h2>Turnos reservados</h2>

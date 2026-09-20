@@ -300,7 +300,8 @@ export default function OnboardingHoursPage() {
                         <button
                           type="button"
                           onClick={() => handleRemoveSlot(day.key, slotIdx)}
-                          className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                          aria-label="Eliminar este tramo horario"
+                          className="rounded-lg p-2 text-destructive transition-colors outline-none hover:bg-destructive/10 focus-visible:ring-[3px] focus-visible:ring-ring/50"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

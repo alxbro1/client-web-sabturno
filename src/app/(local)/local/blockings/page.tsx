@@ -224,7 +224,7 @@ export default function LocalBlockingsPage() {
   return (
     <section className="grid gap-6">
       <header>
-        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-primary">
           Configuracion
         </p>
         <h2 className="text-2xl font-bold text-white">
@@ -234,7 +234,7 @@ export default function LocalBlockingsPage() {
 
         {isLoading ? (
           <div className="h-[650px] flex items-center justify-center">
-            <div className="text-white/60">Cargando calendario...</div>
+            <div className="text-muted-foreground">Cargando calendario...</div>
           </div>
         ) : (
           <ShadcnBigCalendar
@@ -279,7 +279,7 @@ export default function LocalBlockingsPage() {
                       : `${formatDate(block.startDate)} - ${formatDate(block.endDate)}`}
                   </p>
                   {block.reason && (
-                    <p className="text-sm text-white/50">{block.reason}</p>
+                    <p className="text-sm text-muted-foreground">{block.reason}</p>
                   )}
                 </div>
                 <Button
@@ -302,14 +302,14 @@ export default function LocalBlockingsPage() {
               Bloquear fecha
             </h3>
 
-            <p className="text-white/60 mb-4">
+            <p className="text-muted-foreground mb-4">
               {formData.date &&
                 formatDate(new Date(formData.date + "T12:00:00"))}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Tipo de bloqueo
                 </label>
                 <div className="flex gap-3">
@@ -320,8 +320,8 @@ export default function LocalBlockingsPage() {
                     }
                     className={`flex-1 p-3 rounded-xl border transition-all ${
                       formData.type === "full-day"
-                        ? "border-[#00f068]/40 bg-[#00f068]/10 text-white"
-                        : "border-white/10 text-white/60"
+                        ? "border-primary/40 bg-primary/10 text-white"
+                        : "border-white/10 text-muted-foreground"
                     }`}
                   >
                     Dia completo
@@ -333,8 +333,8 @@ export default function LocalBlockingsPage() {
                     }
                     className={`flex-1 p-3 rounded-xl border transition-all ${
                       formData.type === "time-slot"
-                        ? "border-[#00f068]/40 bg-[#00f068]/10 text-white"
-                        : "border-white/10 text-white/60"
+                        ? "border-primary/40 bg-primary/10 text-white"
+                        : "border-white/10 text-muted-foreground"
                     }`}
                   >
                     Franja horaria
@@ -345,7 +345,7 @@ export default function LocalBlockingsPage() {
               {formData.type === "time-slot" && (
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="block text-sm font-medium text-white/80 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Desde
                     </label>
                     <input
@@ -357,11 +357,11 @@ export default function LocalBlockingsPage() {
                           startTime: e.target.value,
                         }))
                       }
-                      className="w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white focus:outline-none focus:border-[#00f068]/50"
+                      className="w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white focus:outline-none focus:border-primary/50"
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="block text-sm font-medium text-white/80 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Hasta
                     </label>
                     <input
@@ -373,14 +373,14 @@ export default function LocalBlockingsPage() {
                           endTime: e.target.value,
                         }))
                       }
-                      className="w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white focus:outline-none focus:border-[#00f068]/50"
+                      className="w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white focus:outline-none focus:border-primary/50"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Motivo (opcional)
                 </label>
                 <input
@@ -390,7 +390,7 @@ export default function LocalBlockingsPage() {
                     setFormData((prev) => ({ ...prev, notes: e.target.value }))
                   }
                   placeholder="Ej: Feriado, mantenimiento..."
-                  className="w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder:text-white/40 focus:outline-none focus:border-[#00f068]/50"
+                  className="w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary/50"
                 />
               </div>
 

@@ -19,7 +19,7 @@ test.describe("Auth registration flow", () => {
     await page.getByLabel("Correo electronico").fill("nuevo@test.com");
     await page.getByLabel("Contraseña", { exact: true }).fill("Test1234!");
     await page.getByLabel("Confirmar contraseña").fill("Test1234!");
-    await page.getByRole("textbox", { name: "Telefono", exact: true }).fill("1112345678");
+    await page.getByRole("textbox", { name: "Teléfono", exact: true }).fill("1112345678");
     await page.getByLabel("Provincia", { exact: true }).selectOption("Buenos Aires");
     await page.getByLabel("Ciudad", { exact: true }).selectOption("CABA");
     await page.getByLabel("Direccion del local").fill("Av. Corrientes 1234");
@@ -33,7 +33,7 @@ test.describe("Auth registration flow", () => {
     await page.goto("/verified?success=true");
     await expect(page.getByText("Correo verificado")).toBeVisible();
     await expect(page.getByText("Tu correo ha sido verificado correctamente")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Ir a iniciar sesion" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Ir a iniciar sesión" })).toBeVisible();
   });
 
   test("verified page shows failure state with resend form", async ({ page }) => {

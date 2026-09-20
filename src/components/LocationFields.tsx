@@ -113,7 +113,7 @@ export function LocationFields({ value, onChange, errors }: LocationFieldsProps)
           }}
           errors={errors?.province}
         >
-          <option value="">Selecciona una provincia</option>
+          <option value="">Seleccioná una provincia</option>
           {STATE_NAMES.map((name) => (
             <option key={name} value={name}>
               {name}
@@ -136,10 +136,10 @@ export function LocationFields({ value, onChange, errors }: LocationFieldsProps)
           >
             <option value="">
               {!value.province
-                ? "Selecciona una provincia"
+                ? "Seleccioná una provincia"
                 : cities.length === 0
                   ? "Sin ciudades disponibles"
-                  : "Selecciona una ciudad"}
+                  : "Seleccioná una ciudad"}
             </option>
             {cities.map((city) => (
               <option key={city.value} value={city.value}>
@@ -159,18 +159,18 @@ export function LocationFields({ value, onChange, errors }: LocationFieldsProps)
         value={value.address}
         onChange={(event) => updateField("address", event.target.value)}
         errors={errors?.address}
-        placeholder="Calle y numero"
+        placeholder="Calle y número"
         hint="La direccion donde los clientes te visitaran"
       />
 
       {/* <InputField
-        label="Telefono de emergencia (opcional)"
+        label="Teléfono de emergencia (opcional)"
         type="tel"
         value={value.emergencyPhone}
         onChange={(event) => updateField("emergencyPhone", event.target.value)}
         errors={errors?.emergencyPhone}
         placeholder="+54 11 1234-5678"
-        hint="Un segundo numero de contacto para clientes urgentes"
+        hint="Un segundo número de contacto para clientes urgentes"
       /> */}
     </div>
   );

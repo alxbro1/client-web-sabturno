@@ -266,7 +266,7 @@ export default function LocalCalendarPage() {
     <section className="grid gap-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-primary">
             Calendario
           </p>
           <h2 className="text-2xl font-bold text-white">Turnos del local</h2>
@@ -281,10 +281,10 @@ export default function LocalCalendarPage() {
             role="tab"
             aria-selected={displayMode === "calendar"}
             onClick={() => setDisplayMode("calendar")}
-            className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00f068] ${
+            className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
               displayMode === "calendar"
-                ? "bg-[#00f068] text-black"
-                : "text-white/60 hover:bg-white/5 hover:text-white"
+                ? "bg-primary text-black"
+                : "text-muted-foreground hover:bg-white/5 hover:text-white"
             }`}
           >
             <CalendarRange className="size-4" />
@@ -295,10 +295,10 @@ export default function LocalCalendarPage() {
             role="tab"
             aria-selected={displayMode === "list"}
             onClick={() => setDisplayMode("list")}
-            className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00f068] ${
+            className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
               displayMode === "list"
-                ? "bg-[#00f068] text-black"
-                : "text-white/60 hover:bg-white/5 hover:text-white"
+                ? "bg-primary text-black"
+                : "text-muted-foreground hover:bg-white/5 hover:text-white"
             }`}
           >
             <List className="size-4" />
@@ -310,13 +310,13 @@ export default function LocalCalendarPage() {
       <article className="border border-white/12 rounded-[28px] backdrop-blur-[12px] p-0 overflow-hidden min-h-[500px]">
         {!user ? (
           <div className="flex items-center justify-center h-64">
-            <p className="text-white/50">
+            <p className="text-muted-foreground">
               Iniciá sesion para ver el calendario
             </p>
           </div>
         ) : isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <p className="text-white/50 animate-pulse">Cargando...</p>
+            <p className="text-muted-foreground animate-pulse">Cargando...</p>
           </div>
         ) : (
           <div className="flex flex-col md:flex-row gap-4 h-[650px]">

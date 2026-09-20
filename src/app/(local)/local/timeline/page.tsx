@@ -4,7 +4,7 @@ export default function LocalTimelinePage() {
   return (
     <section className="grid gap-6">
       <div>
-        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-primary">
           Timeline
         </p>
         <h2>Vista de timeline</h2>

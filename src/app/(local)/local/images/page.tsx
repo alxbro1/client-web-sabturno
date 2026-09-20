@@ -91,7 +91,7 @@ export default function LocalImagesPage() {
   return (
     <section className="grid gap-6">
       <header>
-        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-primary">
           Configuracion
         </p>
         <h2 className="text-2xl font-bold text-white">Fotos del local</h2>
@@ -104,7 +104,7 @@ export default function LocalImagesPage() {
         className={`
           border-2 border-dashed rounded-[28px] p-8 text-center transition-all
           ${isDragging
-            ? "border-[#00f068] bg-[#00f068]/10"
+            ? "border-primary bg-primary/10"
             : "border-white/15 bg-white/[0.02] hover:border-white/25"}
         `}
       >
@@ -122,7 +122,7 @@ export default function LocalImagesPage() {
           className="cursor-pointer flex flex-col items-center gap-3"
         >
           <div
-            className={`text-white/40 ${isDragging ? "text-[#00f068]" : ""}`}
+            className={`text-muted-foreground/70 ${isDragging ? "text-primary" : ""}`}
           >
             <Upload className="w-8 h-8" />
           </div>
@@ -130,9 +130,9 @@ export default function LocalImagesPage() {
             <p className="text-white font-medium">
               {isUploading
                 ? `Subiendo... ${uploadProgress}%`
-                : "Arrastra imagenes aqui o haz clic"}
+                : "Arrastrá imágenes acá o hacé clic"}
             </p>
-            <p className="text-sm text-white/50 mt-1">PNG, JPG hasta 10MB</p>
+            <p className="text-sm text-muted-foreground mt-1">PNG, JPG hasta 10MB</p>
           </div>
         </label>
       </div>
@@ -144,16 +144,16 @@ export default function LocalImagesPage() {
       )}
 
       {isLoading ? (
-        <div className="min-h-[200px] grid place-items-center text-white/50">
+        <div className="min-h-[200px] grid place-items-center text-muted-foreground">
           Cargando imagenes...
         </div>
       ) : images.length === 0 ? (
         <div className="min-h-[200px] grid place-items-center text-center rounded-[28px] border border-white/10 bg-white/[0.02] p-8">
-          <div className="text-white/40 mb-4">
+          <div className="text-muted-foreground/70 mb-4">
             <ImageIcon className="w-5 h-5" />
           </div>
-          <p className="text-white/60">No hay fotos del local.</p>
-          <p className="text-sm text-white/40 mt-1">
+          <p className="text-muted-foreground">No hay fotos del local.</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">
             Sube imagenes para que los clientes puedan ver tu negocio.
           </p>
         </div>
@@ -171,14 +171,16 @@ export default function LocalImagesPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <button
+                type="button"
+                aria-label="Eliminar foto"
                 onClick={() => setDeleteId(image.id)}
-                className="absolute top-3 right-3 p-2 rounded-xl bg-[#ff5678]/80 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-[#ff5678]"
+                className="absolute top-3 right-3 rounded-xl bg-destructive/80 p-2 text-white opacity-0 transition-all outline-none hover:bg-destructive focus-visible:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50 group-hover:opacity-100"
               >
                 <Trash2 className="w-5 h-5" />
               </button>
               {image.description && (
                 <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-                  <p className="text-xs text-white/80 truncate">
+                  <p className="text-xs text-foreground truncate">
                     {image.description}
                   </p>
                 </div>
@@ -189,7 +191,7 @@ export default function LocalImagesPage() {
       )}
 
       {images.length > 0 && (
-        <div className="text-center text-white/50 text-sm">
+        <div className="text-center text-muted-foreground text-sm">
           {images.length} imagen{images.length !== 1 ? "es" : ""} del local
         </div>
       )}
@@ -200,7 +202,7 @@ export default function LocalImagesPage() {
             <h3 className="text-xl font-bold text-white mb-2">
               Eliminar imagen
             </h3>
-            <p className="text-white/60 mb-6">
+            <p className="text-muted-foreground mb-6">
               Esta seguro de que desea eliminar esta imagen? Esta accion no se
               puede deshacer.
             </p>

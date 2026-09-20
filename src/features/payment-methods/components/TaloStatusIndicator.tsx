@@ -26,7 +26,7 @@ export function TaloStatusIndicator({
   if (loading) {
     return (
       <span
-        className="inline-block h-2.5 w-2.5 rounded-full border-2 border-[#00f068] border-t-transparent animate-spin"
+        className="inline-block h-2.5 w-2.5 rounded-full border-2 border-primary border-t-transparent animate-spin"
         aria-label="Cargando estado de Talo"
       />
     );

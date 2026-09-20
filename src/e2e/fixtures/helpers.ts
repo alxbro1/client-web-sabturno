@@ -121,7 +121,7 @@ export async function registerLocalViaUI(
   await page.getByLabel("Correo electronico").fill(data.email);
   await page.getByLabel("Contraseña", { exact: true }).fill(data.password);
   await page.getByLabel("Confirmar contraseña").fill(data.password);
-  await page.getByRole("textbox", { name: "Telefono", exact: true }).fill(data.phone);
+  await page.getByRole("textbox", { name: "Teléfono", exact: true }).fill(data.phone);
   await page.getByLabel("Tu fecha de nacimiento").fill(data.birthDate);
   await page.getByLabel("Provincia", { exact: true }).selectOption(data.province);
   await page.getByLabel("Ciudad", { exact: true }).selectOption(data.city);
@@ -134,7 +134,7 @@ export async function loginViaUI(page: Page, email: string, password: string) {
   await page.goto("/login");
   await page.getByLabel("Correo electronico").fill(email);
   await page.getByLabel("Contraseña").fill(password);
-  await page.getByRole("button", { name: "Iniciar sesion" }).click();
+  await page.getByRole("button", { name: "Iniciar sesión" }).click();
 }
 
 export async function verifyEmailViaBackend(page: Page, email: string) {

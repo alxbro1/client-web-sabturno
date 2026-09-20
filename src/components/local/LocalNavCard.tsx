@@ -19,7 +19,7 @@ export function LocalNavCard({
       href={to}
       className={cn(
         "flex flex-col gap-3 rounded-xl border bg-card p-5 text-card-foreground shadow-sm",
-        "transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-[#00f068]/45",
+        "transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-primary/40",
       )}
     >
       <div className="flex items-start justify-between gap-4">

@@ -49,7 +49,7 @@ export default function LoginPage() {
         router.push(isLocal ? "/local/dashboard" : from);
       }
     } catch {
-      setError("No se pudo iniciar sesion");
+      setError("No se pudo iniciar sesión");
     } finally {
       setLoading(false);
     }
@@ -62,15 +62,15 @@ export default function LoginPage() {
           <LogoMark className="h-10 w-auto" />
         </div>
         <div className="grid gap-2">
-          <p className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-[#00f068]">
+          <p className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-primary">
             Acceso
           </p>
-          <h2 className="text-[1.7rem] leading-none">Inicia sesion</h2>
+          <h2 className="text-[1.7rem] leading-none">Iniciá sesión</h2>
         </div>
       </div>
 
       {emailVerificationPending ? (
-        <div className="rounded-2xl border border-[#00f068]/40 bg-[rgba(0,240,104,0.08)] px-4 py-[0.95rem] text-sm text-[#b3ffcd]">
+        <div className="rounded-2xl border border-primary/40 bg-primary/10 px-4 py-[0.95rem] text-sm text-[#b3ffcd]">
           Revisa tu correo electronico para verificar tu cuenta antes de iniciar sesion.
         </div>
       ) : null}
@@ -102,7 +102,7 @@ export default function LoginPage() {
         ) : null}
 
         <Button type="submit" disabled={!isFormValid || loading} fullWidth>
-          {loading ? "Ingresando..." : "Iniciar sesion"}
+          {loading ? "Ingresando..." : "Iniciar sesión"}
         </Button>
       </form>
 

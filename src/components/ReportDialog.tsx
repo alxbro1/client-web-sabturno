@@ -44,10 +44,10 @@ export function ReportDialog({
   function validateDescription(value: string): string[] {
     const errors: string[] = [];
     if (value.trim().length < 10) {
-      errors.push("La descripcion debe tener al menos 10 caracteres");
+      errors.push("La descripción debe tener al menos 10 caracteres");
     }
     if (value.length > 500) {
-      errors.push("La descripcion no puede exceder 500 caracteres");
+      errors.push("La descripción no puede exceder 500 caracteres");
     }
     return errors;
   }
@@ -127,7 +127,7 @@ export function ReportDialog({
           </SelectField>
 
           <TextareaField
-            label="Descripcion"
+            label="Descripción"
             value={description}
             onChange={(e) => handleDescriptionChange(e.target.value)}
             errors={descriptionErrors}

@@ -32,7 +32,7 @@ export function UserTypeToggle({ className }: { className?: string }) {
         onClick={() => setIsBusiness(false)}
         className={cn(
           "flex-1 rounded-full py-2 text-sm font-semibold transition-colors cursor-pointer",
-          !isBusiness ? "bg-[#00f068] text-[#07090B]" : "text-muted-foreground hover:text-foreground",
+          !isBusiness ? "bg-primary text-[#07090B]" : "text-muted-foreground hover:text-foreground",
         )}
       >
         CLIENTE
@@ -44,7 +44,7 @@ export function UserTypeToggle({ className }: { className?: string }) {
         onClick={() => setIsBusiness(true)}
         className={cn(
           "flex-1 rounded-full py-2 text-sm font-semibold transition-colors cursor-pointer",
-          isBusiness ? "bg-[#00f068] text-[#07090B]" : "text-muted-foreground hover:text-foreground",
+          isBusiness ? "bg-primary text-[#07090B]" : "text-muted-foreground hover:text-foreground",
         )}
       >
         LOCAL

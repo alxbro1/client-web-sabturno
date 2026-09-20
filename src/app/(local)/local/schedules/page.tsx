@@ -78,7 +78,7 @@ export default function LocalSchedulesPage() {
       )}
 
       {isLoading ? (
-        <div className="min-h-[200px] grid place-items-center text-white/50">
+        <div className="min-h-[200px] grid place-items-center text-muted-foreground">
           Cargando plantillas...
         </div>
       ) : templates.length === 0 ? (
@@ -128,14 +128,20 @@ export default function LocalSchedulesPage() {
                 </label>
 
                 <Link href={`/local/schedules/edit/${template.id}`}>
-                  <Button variant="secondary" className="p-3">
+                  <Button
+                    variant="secondary"
+                    size="icon-lg"
+                    aria-label={`Editar el horario ${template.name}`}
+                  >
                     <Pencil className="w-4 h-4" />
                   </Button>
                 </Link>
 
                 <Button
                   variant="ghost"
-                  className="p-3 text-destructive border-destructive/30 hover:bg-destructive/10"
+                  size="icon-lg"
+                  aria-label={`Eliminar el horario ${template.name}`}
+                  className="text-destructive border-destructive/30 hover:bg-destructive/10"
                   onClick={() => setDeleteId(template.id)}
                 >
                   <Trash2 className="w-4 h-4" />

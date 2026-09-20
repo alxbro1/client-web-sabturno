@@ -42,7 +42,7 @@ export default function AppointmentCancelPage({
                 ? "No se pudo cancelar"
                 : `Cancelar turno #${id}`}
           </h2>
-          <p className="text-white/68">
+          <p className="text-muted-foreground">
             {status === "success"
               ? "Tu turno fue cancelado correctamente."
               : status === "error"
@@ -57,7 +57,7 @@ export default function AppointmentCancelPage({
           {status === "success" ? (
             <Link
               href="/"
-              className="inline-flex items-center justify-center gap-2 rounded-[14px] bg-[#00f068] px-6 py-3 text-[#0a0a0a] font-semibold hover:bg-[#00f068]/90 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-[14px] bg-primary px-6 py-3 text-[#0a0a0a] font-semibold hover:bg-primary/90 transition-colors"
             >
               Volver al inicio
             </Link>
@@ -65,7 +65,7 @@ export default function AppointmentCancelPage({
             <>
               <Link
                 href={`/appointment/${id}?hash=${encodeURIComponent(hash || "")}`}
-                className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-white/12 px-6 py-3 text-white/75 hover:bg-white/[0.02] transition-colors"
+                className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-white/12 px-6 py-3 text-muted-foreground hover:bg-white/[0.02] transition-colors"
               >
                 Volver
               </Link>

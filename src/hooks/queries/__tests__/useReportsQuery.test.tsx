@@ -26,7 +26,7 @@ function makeReport(overrides: Partial<Report> = {}): Report {
     localId: LOCAL_ID,
     userId: "user-1",
     reason: ReportReason.SPAM,
-    description: "Descripcion del reporte",
+    description: "Descripción del reporte",
     status: ReportStatus.PENDING,
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",

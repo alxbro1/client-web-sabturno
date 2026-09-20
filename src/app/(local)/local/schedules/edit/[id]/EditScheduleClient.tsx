@@ -154,7 +154,7 @@ export default function LocalScheduleEditorPage() {
       ([_, data]) => data.active,
     );
     if (activeDays.length === 0) {
-      errors.push("Selecciona al menos un dia activo");
+      errors.push("Seleccioná al menos un día activo");
     }
 
     for (const [dayNum, dayData] of activeDays) {
@@ -392,7 +392,8 @@ export default function LocalScheduleEditorPage() {
                             onClick={() =>
                               handleRemoveSlot(day.key, slotIdx)
                             }
-                            className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                            aria-label="Eliminar este tramo horario"
+                            className="rounded-lg p-2 text-destructive transition-colors outline-none hover:bg-destructive/10 focus-visible:ring-[3px] focus-visible:ring-ring/50"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

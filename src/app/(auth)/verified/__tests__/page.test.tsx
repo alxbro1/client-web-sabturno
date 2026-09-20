@@ -142,7 +142,7 @@ describe("VerifiedPage", () => {
     render(<VerifiedPage />);
 
     expect(
-      screen.getByText("Ir a iniciar sesion"),
+      screen.getByText("Ir a iniciar sesión"),
     ).toBeInTheDocument();
   });
 });

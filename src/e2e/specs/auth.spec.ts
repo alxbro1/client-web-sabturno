@@ -14,7 +14,7 @@ test.describe("Auth flow", () => {
 
     await page.goto("/register");
     await page.getByLabel("Nombre").fill("Test User");
-    await page.getByLabel("Telefono").fill("+541112345678");
+    await page.getByLabel("Teléfono").fill("+541112345678");
     await page.getByLabel("Correo electronico").fill("test@example.com");
     await page.getByLabel("Contraseña", { exact: true }).fill("TestPass123!");
     await page.getByLabel("Confirmar contraseña").fill("TestPass123!");
@@ -60,7 +60,7 @@ test.describe("Auth flow", () => {
     await page.goto("/login");
     await page.getByLabel("Correo electronico").fill("test@example.com");
     await page.getByLabel("Contraseña", { exact: true }).fill("password123");
-    await page.getByRole("button", { name: "Iniciar sesion" }).click();
+    await page.getByRole("button", { name: "Iniciar sesión" }).click();
 
     await expect(page).toHaveURL(/\/local\/dashboard/);
   });

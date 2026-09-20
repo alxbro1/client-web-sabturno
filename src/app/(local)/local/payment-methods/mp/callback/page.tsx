@@ -69,7 +69,7 @@ export default function MercadoPagoCallbackPage() {
     <section className="grid gap-6 place-items-center min-h-[60vh]">
       <div className="max-w-md w-full border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] p-8 text-center">
         {status === "success" ? (
-          <div className="text-[#00f068]">
+          <div className="text-primary">
             <CheckCircle2 className="w-12 h-12 mx-auto" aria-hidden="true" />
             <h2 className="text-xl font-bold mt-3">MercadoPago conectado</h2>
           </div>
@@ -79,12 +79,12 @@ export default function MercadoPagoCallbackPage() {
             <h2 className="text-xl font-bold mt-3">No se pudo conectar</h2>
           </div>
         ) : (
-          <div className="text-white/70">
+          <div className="text-muted-foreground">
             <h2 className="text-xl font-bold mt-3">Procesando...</h2>
           </div>
         )}
-        <p className="text-white/70 mt-3">{message}</p>
-        <p className="text-white/40 text-sm mt-4">
+        <p className="text-muted-foreground mt-3">{message}</p>
+        <p className="text-muted-foreground/70 text-sm mt-4">
           Seras redirigido en unos segundos.
         </p>
       </div>

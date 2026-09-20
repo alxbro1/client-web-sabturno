@@ -69,8 +69,8 @@ export default function PaymentMethodsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-[140px] grid place-items-center text-center text-white/50">
-        Inicia sesion para configurar tus metodos de cobro.
+      <div className="min-h-[140px] grid place-items-center text-center text-muted-foreground">
+        Iniciá sesión para configurar tus metodos de cobro.
       </div>
     );
   }
@@ -89,11 +89,11 @@ export default function PaymentMethodsPage() {
   return (
     <section className="grid gap-6">
       <header>
-        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+        <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-primary">
           Cobros
         </p>
         <h2 className="text-2xl font-bold text-white">Metodos de cobro</h2>
-        <p className="text-white/60 mt-1">
+        <p className="text-muted-foreground mt-1">
           Configura MercadoPago, Talo, reserva parcial y efectivo. Los clientes
           solo veran los metodos que tengas activos.
         </p>
@@ -101,7 +101,7 @@ export default function PaymentMethodsPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <PaymentMethodCard
-          title="Mercado Pago (Tarjetas y mas)"
+          title="Mercado Pago (tarjetas y más)"
           description="Conecta tu cuenta para cobrar con tarjeta, debito y otros medios."
           selected={pm.form.mercadoPagoLiveMode}
           onClick={() => pm.toggle("mercadoPagoLiveMode")}
@@ -162,7 +162,7 @@ export default function PaymentMethodsPage() {
             >
               Porcentaje de reserva (10% - 60%)
             </label>
-            <p className="text-white/60 text-sm">
+            <p className="text-muted-foreground text-sm">
               Define cuanto se cobra al reservar. El resto se paga en el local.
             </p>
           </div>
@@ -176,7 +176,7 @@ export default function PaymentMethodsPage() {
             value={pm.form.reservationPercentage}
             onChange={(e) => pm.setReservationPercentage(e.target.value)}
             placeholder="Ej: 20"
-            className="w-32 px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder:text-white/40 focus:outline-none focus:border-[#00f068]/50 focus:ring-1 focus:ring-[#00f068]/30 transition-all"
+            className="w-32 px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
           />
         </div>
       ) : null}
@@ -188,7 +188,7 @@ export default function PaymentMethodsPage() {
       ) : null}
 
       {saveSuccess ? (
-        <div className="rounded-2xl border border-[#00f068]/40 bg-[rgba(0,240,104,0.1)] px-4 py-[0.95rem] text-[#00f068] flex items-center gap-2">
+        <div className="rounded-2xl border border-primary/40 bg-primary/10 px-4 py-[0.95rem] text-primary flex items-center gap-2">
           <CheckCircle2 className="w-5 h-5" aria-hidden="true" />
           Cambios guardados exitosamente
         </div>

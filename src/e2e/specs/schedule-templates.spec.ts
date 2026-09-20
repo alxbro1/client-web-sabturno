@@ -70,6 +70,6 @@ test.describe("Schedule templates CRUD", () => {
     }
 
     await page.getByRole("button", { name: "Guardar plantilla" }).click();
-    await expect(page.getByText("Selecciona al menos un dia activo")).toBeVisible();
+    await expect(page.getByText("Seleccioná al menos un día activo")).toBeVisible();
   });
 });

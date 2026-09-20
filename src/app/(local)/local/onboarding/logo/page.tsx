@@ -76,7 +76,7 @@ export default function OnboardingLogoPage() {
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError("La imagen no puede pesar mas de 5MB");
+      setError("La imagen no puede pesar más de 5MB");
       return;
     }
 
@@ -97,7 +97,7 @@ export default function OnboardingLogoPage() {
 
   async function handleSave() {
     if (!preview) {
-      setError("Selecciona una imagen primero");
+      setError("Seleccioná una imagen primero");
       return;
     }
     uploadMutation.mutate(preview);
@@ -150,7 +150,7 @@ export default function OnboardingLogoPage() {
           ) : (
             <div className="grid place-items-center gap-3 py-6 text-muted-foreground">
               <ImageIcon className="size-10 opacity-50" />
-              <p>Arrastra una imagen aqui o haz clic para seleccionar</p>
+              <p>Arrastrá una imagen acá o hacé clic para seleccionar</p>
               <p className="text-xs">PNG, JPG o WEBP. Max 5MB.</p>
             </div>
           )}

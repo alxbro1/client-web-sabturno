@@ -35,7 +35,7 @@ export default function PaymentsPage() {
     <section className="grid gap-6">
       <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-primary">
             Pagos
           </p>
           <h2>Mis pagos</h2>
@@ -72,7 +72,7 @@ export default function PaymentsPage() {
           >
             <div className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-start">
               <div>
-                <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+                <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-primary">
                   {payment.method || "Pago"}
                 </p>
                 <h3>${Number(payment.amount || 0).toFixed(2)}</h3>
@@ -85,7 +85,7 @@ export default function PaymentsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
               <div>
-                <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">
+                <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-muted-foreground">
                   Servicio
                 </span>
                 <strong>
@@ -93,7 +93,7 @@ export default function PaymentsPage() {
                 </strong>
               </div>
               <div>
-                <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">
+                <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-muted-foreground">
                   Local
                 </span>
                 <strong>
@@ -101,7 +101,7 @@ export default function PaymentsPage() {
                 </strong>
               </div>
               <div>
-                <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">
+                <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-muted-foreground">
                   Turno
                 </span>
                 <strong>
@@ -115,7 +115,7 @@ export default function PaymentsPage() {
                 </strong>
               </div>
               <div>
-                <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-white/52">
+                <span className="block text-[0.78rem] uppercase tracking-[0.08em] text-muted-foreground">
                   Referencia
                 </span>
                 <strong>

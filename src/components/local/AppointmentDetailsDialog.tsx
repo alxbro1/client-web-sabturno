@@ -63,7 +63,7 @@ function Detail({
 }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
-      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-white/40">
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground/70">
         {icon}
         {label}
       </div>
@@ -139,10 +139,10 @@ export function AppointmentDetailsDialog({
         <DialogContent className="max-h-[90vh] overflow-y-auto border-white/12 bg-[#111] sm:max-w-2xl">
           <DialogHeader>
             <div className="mb-1 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#00f068]/25 bg-[#00f068]/10 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[#00f068]">
+              <span className="rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-primary">
                 {STATUS_LABELS[appointment.status]}
               </span>
-              <span className="text-xs text-white/35">Turno #{appointment.id}</span>
+              <span className="text-xs text-muted-foreground/70">Turno #{appointment.id}</span>
             </div>
             <DialogTitle className="text-2xl">
               {appointment.customerName || "Cliente sin nombre"}

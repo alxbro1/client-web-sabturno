@@ -18,9 +18,9 @@ function getStatusColor(status: ReportStatus): string {
     case ReportStatus.RESOLVED:
       return "bg-green-500/20 text-green-300 border-green-500/30";
     case ReportStatus.DISMISSED:
-      return "bg-white/10 text-white/50 border-white/20";
+      return "bg-white/10 text-muted-foreground border-white/20";
     default:
-      return "bg-white/10 text-white/50 border-white/20";
+      return "bg-white/10 text-muted-foreground border-white/20";
   }
 }
 
@@ -31,7 +31,7 @@ export default function ReportsPage() {
     <div className="grid gap-6">
       <div>
         <h1 className="text-[1.5rem] font-bold">Mis reportes</h1>
-        <p className="text-white/54 text-[0.9rem]">
+        <p className="text-muted-foreground text-[0.9rem]">
           Historial de reportes enviados
         </p>
       </div>
@@ -47,8 +47,8 @@ export default function ReportsPage() {
       ) : reports.length === 0 ? (
         <div className="min-h-[200px] grid place-items-center text-center">
           <div className="grid gap-4">
-            <TriangleAlert className="w-12 h-12 mx-auto text-white/24" />
-            <p className="text-white/48">No has enviado reportes</p>
+            <TriangleAlert className="w-12 h-12 mx-auto text-muted-foreground/70" />
+            <p className="text-muted-foreground">No has enviado reportes</p>
             <Link
               href="/home"
               className="text-[#7bcfff] underline decoration-[#7bcfff]/45 underline-offset-[0.2rem]"
@@ -69,7 +69,7 @@ export default function ReportsPage() {
                   {report.local && (
                     <p className="font-medium mb-1">{report.local.name}</p>
                   )}
-                  <p className="text-[0.82rem] text-white/54">
+                  <p className="text-[0.82rem] text-muted-foreground">
                     {REPORT_REASON_LABELS[report.reason]}
                   </p>
                 </div>
@@ -79,8 +79,8 @@ export default function ReportsPage() {
                   {REPORT_STATUS_LABELS[report.status]}
                 </span>
               </div>
-              <p className="text-[0.9rem] text-white/72">{report.description}</p>
-              <p className="text-[0.75rem] text-white/36 mt-2">
+              <p className="text-[0.9rem] text-muted-foreground">{report.description}</p>
+              <p className="text-[0.75rem] text-muted-foreground/70 mt-2">
                 {new Date(report.createdAt).toLocaleDateString("es-AR", {
                   day: "numeric",
                   month: "long",

@@ -180,7 +180,7 @@ export default function LocalDashboardPage() {
             <h3 className="text-lg font-semibold text-foreground">
               {nextAppointment
                 ? "Siguiente reserva"
-                : "Sin turnos proximos"}
+                : "Sin turnos próximos"}
             </h3>
           </div>
           {isLoading && (

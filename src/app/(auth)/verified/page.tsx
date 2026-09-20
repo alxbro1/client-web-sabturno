@@ -64,7 +64,7 @@ export default function VerifiedPage() {
       <CardContent className="grid gap-4">
         <p className="text-center text-muted-foreground">
           {success
-            ? "Tu correo ha sido verificado correctamente. Ya puedes iniciar sesion."
+            ? "Tu correo ha sido verificado correctamente. Ya podés iniciar sesión."
             : "No se pudo verificar tu correo. El enlace puede haber expirado."}
         </p>
 
@@ -102,7 +102,7 @@ export default function VerifiedPage() {
           className="text-sm text-info underline decoration-info/30 underline-offset-2 transition-colors hover:text-info/80 hover:decoration-info/70"
           href="/login"
         >
-          Ir a iniciar sesion
+          Ir a iniciar sesión
         </Link>
       </CardFooter>
     </Card>

@@ -40,7 +40,7 @@ export default function ClientLayout({
   const navLinkClass = (path: string) => {
     const active = isActive(path);
     return [
-      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+      "flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
       active
         ? "bg-primary/10 text-primary border border-primary/30"
         : "text-muted-foreground hover:bg-accent hover:text-accent-foreground border border-transparent",
@@ -110,7 +110,7 @@ export default function ClientLayout({
           className="flex items-center gap-3 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive [&>svg]:size-5"
         >
           <LogOut />
-          <span>Cerrar sesion</span>
+          <span>Cerrar sesión</span>
         </Button>
       </div>
     </aside>
@@ -205,7 +205,7 @@ export default function ClientLayout({
                     className="flex items-center gap-3 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive [&>svg]:size-5"
                   >
                     <LogOut />
-                    <span>Cerrar sesion</span>
+                    <span>Cerrar sesión</span>
                   </Button>
                 </div>
               </div>

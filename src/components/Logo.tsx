@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 export function LogoFull() {
   return (
     <img
@@ -13,7 +15,7 @@ export function LogoMark({ className }: { className?: string }) {
     <img
       src="/white_logotype.webp"
       alt="SabTurno"
-      className={`h-8 w-auto ${className} object-contain`}
+      className={cn("h-8 w-auto object-contain", className)}
     />
   );
 }

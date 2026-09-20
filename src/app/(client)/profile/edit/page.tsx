@@ -70,7 +70,7 @@ export default function EditProfilePage() {
     <section className="grid gap-6">
       <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch">
         <div>
-          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#00f068]">
+          <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-primary">
             Perfil
           </p>
           <h2>Editar perfil</h2>
@@ -94,7 +94,7 @@ export default function EditProfilePage() {
             }
           />
           <InputField
-            label="Telefono"
+            label="Teléfono"
             value={formData.phone}
             onChange={(event) =>
               setFormData((current) => ({
@@ -119,7 +119,7 @@ export default function EditProfilePage() {
         />
 
         <label className="grid gap-[0.45rem]">
-          <span className="text-[0.86rem] font-semibold tracking-[0.04em] text-white/88">
+          <span className="text-[0.86rem] font-semibold tracking-[0.04em] text-foreground">
             Imagen de perfil
           </span>
           <input
@@ -128,7 +128,7 @@ export default function EditProfilePage() {
             onChange={(event) =>
               setImageFile(event.target.files?.[0] || null)
             }
-            className="w-full border border-white/16 bg-[rgba(255,255,255,0.03)] text-white rounded-2xl px-4 py-[0.75rem] transition-[border-color,box-shadow,background-color] duration-150 focus:border-[#00f068]/55 focus:bg-[rgba(255,255,255,0.045)] focus:outline-none focus:ring-2 focus:ring-[#00f068]/22"
+            className="w-full border border-white/16 bg-[rgba(255,255,255,0.03)] text-white rounded-2xl px-4 py-[0.75rem] transition-[border-color,box-shadow,background-color] duration-150 focus:border-primary/50 focus:bg-[rgba(255,255,255,0.045)] focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </label>
 

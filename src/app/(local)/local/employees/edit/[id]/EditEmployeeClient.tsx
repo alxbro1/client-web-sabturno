@@ -114,7 +114,7 @@ export default function EmployeeEditPage() {
       <div className="flex items-center gap-4">
         <Link
           href="/local/employees"
-          className="text-white/48 hover:text-white/72 transition-colors duration-150"
+          className="text-muted-foreground hover:text-muted-foreground transition-colors duration-150"
         >
           <ArrowLeft className="w-6 h-6" />
         </Link>
@@ -122,7 +122,7 @@ export default function EmployeeEditPage() {
           <h1 className="text-[1.5rem] font-bold">
             {isNew ? "Nuevo empleado" : "Editar empleado"}
           </h1>
-          <p className="text-white/54 text-[0.9rem]">
+          <p className="text-muted-foreground text-[0.9rem]">
             {isNew
               ? "Agrega un empleado a tu local"
               : "Modifica los datos del empleado"}
@@ -146,14 +146,14 @@ export default function EmployeeEditPage() {
         />
 
         <InputField
-          label="Telefono (opcional)"
+          label="Teléfono (opcional)"
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
 
         <div className="grid gap-2">
-          <label className="text-[0.85rem] font-medium text-white/72">
+          <label className="text-[0.85rem] font-medium text-muted-foreground">
             Color
           </label>
           <div className="flex flex-wrap gap-2">

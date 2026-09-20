@@ -33,7 +33,7 @@ export default function EmployeesPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-[1.5rem] font-bold">Empleados</h1>
-          <p className="text-white/54 text-[0.9rem]">
+          <p className="text-muted-foreground text-[0.9rem]">
             Gestiona los empleados de tu local
           </p>
         </div>
@@ -53,8 +53,8 @@ export default function EmployeesPage() {
       ) : employees.length === 0 ? (
         <div className="min-h-[200px] grid place-items-center text-center">
           <div className="grid gap-4">
-            <Users className="w-12 h-12 mx-auto text-white/24" />
-            <p className="text-white/48">No hay empleados registrados</p>
+            <Users className="w-12 h-12 mx-auto text-muted-foreground/70" />
+            <p className="text-muted-foreground">No hay empleados registrados</p>
             <Link href="/local/employees/edit/new">
               <Button variant="secondary">Agregar primer empleado</Button>
             </Link>
@@ -76,7 +76,7 @@ export default function EmployeesPage() {
 
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{employee.name}</p>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[0.82rem] text-white/48">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[0.82rem] text-muted-foreground">
                   {employee.email && <span>{employee.email}</span>}
                   {employee.phone && <span>{employee.phone}</span>}
                 </div>

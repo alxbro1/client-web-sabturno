@@ -165,10 +165,10 @@ export function AppointmentList({
             role="tab"
             aria-selected={activeFilter === value}
             onClick={() => setActiveFilter(value)}
-            className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00f068] ${
+            className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
               activeFilter === value
-                ? "bg-[#00f068] text-black"
-                : "text-white/60 hover:bg-white/5 hover:text-white"
+                ? "bg-primary text-black"
+                : "text-muted-foreground hover:bg-white/5 hover:text-white"
             }`}
           >
             {label}
@@ -178,7 +178,7 @@ export function AppointmentList({
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {isLoading ? (
-          <div className="grid min-h-64 place-items-center text-sm text-white/50">
+          <div className="grid min-h-64 place-items-center text-sm text-muted-foreground">
             Cargando turnos...
           </div>
         ) : error ? (
@@ -191,13 +191,13 @@ export function AppointmentList({
         ) : appointments.length === 0 ? (
           <div className="grid min-h-64 place-items-center text-center">
             <div>
-              <CalendarClock className="mx-auto mb-3 size-8 text-white/30" />
+              <CalendarClock className="mx-auto mb-3 size-8 text-muted-foreground/70" />
               <p className="font-semibold text-white">
                 {activeFilter === "upcoming"
                   ? "No hay turnos próximos"
                   : "No hay turnos en el historial"}
               </p>
-              <p className="mt-1 text-sm text-white/45">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {selectedEmployeeId
                   ? "Probá seleccionando otro profesional."
                   : "Los turnos aparecerán acá cuando estén disponibles."}
@@ -225,14 +225,14 @@ export function AppointmentList({
                   <button
                     type="button"
                     onClick={() => onSelect(appointment)}
-                    className="group w-full rounded-2xl border border-white/10 bg-white/[0.035] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#00f068]/35 hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00f068]"
+                    className="group w-full rounded-2xl border border-white/10 bg-white/[0.035] p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="truncate font-bold text-white">
                           {appointment.customerName || "Cliente sin nombre"}
                         </p>
-                        <p className="mt-0.5 truncate text-sm text-white/55">
+                        <p className="mt-0.5 truncate text-sm text-muted-foreground">
                           {appointment.serviceName || "Servicio sin especificar"}
                         </p>
                       </div>
@@ -243,18 +243,18 @@ export function AppointmentList({
                       </span>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-white/65">
+                    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1.5 capitalize">
-                        <CalendarClock className="size-4 text-[#00f068]" />
+                        <CalendarClock className="size-4 text-primary" />
                         {dateLabel}
                       </span>
                       <span className="flex items-center gap-1.5">
-                        <Clock3 className="size-4 text-[#00f068]" />
+                        <Clock3 className="size-4 text-primary" />
                         {timeLabel}
                       </span>
                       {appointment.resourceId !== localId ? (
                         <span className="flex items-center gap-1.5">
-                          <UserRound className="size-4 text-white/40" />
+                          <UserRound className="size-4 text-muted-foreground/70" />
                           Profesional asignado
                         </span>
                       ) : null}

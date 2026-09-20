@@ -160,7 +160,7 @@ export default function ServiceEditPage() {
       <div className="flex items-center gap-4">
         <Link
           href="/local/services"
-          className="text-white/48 hover:text-white/72 transition-colors duration-150"
+          className="text-muted-foreground hover:text-muted-foreground transition-colors duration-150"
         >
           <ArrowLeft className="w-6 h-6" />
         </Link>
@@ -168,7 +168,7 @@ export default function ServiceEditPage() {
           <h1 className="text-[1.5rem] font-bold">
             {isNew ? "Nuevo servicio" : "Editar servicio"}
           </h1>
-          <p className="text-white/54 text-[0.9rem]">
+          <p className="text-muted-foreground text-[0.9rem]">
             {isNew
               ? "Agrega un servicio a tu local"
               : "Modifica los datos del servicio"}
@@ -185,7 +185,7 @@ export default function ServiceEditPage() {
         />
 
         <TextareaField
-          label="Descripcion (opcional)"
+          label="Descripción (opcional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
@@ -208,13 +208,13 @@ export default function ServiceEditPage() {
         </div>
 
         <div className="grid gap-2">
-          <label className="text-[0.85rem] font-medium text-white/72">
+          <label className="text-[0.85rem] font-medium text-muted-foreground">
             Categoria (opcional)
           </label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="rounded-2xl border border-white/16 bg-white/[0.04] px-4 py-3 text-white outline-none transition-[border-color] duration-150 focus:border-[#00f068]/50"
+            className="rounded-2xl border border-white/16 bg-white/[0.04] px-4 py-3 text-white outline-none transition-[border-color] duration-150 focus:border-primary/50"
           >
             <option value="">Sin categoria</option>
             {CATEGORIES.map((cat) => (

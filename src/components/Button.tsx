@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
+import type { VariantProps as CvaVariantProps } from "class-variance-authority";
 import { Button as ShadcnButton, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -15,13 +16,20 @@ import { cn } from "@/lib/utils";
  *
  * `fullWidth` se traduce a `w-full`.
  *
- * Si necesitás las variants nativas de shadcn (`outline`, `link`) o `size`,
- * importá directamente desde `@/components/ui/button`.
+ * `size` se reenvía tal cual a shadcn. Sin `size` se aplica el padding legacy
+ * (`px-5 py-2.5`); con `size` mandan las medidas de shadcn, para que los
+ * tamaños `icon*` queden cuadrados en vez de deformados por ese padding.
+ *
+ * Si necesitás las variants nativas de shadcn (`outline`, `link`), importá
+ * directamente desde `@/components/ui/button`.
  */
 export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
 
+type ButtonSize = NonNullable<CvaVariantProps<typeof buttonVariants>["size"]>;
+
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
+  size?: ButtonSize;
   fullWidth?: boolean;
 };
 
@@ -36,6 +44,7 @@ export function Button({
   children,
   className,
   variant = "primary",
+  size,
   fullWidth = false,
   type,
   ...props
@@ -44,10 +53,13 @@ export function Button({
     <ShadcnButton
       type={type ?? "button"}
       variant={VARIANT_MAP[variant]}
+      size={size}
       className={cn(
         // Radios más generosos que el default de shadcn para mantener el
         // lenguaje visual del brand (ver :root --radius: 0.75rem).
-        "rounded-xl px-5 py-2.5 font-semibold cursor-pointer",
+        "rounded-xl font-semibold cursor-pointer",
+        // El padding legacy sólo aplica cuando no se pide un size de shadcn.
+        size === undefined && "px-5 py-2.5",
         // Sutil lift en hover, igual al Button custom original.
         "hover:-translate-y-px transition-transform",
         fullWidth && "w-full",

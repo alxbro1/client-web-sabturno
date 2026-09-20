@@ -26,7 +26,7 @@ export function LocalStatsCard({
   children,
 }: LocalStatsCardProps) {
   return (
-    <Card className="transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-[#00f068]/38">
+    <Card className="transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-primary/40">
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="grid gap-1">

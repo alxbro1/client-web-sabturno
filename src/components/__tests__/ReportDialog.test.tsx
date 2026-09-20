@@ -74,14 +74,14 @@ describe("ReportDialog", () => {
     const user = userEvent.setup();
     renderDialog(true);
 
-    const textarea = screen.getByLabelText("Descripcion");
+    const textarea = screen.getByLabelText("Descripción");
     await user.type(textarea, "Corto");
 
     const submitButton = screen.getByText("Enviar reporte");
     await user.click(submitButton);
 
     expect(
-      screen.getByText("La descripcion debe tener al menos 10 caracteres"),
+      screen.getByText("La descripción debe tener al menos 10 caracteres"),
     ).toBeInTheDocument();
 
     expect(mockCreateReport).not.toHaveBeenCalled();
@@ -92,8 +92,8 @@ describe("ReportDialog", () => {
     mockCreateReport.mockResolvedValue(undefined);
     renderDialog(true);
 
-    const textarea = screen.getByLabelText("Descripcion");
-    await user.type(textarea, "Descripcion valida del reporte");
+    const textarea = screen.getByLabelText("Descripción");
+    await user.type(textarea, "Descripción válida del reporte");
 
     const submitButton = screen.getByText("Enviar reporte");
     await user.click(submitButton);
@@ -103,7 +103,7 @@ describe("ReportDialog", () => {
       expect(mockCreateReport).toHaveBeenCalledWith({
         localId: LOCAL_ID,
         reason: ReportReason.INAPPROPRIATE_CONTENT,
-        description: "Descripcion valida del reporte",
+        description: "Descripción válida del reporte",
       });
     });
 
@@ -137,8 +137,8 @@ describe("ReportDialog", () => {
     );
     renderDialog(true);
 
-    const textarea = screen.getByLabelText("Descripcion");
-    await user.type(textarea, "Descripcion valida del reporte");
+    const textarea = screen.getByLabelText("Descripción");
+    await user.type(textarea, "Descripción válida del reporte");
 
     const submitButton = screen.getByText("Enviar reporte");
     await user.click(submitButton);
