@@ -39,7 +39,9 @@ export default function PaymentsPage() {
             Pagos
           </p>
           <h2>Mis pagos</h2>
-          <p>Total abonado: ${totalSpent.toFixed(2)}</p>
+          <p className="text-muted-foreground">
+            Total abonado: ${totalSpent.toFixed(2)}
+          </p>
         </div>
         <Button variant="secondary" onClick={() => refetch()}>
           Actualizar

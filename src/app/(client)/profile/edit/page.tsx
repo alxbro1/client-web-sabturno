@@ -74,9 +74,9 @@ export default function EditProfilePage() {
             Perfil
           </p>
           <h2>Editar perfil</h2>
-          <p>
-            Actualiza tus datos desde la web y conserva el mismo backend de la
-            app movil.
+          <p className="text-muted-foreground">
+            Actualizá tus datos desde la web y conservá el mismo backend de la
+            app móvil.
           </p>
         </div>
       </header>
