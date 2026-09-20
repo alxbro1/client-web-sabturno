@@ -1,3 +1,13 @@
+"use client";
+
+// Este módulo es de CLIENTE, no por preferencia sino por necesidad: el
+// interceptor de abajo llama a `getSession()` de `next-auth/react`, que es un
+// módulo "use client". Sin esta directiva, un Server Component puede importarlo
+// sin error de build y recién falla en runtime, dentro de axios, donde es muy
+// fácil que se lo trague un `catch`. Marcarlo acá convierte ese error silencioso
+// en un fallo de build. Para llamar a un endpoint público desde el servidor,
+// usar `fetch` directo (ver src/app/appointment/[id]/page.tsx).
+
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { getSession } from "next-auth/react";
 
