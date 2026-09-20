@@ -33,7 +33,7 @@ NEXT_PUBLIC_API_URL=https://app-api.sabturno.com
 
 ## Deploy
 
-- **Stack:** S3 + Amplify. Bucket: `app.sabturno.com`. Domain: `appweb.sabturno.io`.
+- **Stack:** S3 + Amplify. Bucket: `app.sabturno.com`. Domain: `appweb.sabturno.com`.
 - **Flujo:** `./deploy.sh` ejecuta `npm run build` + `aws s3 sync .next s3://app.sabturno.com --delete --profile sabturno`.
 - **Manual:** No hay CI/CD. Deploy bajo demanda.
 - **AWS Profile:** `sabturno` (credenciales en `~/.aws/credentials`).

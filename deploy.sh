@@ -29,4 +29,4 @@ echo -e "${GREEN}Subiendo archivos a s3://$BUCKET (perfil: $AWS_PROFILE)...${NC}
 aws s3 sync "$DIST_DIR" "s3://$BUCKET" --delete --profile "$AWS_PROFILE"
 
 echo -e "${GREEN}Deploy completo.${NC}"
-echo "URL: https://appweb.sabturno.io"
+echo "URL: https://appweb.sabturno.com"

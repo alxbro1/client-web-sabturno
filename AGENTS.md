@@ -153,7 +153,7 @@ vi.mock("@/hooks/useAuth", () => ({
 
 ## Deploy
 
-- **Stack:** S3 + Amplify. Bucket: `app.sabturno.com`. CloudFront Distribution: `EPA4X8K2B4OH4`. Domain: `appweb.sabturno.io`.
+- **Stack:** S3 + Amplify. Bucket: `app.sabturno.com`. CloudFront Distribution: `EPA4X8K2B4OH4`. Domain: `appweb.sabturno.com`.
 - **Flujo:** `./deploy.sh` ejecuta `npm run build` + `aws s3 sync .next s3://app.sabturno.com --delete --profile sabturno`. Amplify detecta cambios en S3 automáticamente y hace el deploy.
 - **Manual:** No hay CI/CD. Deploy bajo demanda.
 - **API routes:** Se usan en producción. No usar `output: 'export'` en `next.config.ts`.
