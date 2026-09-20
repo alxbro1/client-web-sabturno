@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Check, ChevronLeft } from "lucide-react";
+import { Check, ChevronLeft, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/ui/card";
 import { BookingSummary } from "@/components/booking/BookingSummary";
@@ -27,6 +27,17 @@ const PAYMENT_METHOD_ICONS: Partial<Record<PaymentMethod, string>> = {
   [PaymentMethod.CASH_IN_FRONT]: iconCash.src,
 };
 
+type ContactChannel = "whatsapp" | "email";
+
+const CONTACT_CHANNELS = [
+  { value: "whatsapp", label: "WhatsApp", icon: MessageCircle },
+  { value: "email", label: "Email", icon: Mail },
+] as const satisfies ReadonlyArray<{
+  value: ContactChannel;
+  label: string;
+  icon: typeof Mail;
+}>;
+
 export default function SelectPaymentPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -45,15 +56,30 @@ export default function SelectPaymentPage() {
 
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
+  const [contactChannel, setContactChannel] =
+    useState<ContactChannel>("whatsapp");
 
   const { data: taloStatus } = useTaloStatusQuery(local?.id);
   const createAppointment = useCreateAppointmentMutation();
 
   const taloEnabled = taloStatus?.connected ?? false;
 
-  const isGuestEmailMissing = !user && !email.trim();
   const phoneDigits = phoneNumber.replace(/\D/g, "");
   const isPhoneValid = phoneDigits.length >= 10 && phoneDigits.length <= 15;
+  const isEmailValid = /\S+@\S+\.\S+/.test(email.trim());
+
+  // Con un canal alcanza. El backend trata email y telefono como alternativas:
+  // en create-appointment.dto ambos son @IsOptional(), y la notificacion se
+  // dispara con (email || phoneNumber || user.phone), con WhatsApp y mail
+  // gateados por separado. Exigir los dos era una restriccion solo del front.
+  //
+  // El usuario logueado siempre tiene email en su cuenta, asi que su telefono
+  // es opcional: se precarga para avisarle por WhatsApp, pero no bloquea.
+  const isContactMissing = user
+    ? false
+    : contactChannel === "whatsapp"
+      ? !isPhoneValid
+      : !isEmailValid;
   const { data: loyaltyRewards = [] } = useQuery({
     queryKey: queryKeys.loyaltyBookingRewards(
       local?.id || "",
@@ -164,8 +190,7 @@ export default function SelectPaymentPage() {
     const effectivePaymentMethod = paymentMethod || methods[0]?.method;
     if (
       (!effectivePaymentMethod && !couponMakesServiceFree) ||
-      isGuestEmailMissing ||
-      !isPhoneValid
+      isContactMissing
     ) return;
 
     try {
@@ -180,9 +205,10 @@ export default function SelectPaymentPage() {
         countryCode: user?.countryCode || local?.countryCode,
         timezone,
         paymentMethod: effectivePaymentMethod || PaymentMethod.CASH_IN_FRONT,
-        email: user?.email || email,
+        email: user?.email || (contactChannel === "email" ? email.trim() : ""),
         userName: user?.name || userName,
-        phoneNumber: phoneNumber.trim(),
+        phoneNumber:
+          user || contactChannel === "whatsapp" ? phoneNumber.trim() : "",
         checkoutReturnUrl: `${window.location.origin}/booking/payment-status`,
         ...(user?.id ? { userId: user.id } : {}),
         ...(loyaltyRewardId ? { loyaltyRewardId } : {}),
@@ -258,8 +284,7 @@ export default function SelectPaymentPage() {
   const isConfirmDisabled =
     (!paymentMethod && !isFullyDiscounted) ||
     createAppointment.isPending ||
-    isGuestEmailMissing ||
-    !isPhoneValid ||
+    isContactMissing ||
     isValidatingCoupon;
 
   const confirmBlockedReason = createAppointment.isPending
@@ -268,11 +293,11 @@ export default function SelectPaymentPage() {
       ? "Estamos validando el cupón."
       : !paymentMethod && !isFullyDiscounted
         ? "Elegí un método de pago para continuar."
-        : isGuestEmailMissing
-          ? "Ingresá tu email para recibir la confirmación."
-          : !isPhoneValid
-            ? "Ingresá un teléfono válido para recibir la confirmación."
-            : null;
+        : isContactMissing
+          ? contactChannel === "whatsapp"
+            ? "Ingresá tu WhatsApp para recibir la confirmación."
+            : "Ingresá tu email para recibir la confirmación."
+          : null;
 
   const methodCardBase =
     "relative flex cursor-pointer items-center gap-4 rounded-xl border p-5 text-left shadow-sm transition-colors duration-[140ms] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
@@ -480,68 +505,133 @@ export default function SelectPaymentPage() {
         </Card>
       ) : null}
 
-      <Card className="w-full p-5 grid gap-3">
+      <Card className="w-full p-5 grid grid-cols-1 gap-3">
         <div>
-          <h3 className="font-semibold text-foreground">WhatsApp</h3>
+          <h3 className="font-semibold text-foreground">
+            {user ? "Avisos del turno" : "¿Dónde querés la confirmación?"}
+          </h3>
           <p className="text-sm text-muted-foreground">
-            Te enviaremos la confirmación y el recordatorio del turno a este número.
+            {user
+              ? "Te avisamos por email a tu cuenta. Si dejás tu número, también te escribimos por WhatsApp."
+              : "Con un canal alcanza: te mandamos ahí la confirmación y el recordatorio."}
           </p>
         </div>
-        <label className="text-sm font-medium text-foreground" htmlFor="booking-phone">
-          Teléfono
-        </label>
-        <input
-          id="booking-phone"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          value={phoneNumber}
-          onChange={(event) => setPhoneNumber(event.target.value)}
-          placeholder="Ej. +54 9 351 123 4567"
-          aria-invalid={phoneNumber.length > 0 && !isPhoneValid}
-          aria-describedby="booking-phone-help"
-        />
-        <p
-          id="booking-phone-help"
-          className={`text-sm ${phoneNumber.length > 0 && !isPhoneValid ? "text-destructive" : "text-muted-foreground"}`}
-        >
-          {phoneNumber.length > 0 && !isPhoneValid
-            ? "Ingresá un teléfono válido de entre 10 y 15 dígitos."
-            : "Podés incluir el código de país, por ejemplo +54 9 para Argentina."}
-        </p>
-      </Card>
 
-      {!user && (
-        <Card className="w-full p-5 grid gap-3">
-          <h3 className="font-semibold text-foreground">Datos de contacto</h3>
-          <label className="text-sm font-medium text-foreground">
-            Email (si quieres que te lleguen las notificaciones)
-          </label>
-          <input
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@email.com"
-          />
-          {isGuestEmailMissing ? (
-            <p className="text-sm text-destructive">
-              Falta completar un campo obligatorio: email.
+        {!user ? (
+          <fieldset className="grid grid-cols-1 gap-2">
+            <legend className="sr-only">Canal de contacto</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {CONTACT_CHANNELS.map((option) => {
+                const isActive = contactChannel === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => setContactChannel(option.value)}
+                    className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-3 text-sm transition-colors duration-150 outline-none cursor-pointer focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+                      isActive
+                        ? "border-primary bg-primary font-semibold text-primary-foreground"
+                        : "border-border bg-muted text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}
+                  >
+                    <option.icon aria-hidden className="size-4" />
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+        ) : null}
+
+        {user || contactChannel === "whatsapp" ? (
+          <>
+            <label
+              className="text-sm font-medium text-foreground"
+              htmlFor="booking-phone"
+            >
+              {user ? "Teléfono (opcional)" : "Teléfono"}
+            </label>
+            <input
+              id="booking-phone"
+              className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={phoneNumber}
+              onChange={(event) => setPhoneNumber(event.target.value)}
+              placeholder="Ej. +54 9 351 123 4567"
+              aria-invalid={phoneNumber.length > 0 && !isPhoneValid}
+              aria-describedby="booking-phone-help"
+            />
+            <p
+              id="booking-phone-help"
+              className={`text-sm ${
+                phoneNumber.length > 0 && !isPhoneValid
+                  ? "text-destructive"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {phoneNumber.length > 0 && !isPhoneValid
+                ? "Ingresá un teléfono válido de entre 10 y 15 dígitos."
+                : "Podés incluir el código de país, por ejemplo +54 9 para Argentina."}
             </p>
-          ) : null}
-          <label className="text-sm font-medium text-foreground mt-1">
-            Nombre
-          </label>
-          <input
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
-            type="text"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-            placeholder="Tu nombre"
-          />
-        </Card>
-      )}
+          </>
+        ) : (
+          <>
+            <label
+              className="text-sm font-medium text-foreground"
+              htmlFor="booking-email"
+            >
+              Email
+            </label>
+            <input
+              id="booking-email"
+              className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="tu@email.com"
+              aria-invalid={email.length > 0 && !isEmailValid}
+              aria-describedby="booking-email-help"
+            />
+            <p
+              id="booking-email-help"
+              className={`text-sm ${
+                email.length > 0 && !isEmailValid
+                  ? "text-destructive"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {email.length > 0 && !isEmailValid
+                ? "Revisá el email: parece que le falta algo."
+                : "Te mandamos ahí la confirmación y el recordatorio."}
+            </p>
+          </>
+        )}
+
+        {!user ? (
+          <>
+            <label
+              className="mt-1 text-sm font-medium text-foreground"
+              htmlFor="booking-name"
+            >
+              Nombre
+            </label>
+            <input
+              id="booking-name"
+              className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+              type="text"
+              autoComplete="name"
+              value={userName}
+              onChange={(event) => setUserName(event.target.value)}
+              placeholder="Tu nombre"
+            />
+          </>
+        ) : null}
+      </Card>
 
       <div className="sticky bottom-0 -mx-4 mt-2 w-[calc(100%+2rem)] border-t border-border bg-background/95 px-4 py-3 backdrop-blur">
         {confirmBlockedReason ? (
