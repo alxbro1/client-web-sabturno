@@ -69,7 +69,7 @@ export function PricingCard({
     >
       {plan.isPopular && (
         <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-6 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold whitespace-nowrap">
             <Sparkles className="size-3.5" />
             Más popular
           </span>

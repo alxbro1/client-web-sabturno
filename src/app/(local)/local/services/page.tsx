@@ -43,8 +43,8 @@ export default function ServicesPage() {
   }
 
   return (
-    <div className="grid gap-6">
-      <div className="flex items-center justify-between gap-4">
+    <div className="grid grid-cols-1 gap-6">
+      <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-stretch">
         <div>
           <h1 className="text-[1.5rem] font-bold">Servicios</h1>
           <p className="text-muted-foreground text-[0.9rem]">
@@ -66,7 +66,7 @@ export default function ServicesPage() {
         </div>
       ) : services.length === 0 ? (
         <div className="min-h-[200px] grid place-items-center text-center">
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <Wrench className="w-12 h-12 mx-auto text-muted-foreground/70" />
             <p className="text-muted-foreground">No hay servicios registrados</p>
             <Link href="/local/services/edit/new">
@@ -75,7 +75,7 @@ export default function ServicesPage() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {services.map((service) => (
             <article
               key={service.id}

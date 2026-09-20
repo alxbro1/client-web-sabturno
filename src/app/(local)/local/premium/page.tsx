@@ -70,7 +70,7 @@ export default function PremiumPage() {
   }
 
   return (
-    <section className="grid gap-10">
+    <section className="grid grid-cols-1 gap-10">
       <header className="text-center max-w-2xl mx-auto">
         <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">
           Planes

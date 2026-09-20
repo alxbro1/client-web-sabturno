@@ -29,8 +29,8 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="grid gap-6">
-      <div className="flex items-center justify-between gap-4">
+    <div className="grid grid-cols-1 gap-6">
+      <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-stretch">
         <div>
           <h1 className="text-[1.5rem] font-bold">Empleados</h1>
           <p className="text-muted-foreground text-[0.9rem]">
@@ -52,7 +52,7 @@ export default function EmployeesPage() {
         </div>
       ) : employees.length === 0 ? (
         <div className="min-h-[200px] grid place-items-center text-center">
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <Users className="w-12 h-12 mx-auto text-muted-foreground/70" />
             <p className="text-muted-foreground">No hay empleados registrados</p>
             <Link href="/local/employees/edit/new">
@@ -61,7 +61,7 @@ export default function EmployeesPage() {
           </div>
         </div>
       ) : (
-        <div className="grid gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {employees.map((employee) => (
             <article
               key={employee.id}
