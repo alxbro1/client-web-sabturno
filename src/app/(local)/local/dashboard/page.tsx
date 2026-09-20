@@ -311,7 +311,7 @@ export default function LocalDashboardPage() {
         <LocalNavCard
           to="/local/blockings"
           title="Bloqueos"
-          description="Bloquear dias y franjas horarias"
+          description="Bloquear días y franjas horarias"
           icon={<Ban className="size-5" />}
         />
         <LocalNavCard
@@ -322,7 +322,7 @@ export default function LocalDashboardPage() {
         />
         <LocalNavCard
           to="/local/payment-methods"
-          title="Metodos de cobro"
+          title="Métodos de cobro"
           description="Configura MercadoPago, Talo, reserva y efectivo"
           icon={<DollarSign className="size-5" />}
         />

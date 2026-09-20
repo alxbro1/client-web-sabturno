@@ -81,9 +81,9 @@ export default function PaymentMethodsPage() {
   }
 
   const taloLabel = !pm.taloStatus?.connected
-    ? "Conectar Talo (Transferencias automaticas)"
+    ? "Conectar Talo (transferencias automáticas)"
     : pm.taloStatus.accountStatus === "ACTIVE"
-      ? "Talo activo (Transferencias automaticas)"
+      ? "Talo activo (transferencias automáticas)"
       : `Talo ${pm.taloStatus.accountStatus ?? "PENDING"} (Transferencias automaticas)`;
 
   return (
@@ -92,9 +92,9 @@ export default function PaymentMethodsPage() {
         <p className="text-[0.75rem] font-bold uppercase tracking-[0.22em] text-primary">
           Cobros
         </p>
-        <h2 className="text-2xl font-bold text-white">Metodos de cobro</h2>
+        <h2 className="text-2xl font-bold text-white">Métodos de cobro</h2>
         <p className="text-muted-foreground mt-1">
-          Configura MercadoPago, Talo, reserva parcial y efectivo. Los clientes
+          Configurá Mercado Pago, Talo, reserva parcial y efectivo. Los clientes
           solo veran los metodos que tengas activos.
         </p>
       </header>
@@ -102,7 +102,7 @@ export default function PaymentMethodsPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <PaymentMethodCard
           title="Mercado Pago (tarjetas y más)"
-          description="Conecta tu cuenta para cobrar con tarjeta, debito y otros medios."
+          description="Conectá tu cuenta para cobrar con tarjeta, débito y otros medios."
           selected={pm.form.mercadoPagoLiveMode}
           onClick={() => pm.toggle("mercadoPagoLiveMode")}
           icon={
@@ -112,7 +112,7 @@ export default function PaymentMethodsPage() {
 
         <PaymentMethodCard
           title={taloLabel}
-          description="Transferencias bancarias automaticas. Requiere activar la cuenta."
+          description="Transferencias bancarias automáticas. Requiere activar la cuenta."
           selected={pm.form.payWithTalo}
           onClick={() => pm.toggle("payWithTalo")}
           icon={<MethodIcon src={iconTalo.src} alt="Talo" />}

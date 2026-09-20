@@ -131,7 +131,7 @@ export function ReportDialog({
             value={description}
             onChange={(e) => handleDescriptionChange(e.target.value)}
             errors={descriptionErrors}
-            hint="Explica el motivo del reporte (minimo 10 caracteres)"
+            hint="Explicá el motivo del reporte (mínimo 10 caracteres)"
           />
 
           <p className="text-sm text-muted-foreground text-right">

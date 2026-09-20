@@ -97,7 +97,7 @@ export default function TaloCallbackPage() {
         <p className="text-muted-foreground mt-3">{message}</p>
         <p className="text-muted-foreground/70 text-sm mt-4">
           {window.opener
-            ? "Esta ventana se cerrara automaticamente."
+            ? "Esta ventana se cerrará automáticamente."
             : "Seras redirigido en unos segundos."}
         </p>
       </div>

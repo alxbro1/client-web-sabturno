@@ -49,7 +49,7 @@ export default function AppointmentCancelPage({
                 ? "Hubo un problema al cancelar el turno. Intentalo de nuevo."
                 : hash
                   ? "¿Estas seguro que deseas cancelar este turno?"
-                  : "No se proporciono un enlace valido."}
+                  : "No se proporcionó un enlace válido."}
           </p>
         </div>
 

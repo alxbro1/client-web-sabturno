@@ -378,7 +378,7 @@ export default function LocalCalendarPage() {
         <LocalNavCard
           to="/local/blockings"
           title="Bloqueos"
-          description="Bloquear dias y franjas horarias"
+          description="Bloquear días y franjas horarias"
           icon={
             <Ban className="w-5 h-5" />
           }

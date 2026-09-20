@@ -60,7 +60,7 @@ test.describe("Full local setup E2E", () => {
 
     await page.getByLabel("Nombre del servicio").fill("Corte de cabello");
     await page.getByLabel("Precio (ARS)").fill("3500");
-    await page.getByLabel("Duracion (minutos)").fill("30");
+    await page.getByLabel("Duración (minutos)").fill("30");
     await page.getByRole("button", { name: "Crear servicio" }).click();
     await expect(page).toHaveURL(/\/local\/services/, { timeout: 10000 });
     await expect(page.getByText("Corte de cabello")).toBeVisible();
@@ -69,7 +69,7 @@ test.describe("Full local setup E2E", () => {
     await page.getByRole("button", { name: "Nuevo servicio" }).click();
     await page.getByLabel("Nombre del servicio").fill("Barba");
     await page.getByLabel("Precio (ARS)").fill("2000");
-    await page.getByLabel("Duracion (minutos)").fill("20");
+    await page.getByLabel("Duración (minutos)").fill("20");
     await page.getByRole("button", { name: "Crear servicio" }).click();
     await expect(page).toHaveURL(/\/local\/services/, { timeout: 10000 });
 
@@ -105,7 +105,7 @@ test.describe("Full local setup E2E", () => {
 
     // === 9. MÉTODOS DE COBRO ===
     await page.goto("/local/payment-methods");
-    await expect(page.getByText("Metodos de cobro")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Métodos de cobro")).toBeVisible({ timeout: 10000 });
     // Toggle efectivo
     await page.getByText("Efectivo en el local").click();
     // Toggle reserva parcial

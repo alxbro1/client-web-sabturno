@@ -16,7 +16,7 @@ test.describe("Payment methods", () => {
     });
 
     await page.goto("/local/payment-methods");
-    await expect(page.getByRole("heading", { name: "Metodos de cobro" })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("heading", { name: "Métodos de cobro" })).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole("heading", { name: "Reserva parcial" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Efectivo en el local" })).toBeVisible();
   });
@@ -30,7 +30,7 @@ test.describe("Payment methods", () => {
     });
 
     await page.goto("/local/payment-methods");
-    await expect(page.getByRole("heading", { name: "Metodos de cobro" })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("heading", { name: "Métodos de cobro" })).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/pro/i).first()).toBeVisible();
   });
 
@@ -73,7 +73,7 @@ test.describe("Payment methods", () => {
     });
 
     await page.goto("/local/payment-methods");
-    await expect(page.getByRole("heading", { name: "Metodos de cobro" })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("heading", { name: "Métodos de cobro" })).toBeVisible({ timeout: 10000 });
 
     // Toggle reservation
     await page.getByRole("button", { name: "Reserva parcial" }).click();

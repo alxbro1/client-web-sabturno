@@ -83,9 +83,9 @@ export default function ServiceEditPage() {
     const errors: string[] = [];
     const num = Number(value);
     if (value.trim().length === 0) {
-      errors.push("La duracion es requerida");
+      errors.push("La duración es requerida");
     } else if (isNaN(num) || num < 1) {
-      errors.push("La duracion debe ser al menos 1 minuto");
+      errors.push("La duración debe ser al menos 1 minuto");
     }
     return errors;
   }
@@ -199,7 +199,7 @@ export default function ServiceEditPage() {
             errors={costErrors}
           />
           <InputField
-            label="Duracion (minutos)"
+            label="Duración (minutos)"
             type="number"
             value={duration}
             onChange={(e) => handleDurationChange(e.target.value)}
@@ -216,7 +216,7 @@ export default function ServiceEditPage() {
             onChange={(e) => setCategory(e.target.value)}
             className="rounded-2xl border border-white/16 bg-white/[0.04] px-4 py-3 text-white outline-none transition-[border-color] duration-150 focus:border-primary/50"
           >
-            <option value="">Sin categoria</option>
+            <option value="">Sin categoría</option>
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
                 {cat}

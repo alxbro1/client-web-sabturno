@@ -27,7 +27,7 @@ test.describe("Service CRUD", () => {
     await page.getByLabel("Nombre del servicio").fill("Nuevo Servicio");
     await page.getByLabel("Descripción (opcional)").fill("Descripción del servicio");
     await page.getByLabel("Precio (ARS)").fill("4000");
-    await page.getByLabel("Duracion (minutos)").fill("60");
+    await page.getByLabel("Duración (minutos)").fill("60");
     await page.getByRole("button", { name: "Crear servicio" }).click();
     await expect(page).toHaveURL(/\/local\/services/);
   });

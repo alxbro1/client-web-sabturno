@@ -28,7 +28,7 @@ export default async function AppointmentPublicPage({
     return (
       <PublicShell>
         <p className="text-muted-foreground">
-          No se proporciono un enlace valido.
+          No se proporcionó un enlace válido.
         </p>
       </PublicShell>
     );
