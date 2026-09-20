@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Check } from "lucide-react";
+import { Check, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/ui/card";
+import { BookingSummary } from "@/components/booking/BookingSummary";
 import { useTaloStatusQuery } from "@/hooks/queries/useTaloStatusQuery";
 import { useCreateAppointmentMutation } from "@/hooks/mutations/useCreateAppointmentMutation";
 import { useAuth } from "@/hooks/useAuth";
@@ -254,40 +255,84 @@ export default function SelectPaymentPage() {
   const reservationAmount = finalServiceCost * (reservationPercentage / 100);
   const marketplaceFee = finalServiceCost * 0.03;
 
+  const isConfirmDisabled =
+    (!paymentMethod && !isFullyDiscounted) ||
+    createAppointment.isPending ||
+    isGuestEmailMissing ||
+    !isPhoneValid ||
+    isValidatingCoupon;
+
+  const confirmBlockedReason = createAppointment.isPending
+    ? null
+    : isValidatingCoupon
+      ? "Estamos validando el cupón."
+      : !paymentMethod && !isFullyDiscounted
+        ? "Elegí un método de pago para continuar."
+        : isGuestEmailMissing
+          ? "Ingresá tu email para recibir la confirmación."
+          : !isPhoneValid
+            ? "Ingresá un teléfono válido para recibir la confirmación."
+            : null;
+
   const methodCardBase =
-    "relative rounded-xl p-5 flex items-center gap-4 cursor-pointer text-left transition-all duration-[140ms]";
+    "relative flex cursor-pointer items-center gap-4 rounded-xl border p-5 text-left shadow-sm transition-colors duration-[140ms] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
   const methodCardInactive =
-    "border border-border bg-card shadow-sm hover:-translate-y-0.5 hover:border-primary/40";
-  const methodCardActive =
-    "border-2 border-primary/60 bg-primary/[0.06] shadow-sm";
+    "border-border bg-card hover:border-primary/40";
+  const methodCardActive = "border-primary bg-primary/15";
 
   return (
-    <section className="flex flex-col gap-6 p-8 min-h-screen items-center">
-      <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch w-full">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-primary">
-            Reserva paso 4
-          </p>
-          <h2 className="text-2xl font-bold text-foreground">Metodo de pago</h2>
-          <p className="text-muted-foreground">Selecciona un metodo de pago.</p>
-        </div>
+    <section className="flex flex-col items-center gap-6 py-6">
+      <div className="w-full">
         <Button
-          variant="secondary"
+          variant="ghost"
+          className="-ml-3 gap-1 px-3 text-muted-foreground hover:text-foreground"
           onClick={() => router.push("/booking/appointment")}
         >
-          Volver
+          <ChevronLeft className="size-4" />
+          Cambiar fecha y horario
         </Button>
+      </div>
+
+      <header className="w-full">
+        <h2 className="text-2xl font-bold text-foreground">Confirmá tu turno</h2>
+        <p className="text-muted-foreground">
+          Revisá los datos y elegí cómo querés pagar.
+        </p>
       </header>
 
+      <BookingSummary discount={loyaltyDiscount} />
+
       {isFullyDiscounted ? (
-        <Card className="w-full border-[#00f068]/40 bg-[#00f068]/10 p-5">
+        <Card className="w-full border-primary/40 bg-primary/10 p-5">
           <h3 className="font-semibold text-foreground">Tu turno queda cubierto</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             No necesitás elegir un medio de pago. El turno se confirmará al reservar.
           </p>
         </Card>
       ) : (
-      <div className="grid grid-cols-3 gap-4 max-lg:grid-cols-1 w-full">
+      methods.length === 1 ? (
+        <Card className="w-full flex-row items-center gap-4 p-5">
+          {PAYMENT_METHOD_ICONS[methods[0].method] ? (
+            <img
+              src={PAYMENT_METHOD_ICONS[methods[0].method]}
+              alt=""
+              aria-hidden="true"
+              className="h-10 w-10 shrink-0 object-contain"
+            />
+          ) : null}
+          <div>
+            <h3 className="font-semibold text-foreground">{methods[0].title}</h3>
+            <p className="text-sm text-muted-foreground">
+              {methods[0].description}
+            </p>
+          </div>
+        </Card>
+      ) : (
+      <div className="w-full">
+        <h3 className="mb-3 text-lg font-semibold text-foreground">
+          Método de pago
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2">
         {methods.map((item) => {
           const isActive = paymentMethod === item.method;
           return (
@@ -319,7 +364,9 @@ export default function SelectPaymentPage() {
             </button>
           );
         })}
+        </div>
       </div>
+      )
       )}
 
       {!user ? (
@@ -346,8 +393,8 @@ export default function SelectPaymentPage() {
               Revisá el código: está incompleto o tiene un formato inválido.
             </p>
           ) : couponValidation?.valid ? (
-            <div className="rounded-lg border border-[#00f068]/30 bg-[#00f068]/10 p-3 text-sm">
-              <p className="font-semibold text-[#00b94f]">Cupón válido</p>
+            <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm">
+              <p className="font-semibold text-primary">Cupón válido</p>
               <p className="text-muted-foreground">
                 {couponValidation.benefit}. Ahorrás ${couponValidation.discountAmount.toFixed(2)}.
               </p>
@@ -496,19 +543,30 @@ export default function SelectPaymentPage() {
         </Card>
       )}
 
-      <Button
-        onClick={handleConfirm}
-        disabled={
-          (!paymentMethod && !isFullyDiscounted) ||
-          createAppointment.isPending ||
-          isGuestEmailMissing ||
-          !isPhoneValid ||
-          isValidatingCoupon
-        }
-        className="mt-6 max-w-sm self-center bg-[#00f068] text-black hover:bg-[#00f068]/90 focus:ring-[#00f068]/50"
-      >
-        {createAppointment.isPending ? "Confirmando reserva..." : "Confirmar turno"}
-      </Button>
+      <div className="sticky bottom-0 -mx-4 mt-2 w-[calc(100%+2rem)] border-t border-border bg-background/95 px-4 py-3 backdrop-blur">
+        {confirmBlockedReason ? (
+          <p
+            id="booking-confirm-help"
+            className="mb-2 text-center text-sm text-muted-foreground"
+          >
+            {confirmBlockedReason}
+          </p>
+        ) : null}
+        <div className="flex justify-center">
+          <Button
+            onClick={handleConfirm}
+            aria-describedby={confirmBlockedReason ? "booking-confirm-help" : undefined}
+            disabled={isConfirmDisabled}
+            className="w-full max-w-sm disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
+          >
+            {createAppointment.isPending ? "Confirmando reserva..." : "Confirmar turno"}
+          </Button>
+        </div>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
+          Vas a reservar este turno a tu nombre. Podés cancelarlo desde el
+          detalle del turno.
+        </p>
+      </div>
     </section>
   );
 }

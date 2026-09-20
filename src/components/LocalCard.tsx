@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { MapPin } from "lucide-react";
+import { ChevronRight, MapPin } from "lucide-react";
 import type { Local } from "@/lib/types/local";
 
 interface LocalCardProps {
@@ -15,7 +15,7 @@ export const LocalCard = memo(function LocalCard({
     <button
       type="button"
       onClick={() => onSelect(local)}
-      className="group flex h-24 w-full items-center gap-4 overflow-hidden rounded-xl border bg-card p-3 text-left shadow-sm transition-all duration-[140ms] hover:border-[#00f068]/45 active:scale-95"
+      className="group flex h-24 w-full items-center gap-4 overflow-hidden rounded-xl border border-border bg-card p-3 text-left shadow-sm transition-all duration-[140ms] outline-none hover:border-primary/45 focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95"
     >
       {/* Avatar / imagen del local */}
       <div className="flex-shrink-0">
@@ -53,7 +53,7 @@ export const LocalCard = memo(function LocalCard({
         <div className="flex flex-wrap gap-1.5">
           {local.mercadoPagoLiveMode && (
             <span className="mt-0.5 inline-block whitespace-nowrap rounded-full border bg-muted px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
-              MP
+              Mercado Pago
             </span>
           )}
           {local.payWithCashInFront && (
@@ -63,16 +63,17 @@ export const LocalCard = memo(function LocalCard({
           )}
           {local.payWithReservation && (
             <span className="mt-0.5 inline-block whitespace-nowrap rounded-full border bg-muted px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
-              Reserva
+              Seña
             </span>
           )}
         </div>
       </div>
 
       {/* Chevron */}
-      <div className="flex-shrink-0 text-xl text-muted-foreground transition-all duration-[140ms] group-hover:translate-x-1 group-hover:text-primary">
-        ›
-      </div>
+      <ChevronRight
+        aria-hidden="true"
+        className="size-5 shrink-0 text-muted-foreground transition-transform duration-[140ms] group-hover:translate-x-1 group-hover:text-primary"
+      />
     </button>
   );
 });

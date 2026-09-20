@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/Button";
 import { LocalCard } from "@/components/LocalCard";
 import { useLocalsQuery } from "@/hooks/queries/useLocalsQuery";
@@ -46,16 +47,21 @@ export default function SelectLocalPage() {
   }
 
   return (
-    <section className="flex flex-col gap-6 p-6 min-h-screen items-start">
-      <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch w-full">
+    <section className="flex flex-col items-start gap-6 py-6">
+      <header className="flex w-full items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-primary">
-            Reserva paso 1
+          <h2 className="text-2xl font-bold text-foreground">Elegí un local</h2>
+          <p className="text-muted-foreground">
+            Empezá por el lugar donde querés atenderte.
           </p>
-          <h2 className="text-2xl font-bold text-foreground">Selecciona un local</h2>
         </div>
-        <Button variant="secondary" onClick={() => refetch()}>
-          Actualizar lista
+        <Button
+          variant="ghost"
+          className="shrink-0 gap-1 px-3 text-muted-foreground hover:text-foreground"
+          onClick={() => refetch()}
+        >
+          <RefreshCw className="size-4" />
+          Actualizar
         </Button>
       </header>
 
@@ -71,7 +77,18 @@ export default function SelectLocalPage() {
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-4 w-full">
+      {!isLoading && !error && locals.length === 0 ? (
+        <div className="grid w-full place-items-center gap-2 rounded-xl border border-border bg-card p-8 text-center">
+          <p className="font-semibold text-foreground">
+            Todavía no hay locales disponibles
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Volvé a intentar en unos minutos o actualizá la lista.
+          </p>
+        </div>
+      ) : null}
+
+      <div className="flex w-full flex-col gap-4">
         {locals.map((local) => (
           <LocalCard key={local.id} local={local} onSelect={handleSelect} />
         ))}
@@ -84,7 +101,7 @@ export default function SelectLocalPage() {
             onClick={() => fetchNextPage()}
             disabled={isFetchingNextPage}
           >
-            {isFetchingNextPage ? "Cargando..." : "Cargar mas locales"}
+            {isFetchingNextPage ? "Cargando..." : "Cargar más locales"}
           </Button>
         </div>
       ) : null}

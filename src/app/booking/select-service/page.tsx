@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import { ServiceCard } from "@/components/ServiceCard";
 import { useServicesQuery } from "@/hooks/queries/useServicesQuery";
@@ -86,26 +87,26 @@ export default function SelectServicePage() {
   const isLoading = isLoadingLocals || isLoadingServices;
 
   return (
-    <section className="flex flex-col gap-6 p-6 min-h-screen items-start">
-      <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch w-full">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-primary">
-            Reserva paso 2
-          </p>
-          <h2 className="text-2xl font-bold text-foreground">Selecciona un servicio</h2>
-          {local?.name && (
-            <p className="text-muted-foreground">Local elegido: {local.name}</p>
-          )}
-        </div>
+    <section className="flex flex-col items-start gap-6 py-6">
+      <div>
         <Button
-          variant="secondary"
+          variant="ghost"
+          className="-ml-3 gap-1 px-3 text-muted-foreground hover:text-foreground"
           onClick={() => {
             setLocal(null);
             router.push("/booking/select-local");
           }}
         >
+          <ChevronLeft className="size-4" />
           Cambiar local
         </Button>
+      </div>
+
+      <header>
+        <h2 className="text-2xl font-bold text-foreground">Elegí un servicio</h2>
+        {local?.name && (
+          <p className="text-muted-foreground">En {local.name}</p>
+        )}
       </header>
 
       {isLoading ? (
@@ -120,7 +121,18 @@ export default function SelectServicePage() {
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-4 w-full">
+      {!isLoading && !error && services?.length === 0 ? (
+        <div className="grid w-full place-items-center gap-2 rounded-xl border border-border bg-card p-8 text-center">
+          <p className="font-semibold text-foreground">
+            Este local todavía no publicó servicios
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Probá con otro local.
+          </p>
+        </div>
+      ) : null}
+
+      <div className="flex w-full flex-col gap-4">
         {services?.map((service) => (
           <ServiceCard key={service.id} service={service} onSelect={handleSelect} />
         ))}

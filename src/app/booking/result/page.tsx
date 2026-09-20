@@ -128,7 +128,7 @@ export default function AppointmentResultPage() {
                 if (urlMatch) {
                   return (
                     <div key={i}>
-                      <span>Accede a tu turno aqui: </span>
+                      <span>Accedé a tu turno acá: </span>
                       <a
                         href={urlMatch[1]}
                         className="text-primary underline break-all"

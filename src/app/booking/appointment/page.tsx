@@ -1,13 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useAvailableDaysQuery } from "@/hooks/queries/useAvailableDaysQuery";
 import { useTimeSlotsQuery } from "@/hooks/queries/useTimeSlotsQuery";
-import { buildBookingSearch, parseBookingQuery } from "@/lib/utils/bookingQuery";
+import { parseBookingQuery } from "@/lib/utils/bookingQuery";
+import { cn } from "@/lib/utils";
 import { formatCurrency, formatDateOnlyLocal } from "@/lib/utils/date";
 import { useBookingStore } from "@/stores/booking";
+import type { TimeSlot } from "@/lib/types/booking";
+
+const SLOT_GROUPS = [
+  { label: "Mañana", from: 0, to: 12 },
+  { label: "Tarde", from: 12, to: 18 },
+  { label: "Noche", from: 18, to: 24 },
+] as const;
+
+function groupSlotsByPeriod(slots: TimeSlot[]) {
+  return SLOT_GROUPS.map((group) => ({
+    label: group.label,
+    slots: slots.filter((slot) => {
+      const hour = Number(slot.time.split(":")[0]);
+      return hour >= group.from && hour < group.to;
+    }),
+  })).filter((group) => group.slots.length > 0);
+}
 
 export default function SelectSlotPage() {
   const router = useRouter();
@@ -42,6 +61,11 @@ export default function SelectSlotPage() {
       availabilityRefreshToken,
     );
 
+  const slotGroups = useMemo(
+    () => groupSlotsByPeriod(timeSlots ?? []),
+    [timeSlots],
+  );
+
   function buildSelectServiceUrl() {
     return "/booking/select-service";
   }
@@ -67,130 +91,164 @@ export default function SelectSlotPage() {
   }
 
   const isFormValid = selectedDate !== null && selectedTime !== null;
+  const missingStepLabel = !selectedDate
+    ? "Elegí una fecha para continuar."
+    : "Elegí un horario para continuar.";
 
+  // El estado seleccionado se marca con RELLENO, no con borde: un borde fino no
+  // compite con el texto blanco de los chips sin seleccionar.
   const chipBase =
-    "inline-flex items-center justify-center px-4 py-2 rounded-full border-2 text-sm cursor-pointer transition-all duration-150 disabled:opacity-35 disabled:cursor-not-allowed";
-  const chipInactive = "border-border bg-muted/20 text-muted-foreground hover:border-primary/35 hover:text-foreground";
-  const chipActive = "border-[#00f068] bg-[#00f068]/15 text-[#00f068] shadow-[0_0_12px_rgba(0,240,104,0.25)]";
+    "inline-flex min-h-11 w-full items-center justify-center rounded-full border px-3 text-sm transition-colors duration-150 outline-none cursor-pointer focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-35";
+  const chipInactive =
+    "border-border bg-muted text-muted-foreground hover:border-primary/40 hover:text-foreground";
+  const chipActive =
+    "border-primary bg-primary font-semibold text-primary-foreground";
 
   return (
-    <section className="flex flex-col gap-6 p-8 min-h-screen items-start">
-      <header className="flex justify-between gap-4 items-center max-sm:flex-col max-sm:items-stretch w-full">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-primary">
-            Reserva paso 3
-          </p>
-          <h2 className="text-2xl font-bold text-foreground">Fecha y horario</h2>
-          <p className="text-muted-foreground">
-            {service.name} en {local.name} por {formatCurrency(service.cost)}
-          </p>
-        </div>
+    <section className="flex flex-col gap-6 py-6">
+      <div>
         <Button
-          variant="secondary"
+          variant="ghost"
+          className="-ml-3 gap-1 px-3 text-muted-foreground hover:text-foreground"
           onClick={() => {
             setService(null);
             router.push("/booking/select-service");
           }}
         >
+          <ChevronLeft className="size-4" />
           Cambiar servicio
         </Button>
-      </header>
-
-      <div className="grid grid-cols-2 gap-4 items-start max-lg:grid-cols-1 w-full">
-        <section className="mt-4">
-          <div className="flex justify-between gap-4 items-start mb-3">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-primary">
-                Fechas
-              </p>
-              <h3 className="text-lg font-semibold text-foreground">Disponibilidad</h3>
-            </div>
-            {datesLoading ? (
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">
-                Cargando...
-              </span>
-            ) : null}
-          </div>
-
-          {datesError ? (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive mb-3">
-              {datesError.message}
-            </div>
-          ) : null}
-
-          <div className="flex flex-wrap gap-3">
-            {availableDates?.map((date) => {
-              const value = formatDateOnlyLocal(date);
-              const isActive = selectedDate && formatDateOnlyLocal(selectedDate) === value;
-              return (
-                <button
-                  key={value}
-                  className={`${chipBase} ${isActive ? chipActive : chipInactive}`}
-                  onClick={() => handleDateSelect(date)}
-                  type="button"
-                >
-                  {date.toLocaleDateString("es-AR", {
-                    weekday: "short",
-                    day: "2-digit",
-                    month: "short",
-                  })}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="mt-4">
-          <div className="flex justify-between gap-4 items-start mb-3">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-primary">
-                Horarios
-              </p>
-              <h3 className="text-lg font-semibold text-foreground">Turnos libres</h3>
-            </div>
-            {timeSlotsLoading ? (
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">
-                Cargando...
-              </span>
-            ) : null}
-          </div>
-
-          {!selectedDate ? (
-            <p className="text-muted-foreground">Selecciona una fecha para ver horarios.</p>
-          ) : null}
-
-          {timeSlotsError ? (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive mb-3">
-              {timeSlotsError.message}
-            </div>
-          ) : null}
-
-          <div className="flex flex-wrap gap-3">
-            {timeSlots?.map((slot) => {
-              const isActive = selectedTime === slot.time;
-              return (
-                <button
-                  key={slot.time}
-                  className={`${chipBase} ${isActive ? chipActive : chipInactive}`}
-                  onClick={() => handleTimeSelect(slot.time)}
-                  type="button"
-                  disabled={!slot.available}
-                >
-                  {slot.time}
-                </button>
-              );
-            })}
-          </div>
-        </section>
       </div>
 
-      <Button
-        disabled={!isFormValid}
-        onClick={() => router.push("/booking/payment")}
-        className="mt-6 max-w-sm self-center bg-[#00f068] text-black hover:bg-[#00f068]/90 focus:ring-[#00f068]/50"
-      >
-        Continuar
-      </Button>
+      <header>
+        <h2 className="text-2xl font-bold text-foreground">Fecha y horario</h2>
+        <p className="text-muted-foreground">
+          {service.name} en {local.name} por {formatCurrency(service.cost)}
+        </p>
+      </header>
+
+      <section>
+        <div className="mb-3 flex items-baseline justify-between gap-4">
+          <h3 className="text-lg font-semibold text-foreground">Elegí el día</h3>
+          {datesLoading ? (
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">
+              Cargando...
+            </span>
+          ) : null}
+        </div>
+
+        {datesError ? (
+          <div className="mb-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {datesError.message}
+          </div>
+        ) : null}
+
+        {!datesLoading && !datesError && !availableDates?.length ? (
+          <p className="text-muted-foreground">
+            Este servicio no tiene días disponibles por ahora.
+          </p>
+        ) : null}
+
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+          {availableDates?.map((date) => {
+            const value = formatDateOnlyLocal(date);
+            const isActive =
+              selectedDate !== null && formatDateOnlyLocal(selectedDate) === value;
+            return (
+              <button
+                key={value}
+                className={cn(chipBase, isActive ? chipActive : chipInactive)}
+                onClick={() => handleDateSelect(date)}
+                type="button"
+                aria-pressed={isActive}
+              >
+                {date.toLocaleDateString("es-AR", {
+                  weekday: "short",
+                  day: "2-digit",
+                  month: "short",
+                })}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section>
+        <div className="mb-3 flex items-baseline justify-between gap-4">
+          <h3 className="text-lg font-semibold text-foreground">Elegí el horario</h3>
+          {timeSlotsLoading ? (
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">
+              Cargando...
+            </span>
+          ) : null}
+        </div>
+
+        {!selectedDate ? (
+          <p className="text-muted-foreground">
+            Primero elegí una fecha para ver los horarios libres.
+          </p>
+        ) : null}
+
+        {timeSlotsError ? (
+          <div className="mb-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {timeSlotsError.message}
+          </div>
+        ) : null}
+
+        {selectedDate && !timeSlotsLoading && !timeSlotsError && !slotGroups.length ? (
+          <p className="text-muted-foreground">
+            No quedan horarios libres ese día. Probá con otra fecha.
+          </p>
+        ) : null}
+
+        <div className="grid gap-4">
+          {slotGroups.map((group) => (
+            <div key={group.label}>
+              <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                {group.label}
+              </h4>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {group.slots.map((slot) => {
+                  const isActive = selectedTime === slot.time;
+                  return (
+                    <button
+                      key={slot.time}
+                      className={cn(chipBase, isActive ? chipActive : chipInactive)}
+                      onClick={() => handleTimeSelect(slot.time)}
+                      type="button"
+                      disabled={!slot.available}
+                      aria-pressed={isActive}
+                    >
+                      {slot.time}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="sticky bottom-0 -mx-4 mt-2 border-t border-border bg-background/95 px-4 py-3 backdrop-blur">
+        {!isFormValid ? (
+          <p
+            id="booking-continue-help"
+            className="mb-2 text-center text-sm text-muted-foreground"
+          >
+            {missingStepLabel}
+          </p>
+        ) : null}
+        <div className="flex justify-center">
+          <Button
+            disabled={!isFormValid}
+            onClick={() => router.push("/booking/payment")}
+            aria-describedby={!isFormValid ? "booking-continue-help" : undefined}
+            className="w-full max-w-sm disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
+          >
+            Continuar
+          </Button>
+        </div>
+      </div>
     </section>
   );
 }

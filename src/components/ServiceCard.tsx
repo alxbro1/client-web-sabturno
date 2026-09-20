@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { ChevronRight } from "lucide-react";
 import { formatCurrency } from "@/lib/utils/date";
 import type { Service } from "@/lib/types/booking";
 
@@ -15,7 +16,7 @@ export const ServiceCard = memo(function ServiceCard({
     <button
       type="button"
       onClick={() => onSelect(service)}
-      className="group flex h-24 w-full items-center gap-4 overflow-hidden rounded-xl border bg-card p-3 text-left shadow-sm transition-all duration-[140ms] hover:border-[#00f068]/45 active:scale-95"
+      className="group flex h-24 w-full items-center gap-4 overflow-hidden rounded-xl border border-border bg-card p-3 text-left shadow-sm transition-all duration-[140ms] outline-none hover:border-primary/45 focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95"
     >
       {/* Icono — inicial del servicio */}
       <div className="flex-shrink-0">
@@ -28,14 +29,14 @@ export const ServiceCard = memo(function ServiceCard({
 
       {/* Contenido */}
       <div className="min-w-0 flex-1">
-        <p className="mb-0.5 truncate text-[0.65rem] font-bold uppercase tracking-[0.16em] text-primary">
+        <p className="mb-0.5 truncate text-xs font-semibold text-primary">
           {service.category}
         </p>
         <h3 className="mb-0.5 truncate font-semibold text-foreground">
           {service.name}
         </h3>
         <p className="mb-2 overflow-hidden text-ellipsis text-xs text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
-          {service.description || "Sin descripcion disponible."}
+          {service.description || "Sin descripción disponible."}
         </p>
 
         <div className="flex flex-wrap gap-1.5">
@@ -49,9 +50,10 @@ export const ServiceCard = memo(function ServiceCard({
       </div>
 
       {/* Chevron */}
-      <div className="flex-shrink-0 text-xl text-muted-foreground transition-all duration-[140ms] group-hover:translate-x-1 group-hover:text-primary">
-        ›
-      </div>
+      <ChevronRight
+        aria-hidden="true"
+        className="size-5 shrink-0 text-muted-foreground transition-transform duration-[140ms] group-hover:translate-x-1 group-hover:text-primary"
+      />
     </button>
   );
 });
