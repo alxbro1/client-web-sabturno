@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CalendarDays, Clock, Users, DollarSign, Ban, Image as ImageIcon, Crown } from "lucide-react";
+import { BookingLinkCard } from "@/components/local/BookingLinkCard";
 import { LocalStatsCard } from "@/components/local/LocalStatsCard";
 import { LocalNavCard } from "@/components/local/LocalNavCard";
 import { PlanBadge, TrialCountdown } from "@/components/premium";
@@ -128,6 +129,8 @@ export default function LocalDashboardPage() {
           </Button>
         </div>
       </header>
+
+      {localId && <BookingLinkCard localId={localId} />}
 
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive flex flex-wrap gap-4 items-center justify-between">

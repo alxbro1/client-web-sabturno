@@ -17,13 +17,8 @@ import {
 import { Button } from "@/components/Button";
 import { Card } from "@/components/ui/card";
 import { StampCard } from "@/components/loyalty/StampCard";
-import { buildBookingSearch } from "@/lib/utils/bookingQuery";
+import { buildLocalBookingPath } from "@/lib/utils/bookingQuery";
 import { loyaltyService } from "@/services/loyalty";
-
-function bookingHref(localId: string) {
-  const query = buildBookingSearch({ localId });
-  return query ? `/booking/select-service?${query}` : "/booking/select-service";
-}
 
 function PageIntro() {
   return (
@@ -125,7 +120,7 @@ export default function GuestLoyaltyPage() {
                     // sin este CTA le decimos "te faltan N sellos" y lo dejamos
                     // sin forma de sacar el proximo turno.
                     <Link
-                      href={bookingHref(card.local?.id || card.localId)}
+                      href={buildLocalBookingPath(card.local?.id || card.localId)}
                       className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 font-semibold text-primary-foreground transition-colors outline-none hover:bg-primary/90 focus-visible:ring-[3px] focus-visible:ring-ring/50"
                     >
                       <CalendarPlus className="size-4" aria-hidden="true" />

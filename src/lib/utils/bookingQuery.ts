@@ -79,3 +79,14 @@ export function buildBookingSearch(payload: BookingQueryPayload) {
   if (coupon) params.set("coupon", coupon);
   return params.toString();
 }
+
+const SELECT_SERVICE_PATH = "/booking/select-service";
+
+/**
+ * Public deep link that opens the booking flow already scoped to one local
+ * (skips "Elegí un local"). Returns the bare path when there is no usable id.
+ */
+export function buildLocalBookingPath(localId: string) {
+  const query = buildBookingSearch({ localId });
+  return query ? `${SELECT_SERVICE_PATH}?${query}` : SELECT_SERVICE_PATH;
+}
