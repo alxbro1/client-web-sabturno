@@ -86,15 +86,19 @@ export const loyaltyService = {
     return response.data;
   },
 
-  async requestGuestLink(localId: string, email: string) {
-    await apiService.post("/loyalty/guest/request-link", { localId, email });
+  async requestGuestLink(
+    localId: string,
+    recipient: { email: string } | { phone: string },
+  ) {
+    await apiService.post("/loyalty/guest/request-link", { localId, ...recipient });
     return true;
   },
 
   async verifyGuestLink(token: string) {
     const response = await apiService.post<{
       localId: string;
-      email: string;
+      email?: string;
+      phone?: string;
       cards: LoyaltyCard[];
     }>("/loyalty/guest/verify", { token });
     return response.data;

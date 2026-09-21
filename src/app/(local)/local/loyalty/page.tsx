@@ -1,8 +1,9 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  CheckCircle2,
   FlaskConical,
   Gift,
   Info,
@@ -20,15 +21,50 @@ import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
 import { useServicesQuery } from "@/hooks/queries/useServicesQuery";
 import { queryKeys } from "@/lib/queryKeys";
 import { formatLocalDate } from "@/lib/utils/date";
+import { benefitSentence } from "@/lib/utils/loyalty";
 import { loyaltyService } from "@/services/loyalty";
 import { timelineService } from "@/services/timeline";
-import type { LoyaltyProgramPayload, LoyaltyRewardType } from "@/lib/types/loyalty";
+import { StampCard } from "@/components/loyalty/StampCard";
+import type {
+  LoyaltyCard,
+  LoyaltyProgramPayload,
+  LoyaltyRewardType,
+} from "@/lib/types/loyalty";
 
 const rewardOptions: Array<{ value: LoyaltyRewardType; label: string }> = [
   { value: "FREE_SERVICE", label: "Servicio gratis" },
   { value: "PERCENTAGE_DISCOUNT", label: "Descuento %" },
   { value: "FIXED_DISCOUNT", label: "Descuento fijo" },
 ];
+
+// Los vencimientos viajan al backend en días. Mostrarlos así obliga al dueño a
+// traducir 365 o 90 mentalmente, así que las opciones se nombran y el número
+// queda como detalle de transporte.
+const cardExpiryOptions = [
+  { value: 90, label: "3 meses" },
+  { value: 180, label: "6 meses" },
+  { value: 365, label: "1 año" },
+  { value: 730, label: "2 años" },
+];
+
+const rewardExpiryOptions = [
+  { value: 30, label: "1 mes" },
+  { value: 60, label: "2 meses" },
+  { value: 90, label: "3 meses" },
+  { value: 180, label: "6 meses" },
+  { value: 365, label: "1 año" },
+];
+
+/** Si el programa guardado usa un plazo que no está en la lista, se agrega. */
+function expiryOptionsWith(
+  options: Array<{ value: number; label: string }>,
+  current: number,
+) {
+  if (options.some((option) => option.value === current)) return options;
+  return [...options, { value: current, label: `${current} días` }].sort(
+    (a, b) => a.value - b.value,
+  );
+}
 
 export default function LocalLoyaltyPage() {
   const { user } = useAuth();
@@ -78,6 +114,38 @@ export default function LocalLoyaltyPage() {
     cardExpiresAfterDays: latestRevision?.cardExpiresAfterDays || 365,
     rewardExpiresAfterDays: latestRevision?.rewardExpiresAfterDays || 90,
   }), [latestRevision, services, summary?.program?.name]);
+
+  // El form pasa a ser controlado para poder mostrar el resumen y el preview en
+  // vivo: con `defaultValue` + FormData no hay forma de leer los valores
+  // mientras el dueño escribe.
+  const [form, setForm] = useState(defaultValues);
+
+  // Se resincroniza SOLO cuando llega o cambia la revision guardada.
+  // Depender del objeto `defaultValues` seria un loop infinito: `services`
+  // arranca en un `[]` literal nuevo en cada render, asi que el useMemo cambia
+  // de identidad siempre y el efecto se dispararia en cada render.
+  const savedRevisionId = latestRevision?.id;
+  useEffect(() => {
+    setForm(defaultValues);
+    setRewardType(latestRevision?.rewardType || "FREE_SERVICE");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedRevisionId]);
+
+  // El servicio por defecto recien se puede elegir cuando llega la lista.
+  // El guard corta antes del setState, asi que la identidad inestable de
+  // `services` no reabre el loop de arriba.
+  useEffect(() => {
+    if (form.rewardServiceId || !services.length) return;
+    setForm((prev) => ({ ...prev, rewardServiceId: services[0].id }));
+  }, [services, form.rewardServiceId]);
+
+  function updateForm<K extends keyof typeof defaultValues>(
+    field: K,
+    value: (typeof defaultValues)[K],
+  ) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    saveMutation.reset();
+  }
 
   const saveMutation = useMutation({
     mutationFn: (payload: LoyaltyProgramPayload) =>
@@ -136,25 +204,271 @@ export default function LocalLoyaltyPage() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
     const payload: LoyaltyProgramPayload = {
-      name: String(form.get("name") || "Tarjeta de fidelidad"),
-      stampsRequired: Number(form.get("stampsRequired") || 6),
+      name: form.name.trim() || "Tarjeta de fidelidad",
+      stampsRequired: Math.max(Number(form.stampsRequired) || 6, 1),
       stampsPerAppointment: 1,
       rewardType,
       rewardValue:
-        rewardType === "FREE_SERVICE" ? undefined : Number(form.get("rewardValue") || 0),
+        rewardType === "FREE_SERVICE" ? undefined : Number(form.rewardValue) || 0,
       rewardServiceId:
-        rewardType === "FREE_SERVICE" ? Number(form.get("rewardServiceId")) : undefined,
-      cardExpiresAfterDays: Number(form.get("cardExpiresAfterDays") || 365),
-      rewardExpiresAfterDays: Number(form.get("rewardExpiresAfterDays") || 90),
+        rewardType === "FREE_SERVICE" && form.rewardServiceId
+          ? Number(form.rewardServiceId)
+          : undefined,
+      cardExpiresAfterDays: Number(form.cardExpiresAfterDays) || 365,
+      rewardExpiresAfterDays: Number(form.rewardExpiresAfterDays) || 90,
       status: "ACTIVE",
     };
     saveMutation.mutate(payload);
   }
 
+  const stampsRequired = Math.max(Number(form.stampsRequired) || 1, 1);
+  const summarySentence = benefitSentence(
+    stampsRequired,
+    rewardType,
+    rewardType === "FREE_SERVICE" ? null : form.rewardValue,
+  );
+
+  // Tarjeta sintética con los valores del form: el dueño ve exactamente el
+  // mismo componente que renderiza la pantalla del cliente.
+  const previewCard: LoyaltyCard = {
+    id: "preview",
+    localId,
+    stampsBalance: Math.min(Math.max(Math.floor(stampsRequired / 3), 1), stampsRequired),
+    totalStampsEarned: 0,
+    status: "ACTIVE",
+    expiresAt: null,
+    local: { id: localId, name: user?.localName || user?.name || "Tu local" },
+    program: {
+      id: "preview",
+      localId,
+      name: form.name.trim() || "Tarjeta de fidelidad",
+      status: "ACTIVE",
+      revisions: [],
+      services: [],
+    },
+    revision: {
+      id: "preview",
+      version: 1,
+      stampsRequired,
+      stampsPerAppointment: 1,
+      rewardType,
+      rewardValue: rewardType === "FREE_SERVICE" ? null : form.rewardValue,
+      rewardServiceId: form.rewardServiceId ?? null,
+    },
+    rewards: [],
+  };
+
+  const programCard = (
+    <Card className="grid grid-cols-1 gap-6 p-5">
+      <div className="grid grid-cols-1 gap-1">
+        <h2 className="text-lg font-semibold text-foreground">
+          {summary?.program ? "Configuración del programa" : "Creá tu programa"}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Definí cuántos sellos hacen falta y qué gana el cliente al completarlos.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+        <form className="grid grid-cols-1 gap-4" onSubmit={handleSubmit}>
+          <label className="grid grid-cols-1 gap-2 text-sm font-medium text-foreground">
+            Nombre del programa
+            <input
+              value={form.name}
+              onChange={(event) => updateForm("name", event.target.value)}
+              className="h-11 rounded-md border border-input bg-transparent px-3 text-sm"
+              placeholder="Tarjeta de fidelidad"
+            />
+          </label>
+
+          <label className="grid grid-cols-1 gap-2 text-sm font-medium text-foreground">
+            Sellos necesarios
+            <input
+              type="number"
+              min={1}
+              max={30}
+              required
+              value={form.stampsRequired}
+              onChange={(event) =>
+                updateForm("stampsRequired", Number(event.target.value))
+              }
+              className="h-11 rounded-md border border-input bg-transparent px-3 text-sm"
+            />
+            <span className="text-xs font-normal text-muted-foreground">
+              Cada turno completado suma un sello.
+            </span>
+          </label>
+
+          <fieldset className="grid grid-cols-1 gap-2">
+            <legend className="text-sm font-medium text-foreground">
+              Recompensa
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              {rewardOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    setRewardType(option.value);
+                    saveMutation.reset();
+                  }}
+                  aria-pressed={rewardType === option.value}
+                  className={`min-h-11 rounded-md px-3 text-sm transition-[border-color,background-color,color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                    rewardType === option.value
+                      ? "border-2 border-primary bg-primary/10 text-primary"
+                      : "border border-border text-muted-foreground"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          {rewardType === "FREE_SERVICE" ? (
+            <label className="grid grid-cols-1 gap-2 text-sm font-medium text-foreground">
+              ¿Qué servicio regalás?
+              <select
+                value={form.rewardServiceId ?? ""}
+                onChange={(event) =>
+                  updateForm("rewardServiceId", Number(event.target.value))
+                }
+                className="h-11 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                {services.map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <label className="grid grid-cols-1 gap-2 text-sm font-medium text-foreground">
+              {rewardType === "PERCENTAGE_DISCOUNT"
+                ? "Porcentaje de descuento"
+                : "Monto del descuento"}
+              {/* El mismo campo significaba a veces un porcentaje y a veces
+                  pesos, sin ninguna marca. El afijo lo desambigua. */}
+              <span className="flex h-11 items-center overflow-hidden rounded-md border border-input">
+                {rewardType === "FIXED_DISCOUNT" ? (
+                  <span className="grid h-full w-10 shrink-0 place-items-center border-r border-input bg-muted text-sm text-muted-foreground">
+                    $
+                  </span>
+                ) : null}
+                <input
+                  type="number"
+                  min={0}
+                  max={rewardType === "PERCENTAGE_DISCOUNT" ? 100 : undefined}
+                  required
+                  value={form.rewardValue}
+                  onChange={(event) =>
+                    updateForm("rewardValue", Number(event.target.value))
+                  }
+                  className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm outline-none"
+                />
+                {rewardType === "PERCENTAGE_DISCOUNT" ? (
+                  <span className="grid h-full w-10 shrink-0 place-items-center border-l border-input bg-muted text-sm text-muted-foreground">
+                    %
+                  </span>
+                ) : null}
+              </span>
+            </label>
+          )}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <label className="grid grid-cols-1 gap-2 text-sm font-medium text-foreground">
+              La tarjeta vence a los
+              <select
+                value={form.cardExpiresAfterDays}
+                onChange={(event) =>
+                  updateForm("cardExpiresAfterDays", Number(event.target.value))
+                }
+                className="h-11 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                {expiryOptionsWith(
+                  cardExpiryOptions,
+                  Number(form.cardExpiresAfterDays),
+                ).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <span className="text-xs font-normal text-muted-foreground">
+                Contados desde el primer sello.
+              </span>
+            </label>
+
+            <label className="grid grid-cols-1 gap-2 text-sm font-medium text-foreground">
+              El beneficio vence a los
+              <select
+                value={form.rewardExpiresAfterDays}
+                onChange={(event) =>
+                  updateForm("rewardExpiresAfterDays", Number(event.target.value))
+                }
+                className="h-11 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                {expiryOptionsWith(
+                  rewardExpiryOptions,
+                  Number(form.rewardExpiresAfterDays),
+                ).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <span className="text-xs font-normal text-muted-foreground">
+                Contados desde que el cliente completa la tarjeta.
+              </span>
+            </label>
+          </div>
+
+          <p className="rounded-lg border border-primary/25 bg-primary/[0.06] p-4 text-sm text-foreground">
+            {summarySentence}
+          </p>
+
+          {saveMutation.isError ? (
+            <p
+              role="alert"
+              className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
+            >
+              No pudimos guardar el programa. Revisá los datos e intentá de nuevo.
+            </p>
+          ) : null}
+
+          {saveMutation.isSuccess ? (
+            <p
+              role="status"
+              className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm text-primary"
+            >
+              <CheckCircle2 className="size-4 shrink-0" aria-hidden="true" />
+              Programa guardado. Los clientes ya ven la tarjeta actualizada.
+            </p>
+          ) : null}
+
+          <Button
+            type="submit"
+            disabled={saveMutation.isPending || isLoading}
+            className="justify-self-start"
+          >
+            <Save />
+            {saveMutation.isPending ? "Guardando..." : "Guardar programa"}
+          </Button>
+        </form>
+
+        <div className="grid grid-cols-1 gap-2 content-start">
+          <p className="text-sm font-medium text-foreground">
+            Así la ve tu cliente
+          </p>
+          <StampCard card={previewCard} timezone={user?.timezone} />
+        </div>
+      </div>
+    </Card>
+  );
+
   return (
-    <section className="relative grid gap-6">
+    <section className="relative grid grid-cols-1 gap-6">
       <header className="flex items-start justify-between gap-4 max-sm:flex-col">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-primary">
@@ -162,7 +476,7 @@ export default function LocalLoyaltyPage() {
           </p>
           <h1 className="text-2xl font-bold text-foreground">Fidelidad</h1>
           <p className="text-muted-foreground">
-            Configura sellos, vencimientos y beneficios para tus clientes.
+            Configurá sellos, vencimientos y beneficios para tus clientes.
           </p>
         </div>
         {summary?.program ? (
@@ -187,7 +501,11 @@ export default function LocalLoyaltyPage() {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 md:grid-cols-3">
+          {/* Sin programa configurado, el form es la unica accion posible en
+              esta pantalla: no puede estar quinto, debajo de metricas en cero. */}
+          {!summary?.program ? programCard : null}
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <Card className="p-5">
               <p className="text-sm text-muted-foreground">Tarjetas</p>
               <strong className="text-2xl text-foreground">
@@ -210,7 +528,7 @@ export default function LocalLoyaltyPage() {
 
           <Card className="flex items-start gap-3 border-primary/30 bg-primary/[0.04] p-5">
             <Info className="mt-0.5 size-5 shrink-0 text-primary" />
-            <div className="grid gap-1">
+            <div className="grid grid-cols-1 gap-1">
               <h2 className="font-semibold text-foreground">
                 Las tarjetas se crean automáticamente
               </h2>
@@ -223,10 +541,10 @@ export default function LocalLoyaltyPage() {
           </Card>
 
           {isDevelopment ? (
-            <Card className="grid gap-5 border-amber-400/30 bg-amber-400/[0.04] p-5">
+            <Card className="grid grid-cols-1 gap-5 border-amber-400/30 bg-amber-400/[0.04] p-5">
               <div className="flex items-start gap-3">
                 <FlaskConical className="mt-0.5 size-5 shrink-0 text-amber-300" />
-                <div className="grid gap-1">
+                <div className="grid grid-cols-1 gap-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="font-semibold text-foreground">
                       Herramientas de prueba
@@ -246,7 +564,7 @@ export default function LocalLoyaltyPage() {
               {developmentCompletionMutation.isSuccess ? (
                 <div
                   role="status"
-                  className="grid gap-1 rounded-lg border border-primary/25 bg-primary/[0.06] p-4 text-sm"
+                  className="grid grid-cols-1 gap-1 rounded-lg border border-primary/25 bg-primary/[0.06] p-4 text-sm"
                 >
                   <strong className="text-primary">
                     Turno completado y flujo procesado
@@ -278,8 +596,8 @@ export default function LocalLoyaltyPage() {
               ) : null}
 
               {developmentAppointments?.items.length ? (
-                <div className="grid gap-4">
-                  <label className="grid gap-2 text-sm font-medium text-foreground">
+                <div className="grid grid-cols-1 gap-4">
+                  <label className="grid grid-cols-1 gap-2 text-sm font-medium text-foreground">
                     Turno confirmado
                     <select
                       value={developmentAppointmentId}
@@ -306,8 +624,8 @@ export default function LocalLoyaltyPage() {
                   </label>
 
                   {selectedDevelopmentAppointment ? (
-                    <div className="grid gap-4 rounded-lg border border-amber-300/20 bg-background/60 p-4">
-                      <div className="grid gap-1 text-sm">
+                    <div className="grid grid-cols-1 gap-4 rounded-lg border border-amber-300/20 bg-background/60 p-4">
+                      <div className="grid grid-cols-1 gap-1 text-sm">
                         <strong className="text-foreground">
                           {selectedDevelopmentAppointment.user?.name ||
                             selectedDevelopmentAppointment.userName ||
@@ -368,81 +686,17 @@ export default function LocalLoyaltyPage() {
             </Card>
           ) : null}
 
-          <Card className="p-5">
-            <form className="grid gap-4" onSubmit={handleSubmit}>
-              <div className="grid gap-2">
-                <label className="text-sm font-medium text-foreground">Nombre</label>
-                <input name="name" defaultValue={defaultValues.name} className="h-10 rounded-md border border-input bg-transparent px-3 text-sm" />
-              </div>
+          {summary?.program ? programCard : null}
 
-              <div className="grid gap-4 md:grid-cols-3">
-                <label className="grid gap-2 text-sm font-medium text-foreground">
-                  Sellos necesarios
-                  <input name="stampsRequired" type="number" min={1} defaultValue={defaultValues.stampsRequired} className="h-10 rounded-md border border-input bg-transparent px-3 text-sm" />
-                </label>
-                <label className="grid gap-2 text-sm font-medium text-foreground">
-                  Vence tarjeta en dias
-                  <input name="cardExpiresAfterDays" type="number" min={1} defaultValue={defaultValues.cardExpiresAfterDays} className="h-10 rounded-md border border-input bg-transparent px-3 text-sm" />
-                </label>
-                <label className="grid gap-2 text-sm font-medium text-foreground">
-                  Vence recompensa en dias
-                  <input name="rewardExpiresAfterDays" type="number" min={1} defaultValue={defaultValues.rewardExpiresAfterDays} className="h-10 rounded-md border border-input bg-transparent px-3 text-sm" />
-                </label>
-              </div>
-
-              <div className="grid gap-2">
-                <span className="text-sm font-medium text-foreground">Recompensa</span>
-                <div className="flex flex-wrap gap-2">
-                  {rewardOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setRewardType(option.value)}
-                      aria-pressed={rewardType === option.value}
-                      className={`rounded-md px-3 py-2 text-sm transition-[border-color,background-color,color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                        rewardType === option.value
-                          ? "border-2 border-primary bg-primary/10 text-primary"
-                          : "border border-border text-muted-foreground"
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {rewardType === "FREE_SERVICE" ? (
-                <label className="grid gap-2 text-sm font-medium text-foreground">
-                  Servicio gratis
-                  <select name="rewardServiceId" defaultValue={defaultValues.rewardServiceId} className="h-10 rounded-md border border-input bg-background px-3 text-sm">
-                    {services.map((service) => (
-                      <option key={service.id} value={service.id}>{service.name}</option>
-                    ))}
-                  </select>
-                </label>
-              ) : (
-                <label className="grid gap-2 text-sm font-medium text-foreground">
-                  Valor
-                  <input name="rewardValue" type="number" min={0} defaultValue={defaultValues.rewardValue} className="h-10 rounded-md border border-input bg-transparent px-3 text-sm" />
-                </label>
-              )}
-
-              <Button type="submit" disabled={saveMutation.isPending || isLoading}>
-                <Save />
-                {saveMutation.isPending ? "Guardando..." : "Guardar programa"}
-              </Button>
-            </form>
-          </Card>
-
-          <Card className="grid gap-4 p-5">
+          <Card className="grid grid-cols-1 gap-4 p-5">
             <div className="flex items-center gap-2">
               <Ticket className="size-5 text-primary" />
               <h2 className="text-lg font-semibold text-foreground">Clientes con tarjeta</h2>
             </div>
             {cards.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Todavia no hay tarjetas emitidas.</p>
+              <p className="text-sm text-muted-foreground">Todavía no hay tarjetas emitidas.</p>
             ) : (
-              <div className="grid gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 {cards.map((card) => {
                   const required = card.revision.stampsRequired;
                   const progress = Math.min(100, (card.stampsBalance / required) * 100);
@@ -454,15 +708,21 @@ export default function LocalLoyaltyPage() {
                   return (
                     <article
                       key={card.id}
-                      className="grid gap-4 rounded-xl border border-border bg-background/40 p-4"
+                      className="grid grid-cols-1 gap-4 rounded-xl border border-border bg-background/40 p-4"
                     >
                       <div className="flex items-start justify-between gap-4 max-sm:flex-col">
-                        <div className="grid gap-1">
+                        <div className="grid grid-cols-1 gap-1">
                           <strong className="text-foreground">
-                            {card.user?.name || card.guestIdentity?.email || "Cliente"}
+                            {card.user?.name ||
+                              card.guestIdentity?.email ||
+                              card.guestIdentity?.phone ||
+                              "Cliente"}
                           </strong>
                           <span className="text-xs text-muted-foreground">
-                            {card.user?.email || "Cliente invitado"}
+                            {card.user?.email ||
+                              card.guestIdentity?.email ||
+                              card.guestIdentity?.phone ||
+                              "Cliente invitado"}
                           </span>
                         </div>
                         <Button
@@ -478,7 +738,7 @@ export default function LocalLoyaltyPage() {
                         </Button>
                       </div>
 
-                      <div className="grid gap-2">
+                      <div className="grid grid-cols-1 gap-2">
                         <div className="flex items-center justify-between gap-3 text-sm">
                           <span className="text-muted-foreground">Progreso</span>
                           <span className="font-medium text-foreground">
@@ -508,7 +768,7 @@ export default function LocalLoyaltyPage() {
 
                       {isAdjusting ? (
                         <form
-                          className="grid gap-3 rounded-lg border border-primary/20 bg-primary/[0.03] p-4 md:grid-cols-[140px_1fr_auto]"
+                          className="grid grid-cols-1 gap-3 rounded-lg border border-primary/20 bg-primary/[0.03] p-4 md:grid-cols-[140px_1fr_auto]"
                           onSubmit={(event) => {
                             event.preventDefault();
                             adjustMutation.mutate({
@@ -518,7 +778,7 @@ export default function LocalLoyaltyPage() {
                             });
                           }}
                         >
-                          <label className="grid gap-2 text-sm font-medium text-foreground">
+                          <label className="grid grid-cols-1 gap-2 text-sm font-medium text-foreground">
                             Sellos
                             <input
                               type="number"
@@ -531,7 +791,7 @@ export default function LocalLoyaltyPage() {
                               required
                             />
                           </label>
-                          <label className="grid gap-2 text-sm font-medium text-foreground">
+                          <label className="grid grid-cols-1 gap-2 text-sm font-medium text-foreground">
                             Motivo
                             <input
                               value={adjustmentReason}

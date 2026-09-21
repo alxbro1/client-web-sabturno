@@ -16,6 +16,12 @@ export interface Local {
   reservationPercentage?: number | null;
   payWithCashInFront?: boolean;
   payWithTalo?: boolean;
+  /**
+   * When true, the business receives a WhatsApp message on `phone` every time
+   * a client books an appointment. The backend rejects enabling it without a
+   * valid mobile `phone` (400).
+   */
+  notifyNewAppointmentWhatsapp?: boolean;
   /** ID del plan de suscripción actual */
   subscriptionPlanId?: string | null;
   /** Tier del plan: basic, pro, enterprise */

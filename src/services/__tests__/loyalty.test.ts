@@ -69,3 +69,16 @@ describe("loyaltyService.validateBookingCoupon", () => {
     );
   });
 });
+
+describe("loyaltyService.requestGuestLink", () => {
+  it("requests a guest link by phone without adding an email", async () => {
+    mockApiService.post.mockResolvedValue({ data: { ok: true } });
+
+    await loyaltyService.requestGuestLink("local-1", { phone: "3515551234" });
+
+    expect(mockApiService.post).toHaveBeenCalledWith(
+      "/loyalty/guest/request-link",
+      { localId: "local-1", phone: "3515551234" },
+    );
+  });
+});

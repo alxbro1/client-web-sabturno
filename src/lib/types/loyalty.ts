@@ -80,7 +80,12 @@ export interface LoyaltyCard {
   rewards: LoyaltyReward[];
   movements?: LoyaltyMovement[];
   user?: { id: string; name: string; email: string } | null;
-  guestIdentity?: { id: string; email: string; verifiedAt?: string | null } | null;
+  guestIdentity?: {
+    id: string;
+    email?: string | null;
+    phone?: string | null;
+    verifiedAt?: string | null;
+  } | null;
 }
 
 export interface LoyaltyOwnerSummary {
