@@ -130,7 +130,8 @@ vi.mock("@/hooks/useAuth", () => ({
 ## Conventions
 
 - Path alias `@/*` → `./src/*` is wired in `tsconfig.json` and `vitest.config.ts`. Use it everywhere; don't add new relative `../../../` chains.
-- Tailwind v4 is loaded via `@tailwindcss/postcss` and `@import "tailwindcss";` in `src/styles.css`. There is no `tailwind.config.js`; design tokens are CSS variables on `:root` in `styles.css` (brand neon `#00f068`, danger `#ff5678`, etc.). New tokens go in that file.
+- Tailwind v4 is loaded via `@tailwindcss/postcss` and `@import "tailwindcss";` in `src/styles.css`. There is no `tailwind.config.js` and no `@config` directive — **creating one is a regression**.
+- Los tokens viven en `src/styles.css` y son **dos bloques, ambos obligatorios**: `:root` guarda el valor crudo (triplete HSL sin `hsl()`, más los hex `--brand-*`) y `@theme inline` lo mapea a `--color-*`. Sólo `@theme inline` hace que Tailwind **emita** la utility: un token que está únicamente en `:root` deja a `bg-primary` sin efecto y no avisa. Los resets de elemento van dentro de `@layer base`, porque el CSS sin layer le gana al CSS con layer. Detalle completo y checklist en la skill `sabturno-design-tokens`.
 - Dark-only theme; UI strings are in Spanish ("Cargando...", "Mis turnos"). Match existing copy.
 - Next.js App Router conventions: `page.tsx` for pages, `layout.tsx` for layouts, `loading.tsx` for loading states, `not-found.tsx` for 404.
 - Route groups `(auth)`, `(client)`, `(local)` for layout scoping (not URL segments).
@@ -193,7 +194,81 @@ aws s3 ls --profile sabturno  # Verificar acceso al bucket
 
 ## Skills
 
-Repo-local skills under `.agents/skills/` (composition-patterns, react-best-practices, frontend-design, tailwind-css-patterns, vite, nextauth-migration, etc.) are auto-loaded by opencode via `skills-lock.json` — prefer them over generic advice for React composition, performance, and Tailwind work.
+Dos orígenes distintos, no mezclarlos:
+
+- **Skills propias del monorepo** — contenido en `.claude/skills/<nombre>/SKILL.md`
+  (raíz), con symlink desde `.opencode/skills/<nombre>`. Las cuatro que aplican a
+  este repo: `sabturno-design-tokens`, `mobile-viewport-audit`, `ux-form-review`,
+  `nextjs-silent-failures`. Ver la sección *Diseño y UI*.
+- **Skills de terceros** — `.agents/skills/` (composition-patterns,
+  react-best-practices, frontend-design, tailwind-css-patterns, vite,
+  nextauth-migration…), bajadas de registries externos y fijadas por hash en
+  `skills-lock.json`. Útiles para React genérico, pero **no escribir skills
+  propias ahí**: un refresh del registry puede pisarlas.
+
+> ⚠️ `react-shadcn-branding` (en `.opencode/skills/`) es una skill de **Tailwind
+> v3**: genera `tailwind.config.js` con `module.exports`. No aplica a este repo.
+> Para tokens y branding acá se usa `sabturno-design-tokens`.
+
+## Diseño y UI
+
+Rutas rápidas:
+
+| Situación | Skill |
+| --- | --- |
+| Colores, tokens, tipografía, radios, `styles.css` | `sabturno-design-tokens` |
+| "Se rompe en mobile", desborde horizontal, audit responsive | `mobile-viewport-audit` |
+| Formulario, paso de un flujo, pantalla "poco práctica" | `ux-form-review` |
+| La página muestra su estado de error sin motivo | `nextjs-silent-failures` |
+
+Reglas que no dependen de cargar la skill:
+
+- **Criterio de aceptación mobile**: 0 elementos desbordados a 390px en cada
+  ruta tocada, y `documentElement.scrollWidth === clientWidth === 390`. Un
+  `<section className="grid gap-N">` sin `grid-cols-*` crea una columna implícita
+  `auto` cuyo mínimo es el min-content del subárbol; el arreglo es `grid-cols-1`
+  (`repeat(1, minmax(0, 1fr))`). Cuando `scrollWidth === clientWidth` el
+  contenido **se recorta, no scrollea**: lo que queda afuera es inalcanzable.
+- **Antes de marcar un campo como obligatorio**, leer el DTO y el service del
+  backend. Varios campos son `@IsOptional()` y la notificación sale con un OR;
+  exigir dos canales cuando alcanza con uno es un bug de front, no una regla de
+  negocio.
+- **Touch y accesibilidad**: inputs y targets `h-11`, `<label>` real (el
+  placeholder no es label), grupos de toggles en `<fieldset><legend>`, file
+  inputs con `<label htmlFor>` + input `sr-only` en vez de `ref.current.click()`.
+- **Toda mutación necesita éxito y error visibles** (`role="status"` /
+  `role="alert"`). Un botón que vuelve de "Guardando…" a su texto normal no es
+  feedback.
+- **Lo que ve el cliente final se comparte, no se duplica.** Si el dueño
+  configura algo que el invitado después ve, el componente y la frase salen del
+  mismo lugar (`src/components/loyalty/StampCard.tsx`, `src/lib/utils/loyalty.ts`)
+  para que no puedan divergir.
+- **Copy en español con tildes.** Las que más se escapan: *Todavía, Elegí, días,
+  está, más, número, también, información, aún*.
+
+## Trampas verificadas
+
+Tres fallas que no tiran error donde se lo pueda ver. Detalle y diagnóstico en
+`nextjs-silent-failures`.
+
+1. **Cruce cliente/servidor por cadena de imports.** Un módulo con `"use client"`
+   es un *client reference proxy* en el grafo del servidor: llamar a sus exports
+   desde un Server Component lanza **antes de que salga un solo HTTP**. Caso real:
+   `src/app/appointment/[id]/page.tsx` → `@/services/booking` → `@/lib/api`, y
+   `src/lib/api.ts` importa `getSession` de `next-auth/react`.
+   **Señal**: `curl` al endpoint devuelve 200 y el panel de red de la página
+   muestra **cero** peticiones al backend. Si la página no emite la petición, el
+   problema es anterior al HTTP.
+   `src/lib/api.ts` lleva `"use client"` como primera sentencia justamente para
+   que el próximo cruce sea error de build y no un `catch` mudo.
+2. **Loop de identidad referencial con React Query.**
+   `const { data: x = [] } = useQuery(...)` devuelve un `[]` **nuevo en cada
+   render**; cualquier `useMemo` que dependa de él cambia de identidad siempre, y
+   un `useEffect` sobre ese memo que llame a `setState` no para nunca.
+   **Señal**: `npm run test:run` no termina y quedan procesos de vitest vivos.
+   Depender de un escalar estable (`latestRevision?.id`), no del objeto.
+3. **`catch {}` pelado.** Es lo que mantuvo invisible la trampa 1. Siempre
+   `catch (error)` con `console.error`, y distinguir 404 de 5xx en el copy.
 
 ## Time handling
 
