@@ -16,7 +16,7 @@ export const ServiceCard = memo(function ServiceCard({
     <button
       type="button"
       onClick={() => onSelect(service)}
-      className="group flex h-24 w-full items-center gap-4 overflow-hidden rounded-xl border border-border bg-card p-3 text-left shadow-sm transition-all duration-[140ms] outline-none hover:border-primary/45 focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95"
+      className="group flex min-h-24 w-full items-center gap-4 overflow-hidden rounded-xl border border-border bg-card p-3 text-left shadow-sm transition-all duration-[140ms] outline-none hover:border-primary/45 focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95"
     >
       {/* Icono — inicial del servicio */}
       <div className="flex-shrink-0">
