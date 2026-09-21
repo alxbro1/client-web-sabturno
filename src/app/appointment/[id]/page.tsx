@@ -2,9 +2,7 @@ import Link from "next/link";
 import { formatLocalDate } from "@/lib/utils/date";
 import { DEFAULT_TIMEZONE } from "@/lib/constants/countries";
 
-export function generateStaticParams() {
-  return [];
-}
+export const dynamic = "force-dynamic";
 
 const STATE_LABELS: Record<string, string> = {
   CONFIRMED: "Confirmado",
