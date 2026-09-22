@@ -68,6 +68,12 @@ export default function SelectPaymentPage() {
   const isPhoneValid = phoneDigits.length >= 10 && phoneDigits.length <= 15;
   const isEmailValid = /\S+@\S+\.\S+/.test(email.trim());
 
+  // Border verde para guiar al invitado hacia lo que todavia falta completar.
+  // Para usuarios logueados el telefono es opcional, nunca se marca.
+  const phoneNeedsCompletion = !user && !isPhoneValid;
+  const emailNeedsCompletion = !isEmailValid;
+  const nameNeedsCompletion = userName.trim().length === 0;
+
   // Con un canal alcanza. El backend trata email y telefono como alternativas:
   // en create-appointment.dto ambos son @IsOptional(), y la notificacion se
   // dispara con (email || phoneNumber || user.phone), con WhatsApp y mail
@@ -554,7 +560,7 @@ export default function SelectPaymentPage() {
             </label>
             <input
               id="booking-phone"
-              className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+              className={`flex h-11 w-full rounded-md border ${phoneNeedsCompletion ? "border-primary" : "border-input"} bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm`}
               type="tel"
               inputMode="tel"
               autoComplete="tel"
@@ -587,7 +593,7 @@ export default function SelectPaymentPage() {
             </label>
             <input
               id="booking-email"
-              className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+              className={`flex h-11 w-full rounded-md border ${emailNeedsCompletion ? "border-primary" : "border-input"} bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm`}
               type="email"
               inputMode="email"
               autoComplete="email"
@@ -622,7 +628,7 @@ export default function SelectPaymentPage() {
             </label>
             <input
               id="booking-name"
-              className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+              className={`flex h-11 w-full rounded-md border ${nameNeedsCompletion ? "border-primary" : "border-input"} bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm`}
               type="text"
               autoComplete="name"
               value={userName}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/Button";
@@ -10,23 +10,6 @@ import { parseBookingQuery } from "@/lib/utils/bookingQuery";
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatDateOnlyLocal } from "@/lib/utils/date";
 import { useBookingStore } from "@/stores/booking";
-import type { TimeSlot } from "@/lib/types/booking";
-
-const SLOT_GROUPS = [
-  { label: "Mañana", from: 0, to: 12 },
-  { label: "Tarde", from: 12, to: 18 },
-  { label: "Noche", from: 18, to: 24 },
-] as const;
-
-function groupSlotsByPeriod(slots: TimeSlot[]) {
-  return SLOT_GROUPS.map((group) => ({
-    label: group.label,
-    slots: slots.filter((slot) => {
-      const hour = Number(slot.time.split(":")[0]);
-      return hour >= group.from && hour < group.to;
-    }),
-  })).filter((group) => group.slots.length > 0);
-}
 
 export default function SelectSlotPage() {
   const router = useRouter();
@@ -60,11 +43,6 @@ export default function SelectSlotPage() {
       service?.duration ?? null,
       availabilityRefreshToken,
     );
-
-  const slotGroups = useMemo(
-    () => groupSlotsByPeriod(timeSlots ?? []),
-    [timeSlots],
-  );
 
   function buildSelectServiceUrl() {
     return "/booking/select-service";
@@ -195,37 +173,28 @@ export default function SelectSlotPage() {
           </div>
         ) : null}
 
-        {selectedDate && !timeSlotsLoading && !timeSlotsError && !slotGroups.length ? (
+        {selectedDate && !timeSlotsLoading && !timeSlotsError && !timeSlots?.length ? (
           <p className="text-muted-foreground">
             No quedan horarios libres ese día. Probá con otra fecha.
           </p>
         ) : null}
 
-        <div className="grid gap-4">
-          {slotGroups.map((group) => (
-            <div key={group.label}>
-              <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                {group.label}
-              </h4>
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                {group.slots.map((slot) => {
-                  const isActive = selectedTime === slot.time;
-                  return (
-                    <button
-                      key={slot.time}
-                      className={cn(chipBase, isActive ? chipActive : chipInactive)}
-                      onClick={() => handleTimeSelect(slot.time)}
-                      type="button"
-                      disabled={!slot.available}
-                      aria-pressed={isActive}
-                    >
-                      {slot.time}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+          {timeSlots?.map((slot) => {
+            const isActive = selectedTime === slot.time;
+            return (
+              <button
+                key={slot.time}
+                className={cn(chipBase, isActive ? chipActive : chipInactive)}
+                onClick={() => handleTimeSelect(slot.time)}
+                type="button"
+                disabled={!slot.available}
+                aria-pressed={isActive}
+              >
+                {slot.time}
+              </button>
+            );
+          })}
         </div>
       </section>
 
