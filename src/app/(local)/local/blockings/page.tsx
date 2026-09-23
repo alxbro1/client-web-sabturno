@@ -5,7 +5,10 @@ import { dateFnsLocalizer, type SlotInfo, type View, Views } from "react-big-cal
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { es } from "date-fns/locale/es";
 import { Button } from "@/components/Button";
+import { SelectField } from "@/components/Field";
 import { useLocalCalendarQuery } from "@/hooks/queries/useLocalCalendarQuery";
+import { useEmployeesQuery } from "@/hooks/queries/useEmployeesQuery";
+import { useAuth } from "@/hooks/useAuth";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import ShadcnBigCalendar from "@/components/shadcn-big-calendar/shadcn-big-calendar";
 import "@/components/shadcn-big-calendar/shadcn-big-calendar.css";
@@ -44,6 +47,8 @@ interface BlockingFormData {
   startTime?: string;
   endTime?: string;
   notes: string;
+  /** "" = todo el local. */
+  employeeId: string;
 }
 
 interface CalendarEvent {
@@ -55,6 +60,11 @@ interface CalendarEvent {
 }
 
 export default function LocalBlockingsPage() {
+  const { user } = useAuth();
+  const localId = user?.id ?? "";
+  const { employees } = useEmployeesQuery(localId);
+  const [filterEmployeeId, setFilterEmployeeId] = useState("");
+
   const {
     blockedDates,
     isLoading,
@@ -63,14 +73,20 @@ export default function LocalBlockingsPage() {
     currentMonth,
     currentYear,
     setMonth,
-  } = useLocalCalendarQuery();
+  } = useLocalCalendarQuery(filterEmployeeId || undefined);
 
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<BlockingFormData>({
     type: "full-day",
     date: "",
     notes: "",
+    employeeId: "",
   });
+
+  function employeeLabel(employeeId?: string | null): string {
+    if (!employeeId) return "Todo el local";
+    return employees.find((e) => e.id === employeeId)?.name || "Empleado";
+  }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteId, setDeleteId] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -133,7 +149,7 @@ export default function LocalBlockingsPage() {
         ((endHour === 0 && endMin === 0) || endHour === 23);
 
       if (isFullDay) {
-        setFormData({ type: "full-day", date: dateStr, notes: "" });
+        setFormData({ type: "full-day", date: dateStr, notes: "", employeeId: "" });
       } else {
         const startTime = `${String(startHour).padStart(2, "0")}:${String(startMin).padStart(2, "0")}`;
         const endTime = `${String(endHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
@@ -143,6 +159,7 @@ export default function LocalBlockingsPage() {
           startTime,
           endTime,
           notes: "",
+          employeeId: "",
         });
       }
       setShowForm(true);
@@ -189,7 +206,12 @@ export default function LocalBlockingsPage() {
         startDate = new Date(y, m - 1, d, 0, 0, 0, 0);
         endDate = new Date(y, m - 1, d, 0, 0, 0, 0);
       }
-      await blockDate(startDate, endDate, formData.notes);
+      await blockDate(
+        startDate,
+        endDate,
+        formData.notes,
+        formData.employeeId || undefined,
+      );
       setShowForm(false);
     } catch (err) {
       console.error("Error blocking date:", err);
@@ -232,6 +254,24 @@ export default function LocalBlockingsPage() {
         </h2>
       </header>
 
+      {employees.length > 0 && (
+        <div className="max-w-xs">
+          <SelectField
+            label="Filtrar por empleado"
+            value={filterEmployeeId}
+            onChange={(e) => setFilterEmployeeId(e.target.value)}
+            hint="Muestra los bloqueos de todo el local mas los del empleado elegido."
+          >
+            <option value="">Todos</option>
+            {employees.map((employee) => (
+              <option key={employee.id} value={employee.id}>
+                {employee.name}
+              </option>
+            ))}
+          </SelectField>
+        </div>
+      )}
+
         {isLoading ? (
           <div className="h-[650px] flex items-center justify-center">
             <div className="text-muted-foreground">Cargando calendario...</div>
@@ -270,14 +310,21 @@ export default function LocalBlockingsPage() {
                 className="flex items-center justify-between p-3 rounded-xl border border-[#ff5678]/20 bg-[#ff5678]/5"
               >
                 <div>
-                  <p className="text-white font-medium">
-                    {block.startDate.toDateString() ===
-                    block.endDate.toDateString()
-                      ? block.type === "time-slot" && block.startTime && block.endTime
-                        ? `${formatDate(block.startDate)} \u00b7 ${block.startTime} - ${block.endTime}`
-                        : formatDate(block.startDate)
-                      : `${formatDate(block.startDate)} - ${formatDate(block.endDate)}`}
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-white font-medium">
+                      {block.startDate.toDateString() ===
+                      block.endDate.toDateString()
+                        ? block.type === "time-slot" && block.startTime && block.endTime
+                          ? `${formatDate(block.startDate)} \u00b7 ${block.startTime} - ${block.endTime}`
+                          : formatDate(block.startDate)
+                        : `${formatDate(block.startDate)} - ${formatDate(block.endDate)}`}
+                    </p>
+                    {employees.length > 0 && (
+                      <span className="rounded-full border border-[#ff5678]/30 bg-[#ff5678]/10 px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wide text-[#ff9aae]">
+                        {employeeLabel(block.employeeId)}
+                      </span>
+                    )}
+                  </div>
                   {block.reason && (
                     <p className="text-sm text-muted-foreground">{block.reason}</p>
                   )}
@@ -341,6 +388,26 @@ export default function LocalBlockingsPage() {
                   </button>
                 </div>
               </div>
+
+              {employees.length > 0 && (
+                <SelectField
+                  label="Aplica a"
+                  value={formData.employeeId}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      employeeId: e.target.value,
+                    }))
+                  }
+                >
+                  <option value="">Todo el local</option>
+                  {employees.map((employee) => (
+                    <option key={employee.id} value={employee.id}>
+                      {employee.name}
+                    </option>
+                  ))}
+                </SelectField>
+              )}
 
               {formData.type === "time-slot" && (
                 <div className="flex gap-3">

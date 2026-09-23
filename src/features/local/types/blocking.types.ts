@@ -3,6 +3,8 @@ export interface BaseBlocking {
   localId: string;
   date: string;
   notes?: string;
+  /** null/ausente = bloqueo de todo el local; con valor = solo ese empleado. */
+  employeeId?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -11,6 +13,7 @@ export interface BaseCreateBlockingRequest {
   localId: string;
   date: string;
   notes?: string;
+  employeeId?: string;
 }
 
 export type BlockedDate = BaseBlocking;

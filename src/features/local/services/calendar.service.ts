@@ -45,13 +45,15 @@ export const calendarService = {
   getBlockedDates: async (
     localId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    employeeId?: string,
   ): Promise<BlockedDateRange[]> => {
     const response = await apiService.get<BlockedDateRange[]>(
       `/local/calendar/${localId}/blocked-dates`, {
         params: {
           startDate: formatDateOnlyLocal(startDate),
-          endDate: formatDateOnlyLocal(endDate)
+          endDate: formatDateOnlyLocal(endDate),
+          ...(employeeId ? { employeeId } : {}),
         }
       }
     );

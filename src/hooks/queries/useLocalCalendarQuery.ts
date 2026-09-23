@@ -33,11 +33,12 @@ async function fetchCalendarData(
   localId: string,
   month: number,
   year: number,
+  employeeId?: string,
 ): Promise<CalendarData> {
   const { startDate, endDate } = getDateRange(month, year);
   const [appointmentData, blockedData, workingDaysData] = await Promise.all([
     calendarService.getAppointmentCountByDay(localId, startDate, endDate),
-    calendarService.getBlockedDates(localId, startDate, endDate),
+    calendarService.getBlockedDates(localId, startDate, endDate, employeeId),
     calendarService.getWorkingDaysFromTemplates(localId),
   ]);
   return {
@@ -47,7 +48,7 @@ async function fetchCalendarData(
   };
 }
 
-export function useLocalCalendarQuery() {
+export function useLocalCalendarQuery(employeeId?: string) {
   const { user } = useAuth();
   const localId = user?.id ?? "";
   const [currentMonth, setCurrentMonth] = useState(() =>
@@ -59,8 +60,14 @@ export function useLocalCalendarQuery() {
   const [blockedDates, setBlockedDates] = useState<BlockedDateRange[]>([]);
 
   const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: queryKeys.localCalendar(localId, currentMonth, currentYear),
-    queryFn: () => fetchCalendarData(localId, currentMonth, currentYear),
+    queryKey: queryKeys.localCalendar(
+      localId,
+      currentMonth,
+      currentYear,
+      employeeId,
+    ),
+    queryFn: () =>
+      fetchCalendarData(localId, currentMonth, currentYear, employeeId),
     enabled: !!localId && !!user?.isLocal,
     staleTime: 30_000,
   });
@@ -174,7 +181,12 @@ export function useLocalCalendarQuery() {
   }, []);
 
   const blockDate = useCallback(
-    async (startDate: Date, endDate: Date, reason: string): Promise<boolean> => {
+    async (
+      startDate: Date,
+      endDate: Date,
+      reason: string,
+      blockEmployeeId?: string,
+    ): Promise<boolean> => {
       if (!localId) return false;
       try {
         const createdRanges: BlockedDateRange[] = [];
@@ -198,6 +210,7 @@ export function useLocalCalendarQuery() {
               localId,
               date: dateStr,
               notes: reason,
+              ...(blockEmployeeId ? { employeeId: blockEmployeeId } : {}),
             });
             const dayStart = new Date(cursor);
             const dayEnd = new Date(cursor);
@@ -208,6 +221,7 @@ export function useLocalCalendarQuery() {
               type: 'full-day',
               reason: created.notes || "",
               localId: created.localId,
+              employeeId: created.employeeId ?? blockEmployeeId ?? null,
               createdAt: created.createdAt,
               updatedAt: created.updatedAt,
             });
@@ -224,6 +238,7 @@ export function useLocalCalendarQuery() {
             startTime: startTimeUtc,
             endTime: endTimeUtc,
             notes: reason,
+            ...(blockEmployeeId ? { employeeId: blockEmployeeId } : {}),
           });
           createdRanges.push({
             id: created.id,
@@ -234,6 +249,7 @@ export function useLocalCalendarQuery() {
             endTime: formatLocalTime(endDate),
             reason: created.notes || "",
             localId: created.localId,
+            employeeId: created.employeeId ?? blockEmployeeId ?? null,
             createdAt: created.createdAt,
             updatedAt: created.updatedAt,
           });
@@ -243,6 +259,7 @@ export function useLocalCalendarQuery() {
             localId,
             date: dateStr,
             notes: reason,
+            ...(blockEmployeeId ? { employeeId: blockEmployeeId } : {}),
           });
           createdRanges.push({
             id: created.id,
@@ -251,6 +268,7 @@ export function useLocalCalendarQuery() {
             type: 'full-day',
             reason: created.notes || "",
             localId: created.localId,
+            employeeId: created.employeeId ?? blockEmployeeId ?? null,
             createdAt: created.createdAt,
             updatedAt: created.updatedAt,
           });

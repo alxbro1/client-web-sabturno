@@ -27,8 +27,12 @@ export const queryKeys = {
   localHome: (localId: string) => ["local-home", localId] as const,
   local: (localId: string) => ["local", localId] as const,
   scheduleTemplates: (localId: string) => ["schedule-templates", localId] as const,
-  localCalendar: (localId: string, month: number, year: number) =>
-    ["local-calendar", localId, month, year] as const,
+  localCalendar: (
+    localId: string,
+    month: number,
+    year: number,
+    employeeId?: string,
+  ) => ["local-calendar", localId, month, year, employeeId ?? null] as const,
   localImages: (localId: string) => ["local-images", localId] as const,
   userPayments: () => ["user-payments"] as const,
   employees: (localId: string) => ["employees", localId] as const,

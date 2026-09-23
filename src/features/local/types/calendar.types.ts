@@ -29,6 +29,8 @@ export interface BlockedDateRange {
   isRecurring?: boolean;
   recurrencePattern?: 'weekly' | 'monthly' | 'yearly';
   localId: string;
+  /** null/ausente = bloqueo de todo el local; con valor = solo ese empleado. */
+  employeeId?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
