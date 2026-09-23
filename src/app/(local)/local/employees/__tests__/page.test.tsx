@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 
 const { mockQuery, mockUser } = vi.hoisted(() => ({
   mockQuery: {
-    employees: [] as Array<{ id: string; name: string; email?: string; phone?: string; color?: string }>,
+    employees: [] as Array<{ id: string; name: string; email?: string; phone?: string; color?: string; avatar?: string }>,
     isLoading: false,
     error: null as string | null,
     deleteEmployee: vi.fn(),
@@ -120,5 +120,47 @@ describe("EmployeesPage", () => {
     await waitFor(() => {
       expect(mockQuery.deleteEmployee).toHaveBeenCalledWith("1");
     });
+  });
+
+  it("renders the employee's avatar photo when present", () => {
+    mockQuery.employees = [
+      {
+        id: "1",
+        name: "Juan Perez",
+        color: "#00f068",
+        avatar: "https://cdn.test/emp-1.jpg",
+      },
+    ];
+
+    render(<EmployeesPage />);
+
+    const avatar = screen.getByAltText("Juan Perez");
+    expect(avatar).toHaveAttribute("src", "https://cdn.test/emp-1.jpg");
+  });
+
+  it("shows the backend's 409 message when the employee has future appointments", async () => {
+    const user = userEvent.setup();
+    mockQuery.employees = [{ id: "1", name: "Juan Perez", color: "#00f068" }];
+    mockQuery.deleteEmployee.mockRejectedValue({
+      response: {
+        status: 409,
+        data: {
+          message:
+            "Employee has 2 upcoming confirmed/pending appointment(s). Reassign them before deleting.",
+        },
+      },
+    });
+
+    render(<EmployeesPage />);
+
+    await user.click(screen.getByText("Eliminar"));
+    const dialogButtons = screen.getAllByText("Eliminar");
+    await user.click(dialogButtons[dialogButtons.length - 1]);
+
+    expect(
+      await screen.findByText(
+        "Employee has 2 upcoming confirmed/pending appointment(s). Reassign them before deleting.",
+      ),
+    ).toBeInTheDocument();
   });
 });

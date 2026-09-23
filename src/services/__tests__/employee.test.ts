@@ -116,6 +116,37 @@ describe("employeeService.getPublicEmployees", () => {
   });
 });
 
+describe("employeeService.uploadEmployeeImage", () => {
+  it("makes multipart POST request to /locals/{localId}/employees/{id}/image", async () => {
+    const updated = makeEmployee({ avatar: "https://cdn.example.com/employees/1.jpg" });
+    mockApiService.post.mockResolvedValue({ data: updated });
+
+    const result = await employeeService.uploadEmployeeImage(LOCAL_ID, EMPLOYEE_ID, {
+      uri: "data:image/jpeg;base64,AAAA",
+    });
+
+    expect(mockApiService.post).toHaveBeenCalledTimes(1);
+    const [url, formData, config] = mockApiService.post.mock.calls[0];
+    expect(url).toBe(`/locals/${LOCAL_ID}/employees/${EMPLOYEE_ID}/image`);
+    expect(formData).toBeInstanceOf(FormData);
+    expect(config).toEqual({ headers: { "Content-Type": "multipart/form-data" } });
+    expect(result).toEqual(updated);
+  });
+
+  it("returns null and logs when the upload fails", async () => {
+    mockApiService.post.mockRejectedValue(new Error("network error"));
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const result = await employeeService.uploadEmployeeImage(LOCAL_ID, EMPLOYEE_ID, {
+      uri: "data:image/jpeg;base64,AAAA",
+    });
+
+    expect(result).toBeNull();
+    expect(consoleSpy).toHaveBeenCalled();
+    consoleSpy.mockRestore();
+  });
+});
+
 describe("employeeService.deleteEmployee", () => {
   it("makes DELETE request to /locals/{localId}/employees/{id}", async () => {
     mockApiService.delete.mockResolvedValue({ data: undefined });

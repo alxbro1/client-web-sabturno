@@ -22,6 +22,9 @@ export interface ScheduleTemplateFromAPI {
   isActive: boolean;
   name: string;
   timeSlotsCount: number;
+  /** Plantilla de un empleado especifico, o local-wide si es null/ausente. */
+  employeeId?: string | null;
+  employeeName?: string | null;
 }
 
 export interface TimeStockTemplate {
@@ -41,6 +44,9 @@ export interface ScheduleTemplate {
   name: string;
   isActive: boolean;
   localId: string;
+  /** Plantilla de un empleado especifico, o local-wide si es null/ausente. */
+  employeeId?: string | null;
+  employee?: { id: string; name: string } | null;
   timeStockTemplates: TimeStockTemplate[];
   createdAt: string;
   updatedAt: string;
@@ -56,4 +62,6 @@ export interface CreateScheduleTemplateRequest {
    * legacy, pero el contrato canonico es este.
    */
   schedule: Schedule;
+  /** Asigna esta plantilla a un empleado. Omitir = plantilla del local. */
+  employeeId?: string;
 }

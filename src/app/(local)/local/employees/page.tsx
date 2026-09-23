@@ -16,13 +16,24 @@ export default function EmployeesPage() {
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   async function handleDelete() {
     if (!deleteId) return;
     setIsDeleting(true);
+    setDeleteError(null);
     try {
       await deleteEmployee(deleteId);
       setDeleteId(null);
+    } catch (err: any) {
+      // 409: el empleado tiene turnos futuros CONFIRMED/PENDING. El backend
+      // ya devuelve el conteo en el mensaje, mostrarlo en vez de uno generico.
+      if (err?.response?.status === 409 && err.response.data?.message) {
+        setDeleteError(err.response.data.message);
+      } else {
+        setDeleteError("No se pudo eliminar el empleado. Intenta nuevamente.");
+      }
+      console.error("Error deleting employee:", err);
     } finally {
       setIsDeleting(false);
     }
@@ -67,12 +78,20 @@ export default function EmployeesPage() {
               key={employee.id}
               className="flex items-center gap-4 p-4 rounded-[18px] border border-white/10 bg-white/[0.02] transition-[background-color,border-color] duration-150 hover:bg-white/[0.04] hover:border-white/16"
             >
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-[0.9rem] font-bold text-[#0a0a0a] shrink-0"
-                style={{ backgroundColor: employee.color || "#00f068" }}
-              >
-                {employee.name.charAt(0).toUpperCase()}
-              </div>
+              {employee.avatar ? (
+                <img
+                  src={employee.avatar}
+                  alt={employee.name}
+                  className="w-10 h-10 rounded-full object-cover shrink-0"
+                />
+              ) : (
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-[0.9rem] font-bold text-[#0a0a0a] shrink-0"
+                  style={{ backgroundColor: employee.color || "#00f068" }}
+                >
+                  {employee.name.charAt(0).toUpperCase()}
+                </div>
+              )}
 
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{employee.name}</p>
@@ -91,13 +110,25 @@ export default function EmployeesPage() {
                 <Button
                   variant="danger"
                   className="px-3 py-2 text-[0.85rem]"
-                  onClick={() => setDeleteId(employee.id)}
+                  onClick={() => {
+                    setDeleteError(null);
+                    setDeleteId(employee.id);
+                  }}
                 >
                   Eliminar
                 </Button>
               </div>
             </article>
           ))}
+        </div>
+      )}
+
+      {deleteError && (
+        <div
+          role="alert"
+          className="rounded-2xl border border-[#ff5678]/40 bg-[rgba(83,15,34,0.42)] px-4 py-[0.95rem] text-[#ffd6df]"
+        >
+          {deleteError}
         </div>
       )}
 
