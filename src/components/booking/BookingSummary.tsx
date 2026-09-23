@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Clock, MapPin, Scissors } from "lucide-react";
+import { CalendarDays, Clock, MapPin, Scissors, User } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formatCurrency, parseDateOnlyToLocal } from "@/lib/utils/date";
 import { useBookingStore } from "@/stores/booking";
@@ -25,6 +25,7 @@ type BookingSummaryProps = {
 export function BookingSummary({ discount = 0 }: BookingSummaryProps) {
   const local = useBookingStore((s) => s.local);
   const service = useBookingStore((s) => s.service);
+  const employee = useBookingStore((s) => s.employee);
   const date = useBookingStore((s) => s.date);
   const time = useBookingStore((s) => s.time);
 
@@ -70,6 +71,16 @@ export function BookingSummary({ discount = 0 }: BookingSummaryProps) {
             <Clock aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
             <dt className="sr-only">Hora</dt>
             <dd className="text-muted-foreground">{time} hs</dd>
+          </div>
+        ) : null}
+
+        {employee ? (
+          <div className="flex items-start gap-2">
+            <User aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <dt className="sr-only">Profesional</dt>
+            <dd className="text-muted-foreground">
+              {employee === "any" ? "Sin preferencia" : `Con ${employee.name}`}
+            </dd>
           </div>
         ) : null}
       </dl>

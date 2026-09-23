@@ -43,6 +43,7 @@ export default function SelectPaymentPage() {
   const { user } = useAuth();
   const local = useBookingStore((s) => s.local);
   const service = useBookingStore((s) => s.service);
+  const employee = useBookingStore((s) => s.employee);
   const storedDate = useBookingStore((s) => s.date);
   const storedTime = useBookingStore((s) => s.time);
   const phoneNumber = useBookingStore((s) => s.phoneNumber);
@@ -217,6 +218,7 @@ export default function SelectPaymentPage() {
           user || contactChannel === "whatsapp" ? phoneNumber.trim() : "",
         checkoutReturnUrl: `${window.location.origin}/booking/payment-status`,
         ...(user?.id ? { userId: user.id } : {}),
+        ...(employee && employee !== "any" ? { employeeId: employee.id } : {}),
         ...(loyaltyRewardId ? { loyaltyRewardId } : {}),
         ...(!user && couponValidation?.valid && normalizedCouponCode
           ? { loyaltyCouponCode: normalizedCouponCode }
@@ -228,6 +230,11 @@ export default function SelectPaymentPage() {
       const checkoutUrl =
         createdAppointment.mercadoPago?.initPoint ||
         createdAppointment.mercadoPago?.sandboxInitPoint;
+      // Cubre el caso "sin preferencia": el backend asigna el profesional y lo
+      // devuelve recién en la respuesta de creación.
+      const employeeNameParam = createdAppointment.employee?.name
+        ? `&employeeName=${encodeURIComponent(createdAppointment.employee.name)}`
+        : "";
 
       if (
         (paymentMethod === PaymentMethod.MERCADO_PAGO ||
@@ -249,12 +256,14 @@ export default function SelectPaymentPage() {
         const msg = encodeURIComponent(
           `Tu turno fue reservado correctamente!\n\nPuedes acceder a los detalles y gestionar tu turno usando este link seguro:\n${publicLink}\n\nTambien te enviamos los detalles a tu email o whatsapp.`,
         );
-        router.replace(`/booking/result?status=success&message=${msg}`);
+        router.replace(
+          `/booking/result?status=success&message=${msg}${employeeNameParam}`,
+        );
         return;
       }
 
       router.replace(
-        "/booking/result?status=success&message=Tu%20turno%20fue%20reservado%20correctamente.%20Te%20enviamos%20los%20detalles%20a%20tu%20email%20o%20whatsapp.",
+        `/booking/result?status=success&message=Tu%20turno%20fue%20reservado%20correctamente.%20Te%20enviamos%20los%20detalles%20a%20tu%20email%20o%20whatsapp.${employeeNameParam}`,
       );
     } catch (caughtError: unknown) {
       const err = caughtError as {

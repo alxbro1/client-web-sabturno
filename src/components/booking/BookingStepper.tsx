@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 const STEPS = [
   { segment: "select-local", label: "Local" },
   { segment: "select-service", label: "Servicio" },
+  { segment: "select-professional", label: "Profesional" },
   { segment: "appointment", label: "Fecha y hora" },
   { segment: "payment", label: "Pago" },
 ] as const;

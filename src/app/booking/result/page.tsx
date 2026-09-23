@@ -19,6 +19,7 @@ export default function AppointmentResultPage() {
   const result = searchParams.get("result");
   const paymentMethod = searchParams.get("paymentMethod");
   const paymentId = searchParams.get("paymentId");
+  const employeeName = searchParams.get("employeeName");
 
   useEffect(() => {
     if (
@@ -152,6 +153,12 @@ export default function AppointmentResultPage() {
             </p>
           )}
         </div>
+
+        {isSuccess && employeeName ? (
+          <p className="text-sm text-muted-foreground">
+            Tu turno es con <span className="font-semibold text-foreground">{employeeName}</span>.
+          </p>
+        ) : null}
 
         <Button
           onClick={() => router.replace("/home")}

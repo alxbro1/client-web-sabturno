@@ -47,9 +47,11 @@ export default function SelectServicePage() {
     error,
   } = useServicesQuery(localId);
 
-  function buildAppointmentUrl(serviceId: number) {
+  function buildSelectProfessionalUrl(serviceId: number) {
     const query = buildBookingSearch({ localId, serviceId, coupon });
-    return query ? `/booking/appointment?${query}` : "/booking/appointment";
+    return query
+      ? `/booking/select-professional?${query}`
+      : "/booking/select-professional";
   }
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export default function SelectServicePage() {
     if (matchedService) {
       hasHandledServiceDeepLinkRef.current = true;
       setService(matchedService);
-      router.replace(buildAppointmentUrl(matchedService.id));
+      router.replace(buildSelectProfessionalUrl(matchedService.id));
     }
   }, [serviceIdQuery, services, router, setService, service?.id]);
 
@@ -81,7 +83,7 @@ export default function SelectServicePage() {
 
   function handleSelect(service: Service) {
     setService(service);
-    router.push(buildAppointmentUrl(service.id));
+    router.push(buildSelectProfessionalUrl(service.id));
   }
 
   const isLoading = isLoadingLocals || isLoadingServices;

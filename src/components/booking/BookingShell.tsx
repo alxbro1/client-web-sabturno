@@ -12,9 +12,10 @@ import { BookingStepper } from "@/components/booking/BookingStepper";
  */
 export function BookingShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isFlowStep = /^\/booking\/(select-local|select-service|appointment|payment)$/.test(
-    pathname,
-  );
+  const isFlowStep =
+    /^\/booking\/(select-local|select-service|select-professional|appointment|payment)$/.test(
+      pathname,
+    );
 
   return (
     <div className="flex min-h-screen flex-col">

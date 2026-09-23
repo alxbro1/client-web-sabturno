@@ -16,7 +16,9 @@ export default function SelectSlotPage() {
   const searchParams = useSearchParams();
   const local = useBookingStore((s) => s.local);
   const service = useBookingStore((s) => s.service);
+  const employee = useBookingStore((s) => s.employee);
   const setService = useBookingStore((s) => s.setService);
+  const setEmployee = useBookingStore((s) => s.setEmployee);
   const setDate = useBookingStore((s) => s.setDate);
   const setTime = useBookingStore((s) => s.setTime);
   const availabilityRefreshToken = useBookingStore(
@@ -29,12 +31,13 @@ export default function SelectSlotPage() {
   const { localId: localIdQuery, serviceId: serviceIdQuery } =
     parseBookingQuery(searchParams);
 
+  const employeeIdForQuery = employee === "any" ? "any" : employee?.id;
+
   const { data: availableDates, isLoading: datesLoading, error: datesError } =
     useAvailableDaysQuery(
       local?.id,
       service?.id ?? null,
-      // TODO(W2): reemplazar por el empleado elegido en el store.
-      undefined,
+      employeeIdForQuery,
       availabilityRefreshToken,
     );
 
@@ -43,8 +46,7 @@ export default function SelectSlotPage() {
       local?.id,
       selectedDate,
       service?.duration ?? null,
-      // TODO(W2): reemplazar por el empleado elegido en el store.
-      undefined,
+      employeeIdForQuery,
       availabilityRefreshToken,
     );
 
@@ -59,6 +61,16 @@ export default function SelectSlotPage() {
       router.replace("/booking/select-local");
     }
     return null;
+  }
+
+  if (employee === null) {
+    router.replace("/booking/select-professional");
+    return null;
+  }
+
+  function handleChangeProfessional() {
+    setEmployee(null);
+    router.push("/booking/select-professional");
   }
 
   function handleDateSelect(date: Date) {
@@ -108,6 +120,19 @@ export default function SelectSlotPage() {
           {service.name} en {local.name} por {formatCurrency(service.cost)}
         </p>
       </header>
+
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
+        <p className="min-w-0 truncate text-sm font-medium text-foreground">
+          {employee === "any" ? "Sin preferencia" : `Con ${employee.name}`}
+        </p>
+        <button
+          type="button"
+          className="shrink-0 text-sm font-medium text-primary underline-offset-2 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          onClick={handleChangeProfessional}
+        >
+          Cambiar
+        </button>
+      </div>
 
       <section>
         <div className="mb-3 flex items-baseline justify-between gap-4">
