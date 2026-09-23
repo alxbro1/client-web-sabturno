@@ -44,6 +44,12 @@ export interface TaloPaymentData {
   expirationTimestamp?: string;
 }
 
+export interface AppointmentEmployee {
+  id: string;
+  name: string;
+  avatar?: string | null;
+}
+
 export interface CreateAppointmentResponse {
   id: string;
   startDateTime: string;
@@ -54,6 +60,7 @@ export interface CreateAppointmentResponse {
   originalAmount?: string | number;
   discountAmount?: string | number;
   finalAmount?: string | number;
+  employee?: AppointmentEmployee | null;
 }
 
 export type MercadoPagoPaymentStatus = "PENDING" | "COMPLETED" | "FAILED";
@@ -80,6 +87,8 @@ export interface BookingDTO {
   checkoutReturnUrl?: string;
   loyaltyRewardId?: string;
   loyaltyCouponCode?: string;
+  /** Chosen professional; omitted means "no preference" (backend assigns). */
+  employeeId?: string;
 }
 
 export interface Appointment {

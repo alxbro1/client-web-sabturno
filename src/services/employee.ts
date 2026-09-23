@@ -3,6 +3,7 @@ import type {
   Employee,
   CreateEmployeeRequest,
   UpdateEmployeeRequest,
+  PublicEmployee,
 } from "@/lib/types/employee";
 
 export const employeeService = {
@@ -45,5 +46,19 @@ export const employeeService = {
 
   deleteEmployee: async (localId: string, id: string): Promise<void> => {
     await apiService.delete(`/locals/${localId}/employees/${id}`);
+  },
+
+  /**
+   * Public booking endpoint (no auth). Only eligible employees for the given
+   * service, with id/name/color/avatar — never email/phone.
+   */
+  getPublicEmployees: async (
+    localId: string,
+    serviceId: number,
+  ): Promise<PublicEmployee[]> => {
+    const response = await apiService.get<PublicEmployee[]>(
+      `/locals/${localId}/employees/public?serviceId=${serviceId}`,
+    );
+    return response.data;
   },
 };

@@ -33,6 +33,8 @@ export default function SelectSlotPage() {
     useAvailableDaysQuery(
       local?.id,
       service?.id ?? null,
+      // TODO(W2): reemplazar por el empleado elegido en el store.
+      undefined,
       availabilityRefreshToken,
     );
 
@@ -41,6 +43,8 @@ export default function SelectSlotPage() {
       local?.id,
       selectedDate,
       service?.duration ?? null,
+      // TODO(W2): reemplazar por el empleado elegido en el store.
+      undefined,
       availabilityRefreshToken,
     );
 

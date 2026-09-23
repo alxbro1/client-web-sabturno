@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { employeeService } from "@/services/employee";
-import type { Employee } from "@/lib/types/employee";
+import type { Employee, PublicEmployee } from "@/lib/types/employee";
 
 const { mockApiService } = vi.hoisted(() => ({
   mockApiService: {
@@ -96,6 +96,23 @@ describe("employeeService.updateEmployee", () => {
       data,
     );
     expect(result).toEqual(updated);
+  });
+});
+
+describe("employeeService.getPublicEmployees", () => {
+  it("makes GET request to /locals/{localId}/employees/public with serviceId", async () => {
+    const employees: PublicEmployee[] = [
+      { id: "emp-1", name: "Juan Perez", color: "#00f068", avatar: null },
+    ];
+    mockApiService.get.mockResolvedValue({ data: employees });
+
+    const result = await employeeService.getPublicEmployees(LOCAL_ID, 10);
+
+    expect(mockApiService.get).toHaveBeenCalledTimes(1);
+    expect(mockApiService.get).toHaveBeenCalledWith(
+      `/locals/${LOCAL_ID}/employees/public?serviceId=10`,
+    );
+    expect(result).toEqual(employees);
   });
 });
 

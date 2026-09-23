@@ -20,11 +20,17 @@ export const bookingService = {
     return response.data;
   },
 
-  async getAvailableTimeSlots(localId: string, date: string, serviceDuration: number) {
+  async getAvailableTimeSlots(
+    localId: string,
+    date: string,
+    serviceDuration: number,
+    employeeId?: string,
+  ) {
     const params = new URLSearchParams({
       date,
       serviceDuration: String(serviceDuration),
     });
+    if (employeeId) params.set("employeeId", employeeId);
 
     const response = await apiService.get<TimeSlot[]>(
       withCacheBust(`/time_stock/availability/${localId}?${params.toString()}`),
@@ -38,12 +44,13 @@ export const bookingService = {
     return response.data;
   },
 
-  async getAvailableDays(localId?: string, serviceId?: number) {
+  async getAvailableDays(localId?: string, serviceId?: number, employeeId?: string) {
     if (!localId || !serviceId) {
       return [];
     }
 
     const params = new URLSearchParams({ serviceId: String(serviceId) });
+    if (employeeId) params.set("employeeId", employeeId);
     const response = await apiService.get<string[]>(
       withCacheBust(`/time_stock/available-days/${localId}/?${params.toString()}`),
     );

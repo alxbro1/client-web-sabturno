@@ -2,14 +2,22 @@ export const queryKeys = {
   locals: () => ["locals"] as const,
   localsAvailable: (limit?: number) => ["locals", "available", limit] as const,
   services: (localId: string) => ["services", localId] as const,
-  availableDays: (localId: string, serviceId: number, refreshToken: number) =>
-    ["available-days", localId, serviceId, refreshToken] as const,
+  availableDays: (
+    localId: string,
+    serviceId: number,
+    employeeId: string,
+    refreshToken: number,
+  ) => ["available-days", localId, serviceId, employeeId, refreshToken] as const,
   timeSlots: (
     localId: string,
     date: string,
     serviceDuration: number,
+    employeeId: string,
     refreshToken: number,
-  ) => ["time-slots", localId, date, serviceDuration, refreshToken] as const,
+  ) =>
+    ["time-slots", localId, date, serviceDuration, employeeId, refreshToken] as const,
+  publicEmployees: (localId: string, serviceId: number) =>
+    ["public-employees", localId, serviceId] as const,
   taloStatus: (localId: string) => ["talo-status", localId] as const,
   paymentStatus: (
     externalReference: string,

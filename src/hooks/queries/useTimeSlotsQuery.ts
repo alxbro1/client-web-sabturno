@@ -8,19 +8,28 @@ export function useTimeSlotsQuery(
   localId: string | null | undefined,
   selectedDate: Date | null,
   serviceDuration: number | null | undefined,
+  employeeId: string | "any" | null | undefined,
   refreshToken: number,
 ) {
   const dateStr = selectedDate ? formatDateOnlyLocal(selectedDate) : null;
+  const specificEmployeeId =
+    employeeId && employeeId !== "any" ? employeeId : undefined;
 
   return useQuery<TimeSlot[], Error>({
     queryKey: queryKeys.timeSlots(
       localId ?? "",
       dateStr ?? "",
       serviceDuration ?? 0,
+      employeeId ?? "any",
       refreshToken,
     ),
     queryFn: () =>
-      bookingService.getAvailableTimeSlots(localId!, dateStr!, serviceDuration!),
+      bookingService.getAvailableTimeSlots(
+        localId!,
+        dateStr!,
+        serviceDuration!,
+        specificEmployeeId,
+      ),
     enabled: !!localId && !!dateStr && !!serviceDuration,
     staleTime: 10 * 1000,
   });
