@@ -58,10 +58,18 @@ export function EmployeeSidebar({
                 : "text-muted-foreground hover:bg-accent hover:text-foreground"
             }`}
           >
-            <span
-              className="w-2.5 h-2.5 rounded-full shrink-0"
-              style={{ backgroundColor: resource.color || "#3daaf4" }}
-            />
+            {resource.avatar ? (
+              <img
+                src={resource.avatar}
+                alt={resource.name}
+                className="size-5 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span
+                className="w-2.5 h-2.5 rounded-full shrink-0"
+                style={{ backgroundColor: resource.color || "#3daaf4" }}
+              />
+            )}
             {resource.name}
             {count !== undefined && (
               <span className="ml-auto text-xs text-muted-foreground/70">{count}</span>

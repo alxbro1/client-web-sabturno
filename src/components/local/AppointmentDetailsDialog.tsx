@@ -59,7 +59,7 @@ function Detail({
 }: {
   icon: React.ReactNode;
   label: string;
-  value: string;
+  value: React.ReactNode;
 }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
@@ -83,12 +83,11 @@ export function AppointmentDetailsDialog({
 }: AppointmentDetailsDialogProps) {
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
-  const employeeName = useMemo(
-    () =>
-      resources.find((resource) => resource.id === appointment?.resourceId)?.name ||
-      "Sin asignar",
+  const employeeResource = useMemo(
+    () => resources.find((resource) => resource.id === appointment?.resourceId),
     [appointment?.resourceId, resources],
   );
+  const employeeName = employeeResource?.name || "Sin asignar";
 
   if (!appointment) return null;
 
@@ -161,7 +160,20 @@ export function AppointmentDetailsDialog({
             <Detail
               icon={<UserRound className="size-3.5" />}
               label="Profesional"
-              value={employeeName}
+              value={
+                employeeResource?.avatar ? (
+                  <span className="inline-flex items-center gap-2">
+                    <img
+                      src={employeeResource.avatar}
+                      alt={employeeName}
+                      className="size-6 shrink-0 rounded-full object-cover"
+                    />
+                    {employeeName}
+                  </span>
+                ) : (
+                  employeeName
+                )
+              }
             />
             <Detail
               icon={<CalendarClock className="size-3.5" />}

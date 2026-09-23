@@ -46,6 +46,25 @@ describe("AppointmentDetailsDialog", () => {
     expect(screen.getByRole("button", { name: "Cancelar turno" })).toBeTruthy();
   });
 
+  it("shows the employee's avatar photo when the resource has one", () => {
+    render(
+      <AppointmentDetailsDialog
+        appointment={makeAppointment()}
+        resources={[
+          { id: "employee-1", name: "Lucía", avatar: "https://cdn.test/lucia.jpg" },
+        ]}
+        isMutating={false}
+        mutationError={null}
+        onClose={vi.fn()}
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    const avatar = screen.getByAltText("Lucía");
+    expect(avatar).toHaveAttribute("src", "https://cdn.test/lucia.jpg");
+  });
+
   it("requires a second confirmation before confirming", async () => {
     const onConfirm = vi.fn().mockResolvedValue(undefined);
     render(
