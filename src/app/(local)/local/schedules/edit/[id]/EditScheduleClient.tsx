@@ -5,8 +5,10 @@ import { useRouter, useParams } from "next/navigation";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/ui/input";
+import { SelectField } from "@/components/Field";
 import { Switch } from "@/components/ui/switch";
 import { scheduleService } from "@/features/local/services/schedule.service";
+import { useEmployeesQuery } from "@/hooks/queries/useEmployeesQuery";
 import { useAuth } from "@/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
@@ -44,6 +46,7 @@ export default function LocalScheduleEditorPage() {
   const isNew = id === "new";
 
   const [name, setName] = useState("");
+  const [employeeId, setEmployeeId] = useState("");
   const [schedule, setSchedule] =
     useState<Record<number, DaySlots>>(emptySchedule);
   const [isSaving, setIsSaving] = useState(false);
@@ -52,6 +55,7 @@ export default function LocalScheduleEditorPage() {
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(!isNew);
 
   const localId = user?.id ?? "";
+  const { employees } = useEmployeesQuery(localId);
 
   // Cargar plantilla completa al editar
   useEffect(() => {
@@ -66,6 +70,7 @@ export default function LocalScheduleEditorPage() {
         const full = await scheduleService.getTemplate(id);
         if (cancelled || !full) return;
         setName(full.name);
+        setEmployeeId(full.employeeId ?? "");
         const loaded: Record<number, DaySlots> = { ...emptySchedule };
         for (const slot of full.timeStockTemplates) {
           if (!slot.isActive) continue;
@@ -221,6 +226,7 @@ export default function LocalScheduleEditorPage() {
           name,
           localId: localId,
           schedule: schedulePayload as any,
+          ...(employeeId ? { employeeId } : {}),
         });
       } else if (id) {
         // Para update, el backend acepta tanto `schedule` como `timeStockTemplates`.
@@ -230,6 +236,10 @@ export default function LocalScheduleEditorPage() {
           name,
           isActive: true,
           localId: localId,
+          // Siempre se envia, incluso null: omitirlo deja la asignacion
+          // anterior sin tocar, y elegir "Todo el local" debe poder
+          // desasignar un empleado existente.
+          employeeId: employeeId || null,
           timeStockTemplates: DAYS.flatMap((day) => {
             const dayData = schedule[day.key];
             if (!dayData.active || dayData.slots.length === 0) return [];
@@ -255,7 +265,15 @@ export default function LocalScheduleEditorPage() {
       });
       router.push("/local/schedules");
     } catch (err: any) {
-      setSaveError(err.message || "Error al guardar la plantilla");
+      // 409: el empleado elegido ya tiene otra plantilla activa (regla de
+      // dominio: una sola plantilla ACTIVE por empleado).
+      if (err?.response?.status === 409) {
+        setSaveError(
+          "Este empleado ya tiene una plantilla de horario activa. Desactivala primero.",
+        );
+      } else {
+        setSaveError(err.message || "Error al guardar la plantilla");
+      }
     } finally {
       setIsSaving(false);
     }
@@ -297,6 +315,22 @@ export default function LocalScheduleEditorPage() {
             className="h-10"
           />
         </div>
+
+        {employees.length > 0 && (
+          <SelectField
+            label="Aplica a"
+            value={employeeId}
+            onChange={(e) => setEmployeeId(e.target.value)}
+            hint="Un empleado sin plantilla propia usa el horario del local."
+          >
+            <option value="">Todo el local</option>
+            {employees.map((employee) => (
+              <option key={employee.id} value={employee.id}>
+                {employee.name}
+              </option>
+            ))}
+          </SelectField>
+        )}
 
         <div className="border border-border bg-card rounded-xl p-6 space-y-6">
           <div className="flex items-center justify-between">

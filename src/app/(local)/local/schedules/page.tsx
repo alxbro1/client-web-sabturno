@@ -105,7 +105,14 @@ export default function LocalSchedulesPage() {
                   className={`w-3 h-3 rounded-full ${template.isActive ? "bg-primary" : "bg-muted-foreground/30"}`}
                 />
                 <div>
-                  <h3 className="font-semibold text-white">{template.name}</h3>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-semibold text-white">{template.name}</h3>
+                    <span className="rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wide text-primary">
+                      {template.employeeId
+                        ? template.employeeName || "Empleado"
+                        : "Todo el local"}
+                    </span>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     {template.timeSlotsCount} horario
                     {template.timeSlotsCount !== 1 ? "s" : ""} configurado
