@@ -15,7 +15,6 @@ import { buildBookingSearch, parseBookingQuery } from "@/lib/utils/bookingQuery"
 import { useBookingStore } from "@/stores/booking";
 import {
   buildWhatsappUrl,
-  buildTelUrl,
   buildMapsUrl,
   buildInstagramUrl,
 } from "@/lib/utils/localLinks";
@@ -139,7 +138,6 @@ export default function SelectServicePage() {
     () => buildWhatsappUrl(local?.phone, local?.countryCode),
     [local?.phone, local?.countryCode],
   );
-  const telUrl = useMemo(() => buildTelUrl(local?.phone), [local?.phone]);
   const instagramUrl = useMemo(
     () => buildInstagramUrl(local?.instagram),
     [local?.instagram],
@@ -200,7 +198,6 @@ export default function SelectServicePage() {
 
           <LocalContactActions
             whatsappUrl={whatsappUrl}
-            telUrl={telUrl}
             instagramUrl={instagramUrl}
             mapsUrl={mapsUrl}
           />

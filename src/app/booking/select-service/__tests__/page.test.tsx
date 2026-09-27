@@ -112,6 +112,13 @@ describe("SelectServicePage: renders the local profile and services", () => {
     expect(screen.queryByRole("button", { name: /Cambiar local/ })).not.toBeInTheDocument();
   });
 
+  it("does not offer a call button even when the local has a phone", () => {
+    render(<SelectServicePage />);
+
+    expect(screen.getByRole("link", { name: "WhatsApp" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /llamar/i })).not.toBeInTheDocument();
+  });
+
   it("offers a shortcut down to the services list", () => {
     render(<SelectServicePage />);
 

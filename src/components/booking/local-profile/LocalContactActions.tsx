@@ -1,10 +1,9 @@
 import type { SVGProps } from "react";
-import { Navigation, Phone } from "lucide-react";
+import { Navigation } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 
 interface LocalContactActionsProps {
   whatsappUrl: string | null;
-  telUrl: string | null;
   instagramUrl: string | null;
   mapsUrl: string | null;
 }
@@ -46,7 +45,6 @@ interface ContactAction {
 
 export function LocalContactActions({
   whatsappUrl,
-  telUrl,
   instagramUrl,
   mapsUrl,
 }: LocalContactActionsProps) {
@@ -70,15 +68,6 @@ export function LocalContactActions({
       tinted: false,
     });
   }
-  if (telUrl) {
-    actions.push({
-      key: "tel",
-      href: telUrl,
-      label: "Llamar",
-      icon: <Phone className="size-5" />,
-      tinted: false,
-    });
-  }
   if (mapsUrl) {
     actions.push({
       key: "maps",
@@ -92,26 +81,24 @@ export function LocalContactActions({
   if (actions.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-4 gap-3">
-      {actions.map((action) => {
-        const isTel = action.key === "tel";
-        return (
-          <a
-            key={action.key}
-            href={action.href}
-            {...(!isTel ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            aria-label={action.label}
-            className="flex flex-col items-center gap-1.5"
+    <div className="flex justify-center gap-6">
+      {actions.map((action) => (
+        <a
+          key={action.key}
+          href={action.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={action.label}
+          className="flex w-20 flex-col items-center gap-1.5"
+        >
+          <span
+            className={`${ACTION_BUTTON_CLASS} ${action.tinted ? PRIMARY_TINT_CLASS : NEUTRAL_CLASS}`}
           >
-            <span
-              className={`${ACTION_BUTTON_CLASS} ${action.tinted ? PRIMARY_TINT_CLASS : NEUTRAL_CLASS}`}
-            >
-              {action.icon}
-            </span>
-            <span className="text-xs font-medium text-muted-foreground">{action.label}</span>
-          </a>
-        );
-      })}
+            {action.icon}
+          </span>
+          <span className="text-xs font-medium text-muted-foreground">{action.label}</span>
+        </a>
+      ))}
     </div>
   );
 }

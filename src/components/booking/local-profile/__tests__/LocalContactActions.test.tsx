@@ -7,7 +7,6 @@ describe("LocalContactActions", () => {
     const { container } = render(
       <LocalContactActions
         whatsappUrl={null}
-        telUrl={null}
         instagramUrl={null}
         mapsUrl={null}
       />,
@@ -15,11 +14,10 @@ describe("LocalContactActions", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renders only the actions with data, in WhatsApp/Instagram/Llamar/Cómo llegar order", () => {
+  it("renders only the actions with data, in WhatsApp/Instagram/Cómo llegar order", () => {
     render(
       <LocalContactActions
         whatsappUrl="https://wa.me/541122334455"
-        telUrl={null}
         instagramUrl="https://instagram.com/peluqueria.centro"
         mapsUrl={null}
       />,
@@ -33,27 +31,33 @@ describe("LocalContactActions", () => {
     expect(screen.queryByRole("link", { name: /llegar/i })).not.toBeInTheDocument();
   });
 
-  it("renders all four when all data is present, opening external links in a new tab except tel:", () => {
+  it("renders WhatsApp/Instagram/Cómo llegar, all opening in a new tab, and never a call button", () => {
     render(
       <LocalContactActions
         whatsappUrl="https://wa.me/541122334455"
-        telUrl="tel:+541122334455"
         instagramUrl="https://instagram.com/peluqueria.centro"
         mapsUrl="https://www.google.com/maps/search/?api=1&query=x"
       />,
     );
 
-    const whatsapp = screen.getByRole("link", { name: /whatsapp/i });
-    const call = screen.getByRole("link", { name: /llamar/i });
-    const maps = screen.getByRole("link", { name: /llegar/i });
+    const links = screen.getAllByRole("link");
+    expect(links.map((link) => link.getAttribute("aria-label"))).toEqual([
+      "WhatsApp",
+      "Instagram",
+      "Cómo llegar",
+    ]);
+    links.forEach((link) => {
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
+    });
+    expect(screen.queryByRole("link", { name: /llamar/i })).not.toBeInTheDocument();
+  });
 
-    expect(whatsapp).toHaveAttribute("href", "https://wa.me/541122334455");
-    expect(whatsapp).toHaveAttribute("target", "_blank");
-    expect(whatsapp).toHaveAttribute("rel", expect.stringContaining("noopener"));
+  it("centers the actions instead of pinning them to a fixed 4-column grid", () => {
+    const { container } = render(
+      <LocalContactActions whatsappUrl="https://wa.me/1" instagramUrl={null} mapsUrl="https://maps/x" />,
+    );
 
-    expect(call).toHaveAttribute("href", "tel:+541122334455");
-    expect(call).not.toHaveAttribute("target");
-
-    expect(maps).toHaveAttribute("target", "_blank");
+    expect(container.firstElementChild).toHaveClass("justify-center");
   });
 });
