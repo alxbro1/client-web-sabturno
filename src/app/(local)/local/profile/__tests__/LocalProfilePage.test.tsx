@@ -42,9 +42,12 @@ function localFixture(overrides: Record<string, unknown> = {}) {
     phone: "1122334455",
     isActive: true,
     notifyNewAppointmentWhatsapp: false,
+    instagram: null,
     ...overrides,
   };
 }
+
+const INSTAGRAM_LABEL = "Instagram";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -102,6 +105,79 @@ describe("LocalProfilePage WhatsApp notification toggle", () => {
       await screen.findByText(
         /No pudimos activar el aviso por WhatsApp/,
       ),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("LocalProfilePage Instagram field", () => {
+  it("prefills the existing handle", async () => {
+    mockGetLocal.mockResolvedValue(localFixture({ instagram: "peluqueria.centro" }));
+
+    render(<LocalProfilePage />);
+
+    const input = await screen.findByLabelText(INSTAGRAM_LABEL);
+    expect(input).toHaveValue("peluqueria.centro");
+  });
+
+  it("has an empty input with the @tulocal placeholder when there is none", async () => {
+    mockGetLocal.mockResolvedValue(localFixture({ instagram: null }));
+
+    render(<LocalProfilePage />);
+
+    const input = await screen.findByLabelText(INSTAGRAM_LABEL);
+    expect(input).toHaveValue("");
+    expect(input).toHaveAttribute("placeholder", "@tulocal");
+  });
+
+  it("sends the typed handle in the PATCH payload", async () => {
+    mockGetLocal.mockResolvedValue(localFixture({ instagram: null }));
+
+    render(<LocalProfilePage />);
+
+    const input = await screen.findByLabelText(INSTAGRAM_LABEL);
+    fireEvent.change(input, { target: { value: "nueva.cuenta" } });
+    fireEvent.click(screen.getByRole("button", { name: /Guardar cambios/ }));
+
+    await waitFor(() => {
+      expect(mockUpdateLocal).toHaveBeenCalledWith(
+        "local-1",
+        expect.objectContaining({ instagram: "nueva.cuenta" }),
+      );
+    });
+  });
+
+  it("clears the handle by sending an empty string", async () => {
+    mockGetLocal.mockResolvedValue(localFixture({ instagram: "peluqueria.centro" }));
+
+    render(<LocalProfilePage />);
+
+    const input = await screen.findByLabelText(INSTAGRAM_LABEL);
+    fireEvent.change(input, { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: /Guardar cambios/ }));
+
+    await waitFor(() => {
+      expect(mockUpdateLocal).toHaveBeenCalledWith(
+        "local-1",
+        expect.objectContaining({ instagram: "" }),
+      );
+    });
+  });
+
+  it("shows the backend message when the handle is invalid", async () => {
+    mockGetLocal.mockResolvedValue(localFixture({ instagram: null }));
+    mockUpdateLocal.mockRejectedValue({
+      response: { status: 400 },
+      message: "instagram must be a valid handle: letters, numbers, \".\" and \"_\" only, up to 30 characters",
+    });
+
+    render(<LocalProfilePage />);
+
+    const input = await screen.findByLabelText(INSTAGRAM_LABEL);
+    fireEvent.change(input, { target: { value: "no valido!" } });
+    fireEvent.click(screen.getByRole("button", { name: /Guardar cambios/ }));
+
+    expect(
+      await screen.findByText(/instagram must be a valid handle/),
     ).toBeInTheDocument();
   });
 });

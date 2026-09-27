@@ -23,6 +23,7 @@ export default function LocalProfilePage() {
     city: "",
     province: "",
     notifyNewAppointmentWhatsapp: false,
+    instagram: "",
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -70,6 +71,7 @@ export default function LocalProfilePage() {
           notifyNewAppointmentWhatsapp: Boolean(
             local.notifyNewAppointmentWhatsapp,
           ),
+          instagram: local.instagram || "",
         });
         resetLogo(local.imageProfile ?? user.imageProfile ?? null);
       }
@@ -120,6 +122,7 @@ export default function LocalProfilePage() {
         city: formData.city,
         province: formData.province,
         notifyNewAppointmentWhatsapp: formData.notifyNewAppointmentWhatsapp,
+        instagram: formData.instagram,
       });
 
       if (formData.name !== user.name) {
@@ -397,6 +400,27 @@ export default function LocalProfilePage() {
                 className="w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
                 placeholder="Calle y número"
               />
+            </div>
+
+            <div className="md:col-span-2">
+              <label
+                htmlFor="local-instagram-input"
+                className="block text-sm font-medium text-foreground mb-2"
+              >
+                Instagram
+              </label>
+              <input
+                type="text"
+                id="local-instagram-input"
+                value={formData.instagram}
+                onChange={(e) => handleChange("instagram", e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
+                placeholder="@tulocal"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Solo el usuario, sin el enlace completo. Los clientes lo ven
+                como un botón en tu perfil.
+              </p>
             </div>
           </div>
         </div>
