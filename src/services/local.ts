@@ -1,5 +1,5 @@
 import { apiService } from "@/lib/api";
-import type { Local } from "@/lib/types/local";
+import type { Local, PublicLocalImage } from "@/lib/types/local";
 
 export interface LocalesPaginated {
   items: Local[];
@@ -23,6 +23,18 @@ export const localService = {
       `/local/available${query.toString() ? `?${query.toString()}` : ""}`,
     );
 
+    return response.data;
+  },
+  /**
+   * `GET /local/:id/public-images` — public (no auth), returns only active
+   * LOGO/COVER_IMAGE/GALLERY_IMAGE rows, ordered. `[]` when the local has
+   * none or does not exist (backend convention, see
+   * `backend/src/local/local.repository.ts` → `findPublicImages`).
+   */
+  async getPublicImages(localId: string): Promise<PublicLocalImage[]> {
+    const response = await apiService.get<PublicLocalImage[]>(
+      `/local/${localId}/public-images`,
+    );
     return response.data;
   },
 };
