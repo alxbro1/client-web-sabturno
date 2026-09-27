@@ -89,12 +89,12 @@ export default function SelectSlotPage() {
     ? "Elegí una fecha para continuar."
     : "Elegí un horario para continuar.";
 
-  // El estado seleccionado se marca con RELLENO, no con borde: un borde fino no
-  // compite con el texto blanco de los chips sin seleccionar.
+  // Unselected chips carry a white border so they read as tappable on the dark
+  // background; the selected one is marked with the green FILL, not the border.
   const chipBase =
     "inline-flex min-h-11 w-full items-center justify-center rounded-full border px-3 text-sm transition-colors duration-150 outline-none cursor-pointer focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-35";
   const chipInactive =
-    "border-border bg-muted text-muted-foreground hover:border-primary/40 hover:text-foreground";
+    "border-foreground/70 bg-muted text-foreground hover:border-primary";
   const chipActive =
     "border-primary bg-primary font-semibold text-primary-foreground";
 
