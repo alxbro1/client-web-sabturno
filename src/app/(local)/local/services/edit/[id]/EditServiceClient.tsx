@@ -9,6 +9,7 @@ import { InputField, TextareaField } from "@/components/Field";
 import { useLocalServicesQuery } from "@/hooks/queries/useLocalServicesQuery";
 import { useAuth } from "@/hooks/useAuth";
 import type { LocalService } from "@/lib/types/service";
+import { serviceCategoryLabel } from "@/lib/utils/serviceCategory";
 
 const CATEGORIES = [
   "Peluqueria",
@@ -217,9 +218,15 @@ export default function ServiceEditPage() {
             className="rounded-2xl border border-white/16 bg-white/[0.04] px-4 py-3 text-white outline-none transition-[border-color] duration-150 focus:border-primary/50"
           >
             <option value="">Sin categoría</option>
+            {/* A value outside the list (e.g. an English slug saved from the
+                mobile app) needs its own option, or the select renders it as
+                "Sin categoría". */}
+            {category && !CATEGORIES.includes(category) ? (
+              <option value={category}>{serviceCategoryLabel(category)}</option>
+            ) : null}
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
-                {cat}
+                {serviceCategoryLabel(cat)}
               </option>
             ))}
           </select>

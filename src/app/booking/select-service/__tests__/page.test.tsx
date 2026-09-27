@@ -112,6 +112,24 @@ describe("SelectServicePage: renders the local profile and services", () => {
     expect(screen.queryByRole("button", { name: /Cambiar local/ })).not.toBeInTheDocument();
   });
 
+  it("shows categories stored as English slugs in Spanish, in the tabs and on the cards", () => {
+    mockUseServicesQuery.mockReturnValue({
+      data: [
+        { ...SERVICE_1, category: "haircuts" },
+        { ...SERVICE_2, category: "coloring" },
+      ],
+      isLoading: false,
+      error: null,
+    });
+
+    render(<SelectServicePage />);
+
+    expect(screen.getByRole("tab", { name: "Cortes de cabello" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Coloración" })).toBeInTheDocument();
+    expect(screen.queryByText("haircuts")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Cortes de cabello").length).toBeGreaterThan(1);
+  });
+
   it("does not offer a call button even when the local has a phone", () => {
     render(<SelectServicePage />);
 

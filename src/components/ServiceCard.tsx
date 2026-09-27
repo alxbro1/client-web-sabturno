@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { ChevronRight } from "lucide-react";
 import { formatCurrency } from "@/lib/utils/date";
+import { serviceCategoryLabel } from "@/lib/utils/serviceCategory";
 import type { Service } from "@/lib/types/booking";
 
 interface ServiceCardProps {
@@ -30,7 +31,7 @@ export const ServiceCard = memo(function ServiceCard({
       {/* Contenido */}
       <div className="min-w-0 flex-1">
         <p className="mb-0.5 truncate text-xs font-semibold text-primary">
-          {service.category}
+          {serviceCategoryLabel(service.category)}
         </p>
         <h3 className="mb-0.5 truncate font-semibold text-foreground">
           {service.name}

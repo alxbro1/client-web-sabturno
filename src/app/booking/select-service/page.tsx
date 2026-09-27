@@ -12,6 +12,7 @@ import { useServicesQuery } from "@/hooks/queries/useServicesQuery";
 import { useLocalsQuery } from "@/hooks/queries/useLocalsQuery";
 import { usePublicLocalImagesQuery } from "@/hooks/queries/usePublicLocalImagesQuery";
 import { buildBookingSearch, parseBookingQuery } from "@/lib/utils/bookingQuery";
+import { serviceCategoryLabel } from "@/lib/utils/serviceCategory";
 import { useBookingStore } from "@/stores/booking";
 import {
   buildWhatsappUrl,
@@ -29,7 +30,7 @@ const DEFAULT_CATEGORY = "Otros";
 const SERVICES_SECTION_ID = "servicios";
 
 function serviceCategory(service: Service): string {
-  return service.category?.trim() || DEFAULT_CATEGORY;
+  return serviceCategoryLabel(service.category) || DEFAULT_CATEGORY;
 }
 
 export default function SelectServicePage() {

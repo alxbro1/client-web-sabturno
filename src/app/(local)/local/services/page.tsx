@@ -7,6 +7,7 @@ import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useLocalServicesQuery } from "@/hooks/queries/useLocalServicesQuery";
 import { useAuth } from "@/hooks/useAuth";
+import { serviceCategoryLabel } from "@/lib/utils/serviceCategory";
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("es-AR", {
@@ -98,7 +99,7 @@ export default function ServicesPage() {
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-[0.82rem] text-muted-foreground">
                   <span>{formatCurrency(service.cost)}</span>
                   <span>{formatDuration(service.duration)}</span>
-                  {service.category && <span>{service.category}</span>}
+                  {service.category && <span>{serviceCategoryLabel(service.category)}</span>}
                 </div>
               </div>
 
