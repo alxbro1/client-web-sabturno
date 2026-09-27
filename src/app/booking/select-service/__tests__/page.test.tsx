@@ -106,6 +106,18 @@ describe("SelectServicePage: renders the local profile and services", () => {
     expect(screen.getByText("Coloración")).toBeInTheDocument();
   });
 
+  it("renders the hero first, without a 'Cambiar local' button above it", () => {
+    render(<SelectServicePage />);
+
+    expect(screen.queryByRole("button", { name: /Cambiar local/ })).not.toBeInTheDocument();
+  });
+
+  it("offers a shortcut down to the services list", () => {
+    render(<SelectServicePage />);
+
+    expect(screen.getByRole("button", { name: "Ir a los servicios" })).toBeInTheDocument();
+  });
+
   it("pushes to select-professional with the local and service id when a service is picked", () => {
     render(<SelectServicePage />);
 
@@ -117,5 +129,23 @@ describe("SelectServicePage: renders the local profile and services", () => {
     const parsed = parseBookingQuery(new URLSearchParams(query));
     expect(parsed.localId).toBe("local-1");
     expect(parsed.serviceId).toBe(10);
+  });
+
+  it("prefers the owner-uploaded profile image over a LOGO image as the logo", () => {
+    useBookingStore.setState({
+      local: { ...LOCAL, imageProfile: "https://s3/uploaded-logo.jpg" },
+    });
+    mockUsePublicLocalImagesQuery.mockReturnValue({
+      data: [{ id: 1, url: "https://s3/seed-logo.png", type: "LOGO", order: 0 }],
+      isLoading: false,
+      error: null,
+    });
+
+    render(<SelectServicePage />);
+
+    expect(screen.getByAltText("Logo de Peluqueria Centro")).toHaveAttribute(
+      "src",
+      "https://s3/uploaded-logo.jpg",
+    );
   });
 });

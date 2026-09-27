@@ -15,7 +15,7 @@ export const LocalCard = memo(function LocalCard({
     <button
       type="button"
       onClick={() => onSelect(local)}
-      className="group flex h-24 w-full items-center gap-4 overflow-hidden rounded-xl border border-border bg-card p-3 text-left shadow-sm transition-all duration-[140ms] outline-none hover:border-primary/45 focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95"
+      className="group flex h-24 w-full items-center gap-4 overflow-hidden rounded-xl border border-white bg-card p-3 text-left shadow-sm transition-all duration-[140ms] outline-none hover:border-primary/45 focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-95"
     >
       {/* Avatar / imagen del local */}
       <div className="flex-shrink-0">

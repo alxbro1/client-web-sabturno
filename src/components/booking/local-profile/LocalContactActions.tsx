@@ -1,5 +1,6 @@
 import type { SVGProps } from "react";
 import { Navigation, Phone } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa6";
 
 interface LocalContactActionsProps {
   whatsappUrl: string | null;
@@ -9,25 +10,8 @@ interface LocalContactActionsProps {
 }
 
 // lucide-react has no brand icons (WhatsApp/Instagram were dropped from the
-// package); these are small inline outline glyphs matching its stroke style.
-function WhatsappIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      {...props}
-    >
-      <path d="M3 21l1.65-4.95A8 8 0 1 1 9 20.35Z" />
-      <path d="M8.5 9.5c0 3 2.5 5.5 5.5 5.5 1 0 1.3-.6 1.2-1.2l-.3-1.3-1.9-.5-1 1c-1-.6-1.8-1.4-2.4-2.4l1-1-.5-1.9-1.3-.3c-.6-.1-1.3.2-1.3 1.2Z" />
-    </svg>
-  );
-}
-
+// package). WhatsApp uses the official logo from react-icons; Instagram is a
+// small inline outline glyph matching lucide's stroke style.
 function InstagramIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -73,7 +57,7 @@ export function LocalContactActions({
       key: "whatsapp",
       href: whatsappUrl,
       label: "WhatsApp",
-      icon: <WhatsappIcon className="size-5" />,
+      icon: <FaWhatsapp aria-hidden="true" className="size-6" />,
       tinted: true,
     });
   }

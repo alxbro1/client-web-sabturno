@@ -2,13 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/Button";
 import { ServiceCard } from "@/components/ServiceCard";
 import { LocalHeroCarousel } from "@/components/booking/local-profile/LocalHeroCarousel";
 import { LocalContactActions } from "@/components/booking/local-profile/LocalContactActions";
 import { LocalInfoCard } from "@/components/booking/local-profile/LocalInfoCard";
 import { ServiceCategoryTabs } from "@/components/booking/local-profile/ServiceCategoryTabs";
+import { ScrollToServicesButton } from "@/components/booking/local-profile/ScrollToServicesButton";
 import { useServicesQuery } from "@/hooks/queries/useServicesQuery";
 import { useLocalsQuery } from "@/hooks/queries/useLocalsQuery";
 import { usePublicLocalImagesQuery } from "@/hooks/queries/usePublicLocalImagesQuery";
@@ -28,6 +27,7 @@ import {
 import type { Service } from "@/lib/types/booking";
 
 const DEFAULT_CATEGORY = "Otros";
+const SERVICES_SECTION_ID = "servicios";
 
 function serviceCategory(service: Service): string {
   return service.category?.trim() || DEFAULT_CATEGORY;
@@ -185,30 +185,18 @@ export default function SelectServicePage() {
 
   return (
     <section className="flex flex-col gap-6 pb-6">
-      <div className="pt-2">
-        <Button
-          variant="ghost"
-          className="-ml-3 gap-1 px-3 text-muted-foreground hover:text-foreground"
-          onClick={() => {
-            setLocal(null);
-            router.push("/booking/select-local");
-          }}
-        >
-          <ChevronLeft className="size-4" />
-          Cambiar local
-        </Button>
-      </div>
-
       {local && (
         <>
           <LocalHeroCarousel
             galleryImages={galleryImages}
             coverImageUrl={coverImageUrl}
-            logoUrl={logoImageUrl ?? local.imageProfile ?? null}
+            logoUrl={local.imageProfile ?? logoImageUrl ?? null}
             localName={local.name}
             city={local.city}
             province={local.province}
           />
+
+          <ScrollToServicesButton targetId={SERVICES_SECTION_ID} />
 
           <LocalContactActions
             whatsappUrl={whatsappUrl}
@@ -226,7 +214,8 @@ export default function SelectServicePage() {
         </>
       )}
 
-      <header>
+      {/* scroll-mt clears the sticky booking header (logo bar + stepper). */}
+      <header id={SERVICES_SECTION_ID} className="scroll-mt-32">
         <h2 className="font-display text-2xl font-bold text-foreground">
           Elegí un servicio
         </h2>
