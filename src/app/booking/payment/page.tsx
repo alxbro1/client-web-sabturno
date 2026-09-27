@@ -315,9 +315,9 @@ export default function SelectPaymentPage() {
           : null;
 
   const methodCardBase =
-    "relative flex cursor-pointer items-center gap-4 rounded-xl border p-5 text-left shadow-sm transition-colors duration-[140ms] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
+    "relative flex cursor-pointer items-center gap-4 rounded-xl border p-5 pr-12 text-left shadow-sm transition-colors duration-[140ms] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
   const methodCardInactive =
-    "border-border bg-card hover:border-primary/40";
+    "border-white bg-card hover:border-primary/40";
   const methodCardActive = "border-primary bg-primary/15";
 
   return (
@@ -369,24 +369,44 @@ export default function SelectPaymentPage() {
         </Card>
       ) : (
       <div className="w-full">
-        <h3 className="mb-3 text-lg font-semibold text-foreground">
+        <h3
+          id="payment-method-heading"
+          className="text-lg font-semibold text-foreground"
+        >
           Método de pago
         </h3>
-        <div className="grid gap-4 md:grid-cols-2">
+        <p id="payment-method-help" className="mb-3 text-sm text-muted-foreground">
+          Seleccioná uno para continuar.
+        </p>
+        <div
+          role="radiogroup"
+          aria-labelledby="payment-method-heading"
+          aria-describedby="payment-method-help"
+          className="grid gap-4 md:grid-cols-2"
+        >
         {methods.map((item) => {
           const isActive = paymentMethod === item.method;
           return (
             <button
               key={item.method}
+              role="radio"
+              aria-checked={isActive}
               className={`${methodCardBase} ${isActive ? methodCardActive : methodCardInactive}`}
               onClick={() => setPaymentMethod(item.method)}
               type="button"
             >
-              {isActive ? (
-                <span className="absolute top-4 right-4 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+              {/* Empty circle on every option so the cards read as a choice,
+                  not as information, before anything is picked. */}
+              <span
+                aria-hidden="true"
+                className={`absolute top-4 right-4 inline-flex h-5 w-5 items-center justify-center rounded-full border-2 ${
+                  isActive ? "border-primary bg-primary" : "border-muted-foreground"
+                }`}
+              >
+                {isActive ? (
                   <Check className="h-3 w-3 text-primary-foreground" />
-                </span>
-              ) : null}
+                ) : null}
+              </span>
               {PAYMENT_METHOD_ICONS[item.method] ? (
                 <img
                   src={PAYMENT_METHOD_ICONS[item.method]}
@@ -457,7 +477,7 @@ export default function SelectPaymentPage() {
               className={`rounded-lg border p-3 text-left text-sm ${
                 !loyaltyRewardId
                   ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground"
+                  : "border-white text-muted-foreground"
               }`}
             >
               No usar recompensa
@@ -470,7 +490,7 @@ export default function SelectPaymentPage() {
                 className={`rounded-lg border p-3 text-left text-sm ${
                   loyaltyRewardId === reward.id
                     ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground"
+                    : "border-white text-muted-foreground"
                 }`}
               >
                 <span className="block font-semibold text-foreground">
