@@ -17,7 +17,11 @@ import { queryKeys } from "@/lib/queryKeys";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { PricingCard } from "@/components/premium";
+import {
+  PricingCard,
+  PayerEmailField,
+  usePayerEmail,
+} from "@/components/premium";
 import type { PlanInterval } from "@/lib/types/premium";
 
 /**
@@ -36,6 +40,7 @@ export default function OnboardingSubscriptionPage() {
   const { setSelectedPlan } = useOnboardingStore();
   const { user } = useAuth();
   const [interval, setInterval] = useState<PlanInterval>("monthly");
+  const payer = usePayerEmail(user?.email);
   const [subscribingPlanId, setSubscribingPlanId] = useState<string | null>(null);
 
   const { data: plans } = usePremiumPlansQuery();
@@ -46,11 +51,15 @@ export default function OnboardingSubscriptionPage() {
   async function handleSelectPlan(planId: string) {
     if (status?.currentPlanId === planId) return;
 
+    const payerEmail = payer.validate();
+    if (!payerEmail) return;
+
     setSubscribingPlanId(planId);
     try {
       const result = await premiumService.subscribe({
         plan: planId.toUpperCase() as "BASIC" | "PRO" | "ENTERPRISE",
         interval,
+        payerEmail,
       });
 
       const selectedTier = displayPlans.find((p) => p.id === planId)?.tier ?? null;
@@ -134,6 +143,8 @@ export default function OnboardingSubscriptionPage() {
           </button>
         </div>
       </div>
+
+      <PayerEmailField {...payer.fieldProps} />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {displayPlans.map((plan) => (

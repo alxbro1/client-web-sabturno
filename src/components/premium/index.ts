@@ -5,3 +5,4 @@ export { FeatureLockedOverlay } from "./FeatureLockedOverlay";
 export { CancelSubscriptionDialog } from "./CancelSubscriptionDialog";
 export { PricingCard } from "./PricingCard";
 export { PricingComparison } from "./PricingComparison";
+export { PayerEmailField, usePayerEmail } from "./PayerEmailField";

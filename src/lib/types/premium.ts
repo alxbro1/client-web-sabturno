@@ -56,6 +56,8 @@ export interface SubscriptionStatus {
 export interface SubscribeRequest {
   plan: "BASIC" | "PRO" | "ENTERPRISE";
   interval: PlanInterval;
+  /** Email of the payer's Mercado Pago account. */
+  payerEmail?: string;
 }
 
 export interface SubscribeResponse {

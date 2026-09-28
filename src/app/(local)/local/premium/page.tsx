@@ -7,6 +7,8 @@ import { Loader2 } from "lucide-react";
 import {
   PricingCard,
   PricingComparison,
+  PayerEmailField,
+  usePayerEmail,
 } from "@/components/premium";
 import { usePremiumPlansQuery, FALLBACK_PLANS } from "@/hooks/queries/usePremiumPlansQuery";
 import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
@@ -19,6 +21,7 @@ export default function PremiumPage() {
   const router = useRouter();
   const { hasHydrated, user } = useAuth();
   const [interval, setInterval] = useState<PlanInterval>("monthly");
+  const payer = usePayerEmail(user?.email);
   const [subscribingPlanId, setSubscribingPlanId] = useState<string | null>(null);
 
   const { data: plans } = usePremiumPlansQuery();
@@ -29,11 +32,15 @@ export default function PremiumPage() {
   async function handleSelectPlan(planId: string) {
     if (status?.currentPlanId === planId) return;
 
+    const payerEmail = payer.validate();
+    if (!payerEmail) return;
+
     setSubscribingPlanId(planId);
     try {
       const result = await premiumService.subscribe({
         plan: planId.toUpperCase() as "BASIC" | "PRO" | "ENTERPRISE",
         interval,
+        payerEmail,
       });
 
       if (result.checkoutUrl) {
@@ -116,6 +123,8 @@ export default function PremiumPage() {
           </button>
         </div>
       </div>
+
+      <PayerEmailField {...payer.fieldProps} />
 
       {/* Cards de planes */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto w-full">
