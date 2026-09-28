@@ -11,7 +11,7 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { getSession } from "next-auth/react";
 
-const API_BASE_URL =
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://app-api.sabturno.com";
 
 const apiClient = axios.create({

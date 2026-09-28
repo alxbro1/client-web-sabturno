@@ -25,6 +25,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { API_BASE_URL } from "@/lib/api";
 import { useLocalQuery } from "@/hooks/queries/useLocalQuery";
 import { useTaloStatusQuery } from "@/hooks/queries/useTaloStatusQuery";
 import { taloService } from "@/services/talo";
@@ -104,7 +105,7 @@ export function usePaymentMethods(
   options: UsePaymentMethodsOptions = {},
 ): UsePaymentMethodsResult {
   const router = useRouter();
-  const { user, hasHydrated } = useAuth();
+  const { user, token, hasHydrated } = useAuth();
   const localId = user?.id ?? null;
 
   // Source of truth: el Local traído por React Query.
@@ -164,15 +165,24 @@ export function usePaymentMethods(
 
   // 2) Acciones de OAuth.
 
+  // Top-level navigation can't send the Authorization header, so the JWT goes
+  // in the query string through `mobile-start` (same flow as the mobile app).
   const startMercadoPagoOAuth = useCallback(() => {
+    if (!token) {
+      setError("No se pudo obtener tu sesión. Volvé a iniciar sesión.");
+      return;
+    }
     options.onBeforeRedirect?.();
     const appRedirectUri =
       typeof window !== "undefined"
         ? `${window.location.origin}/local/payment-methods/mp/callback`
         : "";
-    const params = new URLSearchParams({ app_redirect_uri: appRedirectUri });
-    window.location.href = `/mercadopago/oauth/start?${params.toString()}`;
-  }, [options]);
+    const params = new URLSearchParams({
+      token,
+      app_redirect_uri: appRedirectUri,
+    });
+    window.location.href = `${API_BASE_URL}/mercadopago/oauth/mobile-start?${params.toString()}`;
+  }, [options, token]);
 
   const startTaloOAuth = useCallback(async () => {
     if (!localId) return;

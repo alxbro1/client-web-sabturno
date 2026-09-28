@@ -7,8 +7,8 @@
  * Flujo:
  *   1. El local-owner hace click en "Activar MercadoPago" en
  *      `/local/payment-methods`.
- *   2. El frontend redirige a `/mercadopago/oauth/start?app_redirect_uri=...`
- *      (top-level redirect, sale de la SPA).
+ *   2. El frontend redirige a `<API>/mercadopago/oauth/mobile-start?token=<jwt>&app_redirect_uri=...`
+ *      (top-level redirect, sale de la SPA; sin header Authorization, el JWT va por query).
  *   3. El backend inicia el OAuth con MercadoPago (PKCE).
  *   4. MercadoPago redirige a `/mercadopago/oauth/callback` en el backend.
  *   5. El backend intercambia el code por tokens, persiste en el `Local`
