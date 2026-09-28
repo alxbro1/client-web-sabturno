@@ -49,7 +49,10 @@ export default function PaymentMethodsPage() {
   const { data: premiumStatus } = usePremiumStatusQuery();
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const isCashLocked = premiumStatus?.tier === "basic";
+  // After a downgrade cash can still be on: the backend only rejects
+  // enabling it, so the owner must be able to turn it off.
+  const isCashLocked =
+    premiumStatus?.tier === "basic" && !pm.form.payWithCashInFront;
 
   // Auto-clear del banner de éxito después de 3s (paridad con
   // `local/profile/page.tsx:89`).
@@ -133,24 +136,25 @@ export default function PaymentMethodsPage() {
           icon={<MethodIcon src={iconReserved.src} alt="Reserva" />}
         />
 
-        <PaymentMethodCard
-          title="Efectivo en el local"
-          description="El cliente paga presencialmente al momento del turno."
-          selected={pm.form.payWithCashInFront}
-          onClick={() => !isCashLocked && pm.toggle("payWithCashInFront")}
-          icon={<MethodIcon src={iconCash.src} alt="Efectivo" />}
-          disabled={isCashLocked}
-          rightContent={
-            isCashLocked ? (
-              <FeatureLockedOverlay
-                featureName="Efectivo"
-                requiredTier="pro"
-                variant="inline"
-                className="border-0 bg-transparent p-0"
-              />
-            ) : undefined
-          }
-        />
+        {/* The upgrade prompt sits below the card, not inside it: its link
+            cannot be nested in the card's <button>. */}
+        <div className="grid gap-2">
+          <PaymentMethodCard
+            title="Efectivo en el local"
+            description="El cliente paga presencialmente al momento del turno."
+            selected={pm.form.payWithCashInFront}
+            onClick={() => !isCashLocked && pm.toggle("payWithCashInFront")}
+            icon={<MethodIcon src={iconCash.src} alt="Efectivo" />}
+            disabled={isCashLocked}
+          />
+          {isCashLocked ? (
+            <FeatureLockedOverlay
+              featureName="Efectivo"
+              requiredTier="pro"
+              variant="inline"
+            />
+          ) : null}
+        </div>
       </div>
 
       {pm.form.payWithReservation ? (
