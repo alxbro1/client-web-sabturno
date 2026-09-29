@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useAvailableDaysQuery } from "@/hooks/queries/useAvailableDaysQuery";
 import { useTimeSlotsQuery } from "@/hooks/queries/useTimeSlotsQuery";
+import { useAuth } from "@/hooks/useAuth";
+import { DEFAULT_TIMEZONE } from "@/lib/constants/countries";
+import { filterFutureTimeSlots } from "@/lib/utils/timeSlots";
 import { parseBookingQuery } from "@/lib/utils/bookingQuery";
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatDateOnlyLocal } from "@/lib/utils/date";
@@ -14,6 +17,7 @@ import { useBookingStore } from "@/stores/booking";
 export default function SelectSlotPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const local = useBookingStore((s) => s.local);
   const service = useBookingStore((s) => s.service);
   const employee = useBookingStore((s) => s.employee);
@@ -49,6 +53,20 @@ export default function SelectSlotPage() {
       employeeIdForQuery,
       availabilityRefreshToken,
     );
+
+  // Same timezone the payment step uses to build the start instant.
+  const bookingTimezone = user?.timezone || local?.timezone || DEFAULT_TIMEZONE;
+  const visibleTimeSlots = useMemo(
+    () =>
+      timeSlots && selectedDate
+        ? filterFutureTimeSlots(
+            timeSlots,
+            formatDateOnlyLocal(selectedDate),
+            bookingTimezone,
+          )
+        : timeSlots,
+    [timeSlots, selectedDate, bookingTimezone],
+  );
 
   function buildSelectServiceUrl() {
     return "/booking/select-service";
@@ -202,14 +220,14 @@ export default function SelectSlotPage() {
           </div>
         ) : null}
 
-        {selectedDate && !timeSlotsLoading && !timeSlotsError && !timeSlots?.length ? (
+        {selectedDate && !timeSlotsLoading && !timeSlotsError && !visibleTimeSlots?.length ? (
           <p className="text-muted-foreground">
             No quedan horarios libres ese día. Probá con otra fecha.
           </p>
         ) : null}
 
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-          {timeSlots?.map((slot) => {
+          {visibleTimeSlots?.map((slot) => {
             const isActive = selectedTime === slot.time;
             return (
               <button
