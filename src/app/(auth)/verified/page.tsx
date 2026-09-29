@@ -18,6 +18,7 @@ import { authService } from "@/services/auth";
 export default function VerifiedPage() {
   const searchParams = useSearchParams();
   const success = searchParams.get("success") !== "false";
+  const expired = searchParams.get("reason") === "expired";
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,9 +38,18 @@ export default function VerifiedPage() {
 
     try {
       await authService.resendVerification(email.trim());
-      setMessage("Correo de verificacion reenviado. Revisa tu bandeja de entrada.");
-    } catch {
-      setError("No se pudo reenviar el correo. Intenta nuevamente.");
+      setMessage(
+        "Te enviamos un nuevo enlace de verificación. Revisá tu bandeja de entrada.",
+      );
+    } catch (caught) {
+      const backendMessage = (
+        caught as { response?: { data?: { message?: unknown } } }
+      )?.response?.data?.message;
+      setError(
+        typeof backendMessage === "string" && backendMessage
+          ? backendMessage
+          : "No se pudo reenviar el correo. Intenta nuevamente.",
+      );
     } finally {
       setLoading(false);
     }
@@ -53,10 +63,10 @@ export default function VerifiedPage() {
         </div>
         <div className="grid gap-1">
           <p className="text-xs font-bold uppercase tracking-widest text-primary">
-            Verificacion
+            Verificación
           </p>
           <h2 className="text-[1.7rem] leading-none font-semibold">
-            {success ? "Correo verificado" : "Error de verificacion"}
+            {success ? "Correo verificado" : "No pudimos verificar tu correo"}
           </h2>
         </div>
       </CardHeader>
@@ -65,16 +75,18 @@ export default function VerifiedPage() {
         <p className="text-center text-muted-foreground">
           {success
             ? "Tu correo ha sido verificado correctamente. Ya podés iniciar sesión."
-            : "No se pudo verificar tu correo. El enlace puede haber expirado."}
+            : expired
+              ? "El enlace venció. Los enlaces de verificación duran 24 horas."
+              : "El enlace no es válido o ya fue usado."}
         </p>
 
         {!success && (
           <form className="grid gap-4" onSubmit={handleResend}>
             <p className="text-center text-muted-foreground text-sm">
-              Ingresa tu correo para recibir un nuevo enlace de verificacion.
+              Ingresá tu correo para recibir un nuevo enlace de verificación.
             </p>
             <InputField
-              label="Correo electronico"
+              label="Correo electrónico"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -88,10 +100,13 @@ export default function VerifiedPage() {
             {error ? (
               <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 {error}
+                {error.includes("ya está verificado") ? (
+                  <span> Ya podés iniciar sesión con tu cuenta.</span>
+                ) : null}
               </div>
             ) : null}
             <Button type="submit" disabled={!isFormValid || loading} fullWidth>
-              {loading ? "Enviando..." : "Reenviar verificacion"}
+              {loading ? "Enviando..." : "Reenviar enlace"}
             </Button>
           </form>
         )}

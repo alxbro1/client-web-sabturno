@@ -3,15 +3,17 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import VerifiedPage from "@/app/(auth)/verified/page";
 
-const { mockResendVerification, mockSuccess } = vi.hoisted(() => ({
+const { mockResendVerification, mockSuccess, mockReason } = vi.hoisted(() => ({
   mockResendVerification: vi.fn(),
   mockSuccess: { value: "true" },
+  mockReason: { value: null as string | null },
 }));
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => ({
     get: (param: string) => {
       if (param === "success") return mockSuccess.value;
+      if (param === "reason") return mockReason.value;
       return null;
     },
   }),
@@ -36,6 +38,7 @@ vi.mock("next/link", () => ({
 beforeEach(() => {
   vi.clearAllMocks();
   mockSuccess.value = "true";
+  mockReason.value = null;
 });
 
 describe("VerifiedPage", () => {
@@ -47,7 +50,7 @@ describe("VerifiedPage", () => {
       screen.getByText(/ha sido verificado correctamente/i),
     ).toBeInTheDocument();
     expect(
-      screen.queryByText("Reenviar verificacion"),
+      screen.queryByText("Reenviar enlace"),
     ).not.toBeInTheDocument();
   });
 
@@ -56,27 +59,68 @@ describe("VerifiedPage", () => {
 
     render(<VerifiedPage />);
 
-    expect(screen.getByText("Error de verificacion")).toBeInTheDocument();
+    expect(screen.getByText("No pudimos verificar tu correo")).toBeInTheDocument();
     expect(
-      screen.getByText(/no se pudo verificar/i),
+      screen.getByText(/no es válido o ya fue usado/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Reenviar verificacion"),
+      screen.getByText("Reenviar enlace"),
     ).toBeInTheDocument();
   });
 
-  it("validates email in resend form", async () => {
+  it("explains the link expired when reason=expired", () => {
+    mockSuccess.value = "false";
+    mockReason.value = "expired";
+
+    render(<VerifiedPage />);
+
+    expect(screen.getByText(/enlace venció/i)).toBeInTheDocument();
+  });
+
+  it("explains the link is invalid or already used when reason=invalid", () => {
+    mockSuccess.value = "false";
+    mockReason.value = "invalid";
+
+    render(<VerifiedPage />);
+
+    expect(
+      screen.getByText(/no es válido o ya fue usado/i),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the backend message and a login hint when already verified", async () => {
+    const user = userEvent.setup();
+    mockSuccess.value = "false";
+    mockResendVerification.mockRejectedValue({
+      response: { data: { message: "El usuario ya está verificado" } },
+    });
+
+    render(<VerifiedPage />);
+
+    await user.type(
+      screen.getByLabelText(/^Correo electrónico/),
+      "test@example.com",
+    );
+    await user.click(screen.getByText("Reenviar enlace"));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/El usuario ya está verificado/),
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByText(/Ya podés iniciar sesión/)).toBeInTheDocument();
+  });
+
+  it("disables resend for an invalid email", async () => {
     const user = userEvent.setup();
     mockSuccess.value = "false";
 
     render(<VerifiedPage />);
 
-    const emailInput = screen.getByLabelText(/^Correo electronico/);
+    const emailInput = screen.getByLabelText(/^Correo electrónico/);
     await user.type(emailInput, "invalid-email");
 
-    expect(
-      screen.getByText("Formato de email invalido"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Reenviar enlace").closest("button")).toBeDisabled();
   });
 
   it("calls resendVerification on submit with valid email", async () => {
@@ -86,10 +130,10 @@ describe("VerifiedPage", () => {
 
     render(<VerifiedPage />);
 
-    const emailInput = screen.getByLabelText(/^Correo electronico/);
+    const emailInput = screen.getByLabelText(/^Correo electrónico/);
     await user.type(emailInput, "test@example.com");
 
-    const submitButton = screen.getByText("Reenviar verificacion");
+    const submitButton = screen.getByText("Reenviar enlace");
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -105,15 +149,15 @@ describe("VerifiedPage", () => {
 
     render(<VerifiedPage />);
 
-    const emailInput = screen.getByLabelText(/^Correo electronico/);
+    const emailInput = screen.getByLabelText(/^Correo electrónico/);
     await user.type(emailInput, "test@example.com");
 
-    const submitButton = screen.getByText("Reenviar verificacion");
+    const submitButton = screen.getByText("Reenviar enlace");
     await user.click(submitButton);
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Correo de verificacion reenviado/i),
+        screen.getByText(/Te enviamos un nuevo enlace/i),
       ).toBeInTheDocument();
     });
   });
@@ -125,10 +169,10 @@ describe("VerifiedPage", () => {
 
     render(<VerifiedPage />);
 
-    const emailInput = screen.getByLabelText(/^Correo electronico/);
+    const emailInput = screen.getByLabelText(/^Correo electrónico/);
     await user.type(emailInput, "test@example.com");
 
-    const submitButton = screen.getByText("Reenviar verificacion");
+    const submitButton = screen.getByText("Reenviar enlace");
     await user.click(submitButton);
 
     await waitFor(() => {
