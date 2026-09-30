@@ -88,11 +88,12 @@ describe("VerifiedPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows the backend message and a login hint when already verified", async () => {
+  it("shows the generic backend message after a resend", async () => {
     const user = userEvent.setup();
     mockSuccess.value = "false";
-    mockResendVerification.mockRejectedValue({
-      response: { data: { message: "El usuario ya está verificado" } },
+    mockResendVerification.mockResolvedValue({
+      ok: true,
+      message: "Mensaje genérico del backend.",
     });
 
     render(<VerifiedPage />);
@@ -104,11 +105,8 @@ describe("VerifiedPage", () => {
     await user.click(screen.getByText("Reenviar enlace"));
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/El usuario ya está verificado/),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Mensaje genérico del backend.")).toBeInTheDocument();
     });
-    expect(screen.getByText(/Ya podés iniciar sesión/)).toBeInTheDocument();
   });
 
   it("disables resend for an invalid email", async () => {

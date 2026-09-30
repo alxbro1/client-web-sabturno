@@ -37,9 +37,11 @@ export default function VerifiedPage() {
     setMessage(null);
 
     try {
-      await authService.resendVerification(email.trim());
+      const result = await authService.resendVerification(email.trim());
       setMessage(
-        "Te enviamos un nuevo enlace de verificación. Revisá tu bandeja de entrada.",
+        typeof result?.message === "string" && result.message
+          ? result.message
+          : "Si la cuenta existe y no está verificada, te enviamos un correo de verificación.",
       );
     } catch (caught) {
       const backendMessage = (
@@ -100,9 +102,6 @@ export default function VerifiedPage() {
             {error ? (
               <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 {error}
-                {error.includes("ya está verificado") ? (
-                  <span> Ya podés iniciar sesión con tu cuenta.</span>
-                ) : null}
               </div>
             ) : null}
             <Button type="submit" disabled={!isFormValid || loading} fullWidth>
