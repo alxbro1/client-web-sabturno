@@ -155,7 +155,7 @@ describe("VerifiedPage", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Te enviamos un nuevo enlace/i),
+        screen.getByText(/Si la cuenta existe/i),
       ).toBeInTheDocument();
     });
   });
