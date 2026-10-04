@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/Button";
 import { InputField, SelectField } from "@/components/Field";
@@ -84,8 +84,18 @@ const ALL_TOUCHED: Record<keyof RegisterFormData, boolean> = {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isBusiness, reset: resetClientType } = useClientTypeStore();
-  const [formData, setFormData] = useState<RegisterFormData>(INITIAL_FORM);
+  // Prefill desde el CTA "Crear cuenta" de AppointmentConfirmationActions
+  // (`/register?name=...&email=...&phone=...`): cada campo se precarga de
+  // forma independiente si está presente, sin vincular el turno con la
+  // cuenta nueva.
+  const [formData, setFormData] = useState<RegisterFormData>(() => ({
+    ...INITIAL_FORM,
+    name: searchParams.get("name") || INITIAL_FORM.name,
+    email: searchParams.get("email") || INITIAL_FORM.email,
+    phone: searchParams.get("phone") || INITIAL_FORM.phone,
+  }));
   const [location, setLocation] =
     useState<LocationFieldsValue>(INITIAL_LOCATION);
   const [touched, setTouched] =

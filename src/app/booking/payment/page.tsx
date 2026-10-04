@@ -252,18 +252,14 @@ export default function SelectPaymentPage() {
       }
 
       if (!user && createdAppointment.accessHash) {
-        const publicLink = `${window.location.origin}/appointment/${createdAppointment.id}?hash=${createdAppointment.accessHash}`;
-        const msg = encodeURIComponent(
-          `Tu turno fue reservado correctamente!\n\nPuedes acceder a los detalles y gestionar tu turno usando este link seguro:\n${publicLink}\n\nTambien te enviamos los detalles a tu email o whatsapp.`,
-        );
         router.replace(
-          `/booking/result?status=success&message=${msg}${employeeNameParam}`,
+          `/booking/result?status=success&appointmentId=${createdAppointment.id}&hash=${encodeURIComponent(createdAppointment.accessHash)}${employeeNameParam}`,
         );
         return;
       }
 
       router.replace(
-        `/booking/result?status=success&message=Tu%20turno%20fue%20reservado%20correctamente.%20Te%20enviamos%20los%20detalles%20a%20tu%20email%20o%20whatsapp.${employeeNameParam}`,
+        `/booking/result?status=success&appointmentId=${createdAppointment.id}${employeeNameParam}`,
       );
     } catch (caughtError: unknown) {
       const err = caughtError as {

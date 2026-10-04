@@ -1,6 +1,7 @@
 import { apiService } from "@/lib/api";
 import { useBookingStore } from "@/stores/booking";
 import type {
+  AppointmentPublicDetails,
   BookingDTO,
   CreateAppointmentResponse,
   PaymentStatusResponse,
@@ -82,7 +83,9 @@ export const bookingService = {
     return response.data;
   },
   async getAppointmentPublic(id: string, hash: string) {
-    const response = await apiService.get(`/appointments/${id}/public?hash=${encodeURIComponent(hash)}`);
+    const response = await apiService.get<AppointmentPublicDetails>(
+      `/appointments/${id}/public?hash=${encodeURIComponent(hash)}`,
+    );
     return response.data;
   },
 

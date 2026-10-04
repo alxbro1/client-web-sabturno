@@ -6,6 +6,8 @@ import { Check, X, Hourglass } from "lucide-react";
 import { Button } from "@/components/Button";
 import TaloPaymentInfo from "@/components/TaloPaymentInfo";
 import { useBookingStore } from "@/stores/booking";
+import { AppointmentConfirmationActions } from "@/components/appointment/AppointmentConfirmationActions";
+import { useAppointmentPublicQuery } from "@/hooks/queries/useAppointmentPublicQuery";
 
 type ResultStatus = "success" | "error";
 
@@ -20,6 +22,20 @@ export default function AppointmentResultPage() {
   const paymentMethod = searchParams.get("paymentMethod");
   const paymentId = searchParams.get("paymentId");
   const employeeName = searchParams.get("employeeName");
+  const appointmentId = searchParams.get("appointmentId");
+  const appointmentHash = searchParams.get("hash") || "";
+
+  // El flujo Talo queda pendiente de pago: todavía no hay nada que gestionar
+  // (cancelar/agendar), así que nunca pedimos ni mostramos las acciones ahí.
+  const isTaloPending = result === "success" && paymentMethod === "talo";
+
+  const {
+    data: appointment,
+    isSuccess: hasAppointment,
+  } = useAppointmentPublicQuery(
+    !isTaloPending && appointmentId ? appointmentId : null,
+    appointmentHash,
+  );
 
   useEffect(() => {
     if (
@@ -158,6 +174,10 @@ export default function AppointmentResultPage() {
           <p className="text-sm text-muted-foreground">
             Tu turno es con <span className="font-semibold text-foreground">{employeeName}</span>.
           </p>
+        ) : null}
+
+        {isSuccess && hasAppointment && appointment ? (
+          <AppointmentConfirmationActions appointment={appointment} />
         ) : null}
 
         <Button

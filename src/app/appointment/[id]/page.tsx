@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { formatLocalDate } from "@/lib/utils/date";
 import { DEFAULT_TIMEZONE } from "@/lib/constants/countries";
+import { auth } from "@/lib/auth";
+import { AppointmentConfirmationActions } from "@/components/appointment/AppointmentConfirmationActions";
+import type { AppointmentPublicDetails } from "@/lib/types/booking";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +65,46 @@ async function fetchAppointment(
   }
 }
 
+type SessionFetchOutcome =
+  | { ok: true; appointment: AppointmentPublicDetails }
+  | { ok: false };
+
+/**
+ * Mismo endpoint público, pero por sesión: sin hash, con un header
+ * `Authorization: Bearer` tomado de la sesión server-side para que el
+ * `OptionalAuthGuard` del backend valide ownership (ver
+ * `appointments.service.ts#getAppointmentByIdAndHash`). Sigue siendo `fetch`
+ * directo, nunca `apiService`: la misma razón que `fetchAppointment` arriba
+ * — el interceptor de `apiService` llama a `getSession()` de
+ * `next-auth/react`, un hook de cliente que tira error en un Server Component.
+ */
+async function fetchAppointmentBySession(
+  id: string,
+  accessToken: string,
+): Promise<SessionFetchOutcome> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/appointments/${id}/public?hash=`,
+      { cache: "no-store", headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+
+    if (!response.ok) {
+      return { ok: false };
+    }
+
+    return {
+      ok: true,
+      appointment: (await response.json()) as AppointmentPublicDetails,
+    };
+  } catch (error) {
+    console.error(
+      `[appointment/${id}] no se pudo consultar el turno vía sesión:`,
+      error,
+    );
+    return { ok: false };
+  }
+}
+
 export default async function AppointmentPublicPage({
   params,
   searchParams,
@@ -73,6 +116,45 @@ export default async function AppointmentPublicPage({
   const { hash } = await searchParams;
 
   if (!hash) {
+    const session = await auth();
+    const accessToken = (session as { accessToken?: string } | null)
+      ?.accessToken;
+
+    if (accessToken) {
+      const sessionResult = await fetchAppointmentBySession(id, accessToken);
+      if (sessionResult.ok) {
+        const { appointment } = sessionResult;
+        const timezone = appointment.timezone || DEFAULT_TIMEZONE;
+
+        return (
+          <div className="min-h-screen grid place-items-center p-8">
+            <section className="w-full max-w-140 rounded-[24px] border border-border bg-card p-7 shadow-[0_18px_40px_rgba(0,0,0,0.34)] sm:p-8 flex flex-col gap-6 min-w-0 text-center">
+              <div className="grid gap-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-primary">
+                  Turno #{appointment.id}
+                </p>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {appointment.service?.name || "Tu turno"}
+                </h2>
+                <div className="grid gap-1 text-muted-foreground text-sm">
+                  <p>{appointment.local?.name}</p>
+                  <p className="first-letter:uppercase">
+                    {formatLocalDate(
+                      appointment.startDateTime,
+                      timezone,
+                      "EEEE d 'de' MMMM 'a las' HH:mm",
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <AppointmentConfirmationActions appointment={appointment} />
+            </section>
+          </div>
+        );
+      }
+    }
+
     return (
       <PublicShell title="Enlace incompleto">
         <p className="text-muted-foreground">

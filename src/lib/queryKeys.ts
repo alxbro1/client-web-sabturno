@@ -48,4 +48,6 @@ export const queryKeys = {
   loyaltyMyCards: () => ["loyalty", "my-cards"] as const,
   loyaltyBookingRewards: (localId: string, serviceId: number, userId?: string) =>
     ["loyalty", "booking-rewards", localId, serviceId, userId] as const,
+  appointmentPublic: (appointmentId: string, hash: string) =>
+    ["appointment-public", appointmentId, hash] as const,
 };
