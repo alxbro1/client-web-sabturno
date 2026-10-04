@@ -113,3 +113,27 @@ export interface Appointment {
   timezone?: string;
   paymentMethodSelected?: PaymentMethod;
 }
+
+/** Response shape of `GET /appointments/:id/public` (guest hash or logged-in owner). */
+export interface AppointmentPublicDetails {
+  id: number;
+  state: "CONFIRMED" | "PENDING" | "CANCELLED" | "COMPLETED";
+  startDateTime: string;
+  endDateTime: string;
+  timezone?: string;
+  countryCode?: string;
+  /** Present only when booked by a logged-in user; absent/null for guest bookings. */
+  userId?: string | null;
+  /** Present for guest bookings; used by the public (hash-based) read/cancel endpoints. */
+  accessHash?: string | null;
+  email?: string | null;
+  userName?: string | null;
+  phoneNumber?: string | null;
+  originalAmount?: number | string | null;
+  discountAmount?: number | string | null;
+  finalAmount?: number | string | null;
+  paymentMethodSelected?: PaymentMethod | null;
+  service: Service;
+  local: Local;
+  employee?: AppointmentEmployee | null;
+}
