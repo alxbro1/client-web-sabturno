@@ -4,6 +4,8 @@ import { useState } from "react";
 import { CalendarPlus, Share2, UserPlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/Button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   buildGoogleCalendarUrl,
   buildIcsContent,
@@ -131,41 +133,54 @@ export function AppointmentConfirmationActions({
 
   return (
     <div className="grid gap-3">
-      <div className="flex flex-wrap gap-3">
-        <a
-          href={googleCalendarUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-input bg-card px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted/30"
-        >
-          <CalendarPlus className="size-4" aria-hidden="true" />
-          Agregar a Google Calendar
-        </a>
-
-        <Button variant="secondary" onClick={handleShare}>
-          <Share2 className="size-4" aria-hidden="true" />
-          Guardar / Compartir
-        </Button>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        {cancelState === "confirming" ? (
-          <>
-            <span className="text-sm text-muted-foreground">¿Estás seguro?</span>
-            <Button variant="danger" onClick={confirmCancel}>
-              Confirmar cancelación
-            </Button>
-            <Button variant="ghost" onClick={dismissConfirm}>
-              <X className="size-4" aria-hidden="true" />
-              No, volver
-            </Button>
-          </>
-        ) : (
-          <Button variant="danger" onClick={requestCancel} disabled={cancelState === "loading"}>
-            {cancelState === "loading" ? "Cancelando..." : "Cancelar turno"}
+      {cancelState === "confirming" ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-3">
+          <span className="text-sm text-muted-foreground">¿Estás seguro?</span>
+          <Button variant="danger" onClick={confirmCancel}>
+            Confirmar cancelación
           </Button>
-        )}
-      </div>
+          <Button variant="ghost" onClick={dismissConfirm}>
+            <X className="size-4" aria-hidden="true" />
+            No, volver
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-2">
+          <a
+            href={googleCalendarUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Agregar a Google Calendar"
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "h-11 rounded-xl px-1 text-xs font-semibold sm:text-sm",
+            )}
+          >
+            <CalendarPlus className="size-4" aria-hidden="true" />
+            Calendario
+          </a>
+
+          <Button
+            variant="secondary"
+            aria-label="Guardar o compartir turno"
+            className="h-11 px-1 text-xs sm:text-sm"
+            onClick={handleShare}
+          >
+            <Share2 className="size-4" aria-hidden="true" />
+            Compartir
+          </Button>
+
+          <Button
+            variant="danger"
+            aria-label="Cancelar turno"
+            className="h-11 px-1 text-xs sm:text-sm"
+            onClick={requestCancel}
+            disabled={cancelState === "loading"}
+          >
+            {cancelState === "loading" ? "Cancelando…" : "Cancelar"}
+          </Button>
+        </div>
+      )}
 
       {cancelState === "error" && cancelError ? (
         <p role="alert" className="text-sm text-destructive">
