@@ -325,7 +325,7 @@ export default function LocalProfilePage() {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] p-6 space-y-5">
           <h3 className="text-lg font-semibold text-white">
             Informacion del negocio

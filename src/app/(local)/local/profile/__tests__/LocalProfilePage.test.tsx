@@ -201,7 +201,11 @@ describe("LocalProfilePage slot interval field", () => {
 
     const input = await screen.findByLabelText(SLOT_INTERVAL_LABEL);
     fireEvent.change(input, { target: { value: "200" } });
-    fireEvent.click(screen.getByRole("button", { name: /Guardar cambios/ }));
+    // fireEvent.submit bypasses jsdom's native HTML5 constraint validation
+    // (which fireEvent.click on the submit button would trigger because of
+    // this input's own min/max attributes), so the component's own 5-120
+    // check is what's actually under test here, not the browser's.
+    fireEvent.submit(input.closest("form")!);
 
     expect(
       await screen.findByText(/entre 5 y 120/),
