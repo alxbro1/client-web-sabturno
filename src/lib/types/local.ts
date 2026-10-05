@@ -35,6 +35,11 @@ export interface Local {
    */
   instagram?: string | null;
   /**
+   * Client-facing booking slot granularity, in minutes. Backend default is
+   * `30`, validated server-side with `@IsInt() @Min(5) @Max(120)`.
+   */
+  slotIntervalMinutes?: number | null;
+  /**
    * Only present on `GET /local/available` items (`findAvailableLocals`).
    * Already filtered server-side to active templates with an active
    * `scheduleTemplate`, so every entry here is currently in effect.

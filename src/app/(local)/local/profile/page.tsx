@@ -24,6 +24,7 @@ export default function LocalProfilePage() {
     province: "",
     notifyNewAppointmentWhatsapp: false,
     instagram: "",
+    slotIntervalMinutes: "30",
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -72,6 +73,7 @@ export default function LocalProfilePage() {
             local.notifyNewAppointmentWhatsapp,
           ),
           instagram: local.instagram || "",
+          slotIntervalMinutes: String(local.slotIntervalMinutes ?? 30),
         });
         resetLogo(local.imageProfile ?? user.imageProfile ?? null);
       }
@@ -109,6 +111,16 @@ export default function LocalProfilePage() {
     e.preventDefault();
     if (!user?.id) return;
 
+    const slotIntervalMinutes = Number(formData.slotIntervalMinutes);
+    if (
+      !Number.isFinite(slotIntervalMinutes) ||
+      slotIntervalMinutes < 5 ||
+      slotIntervalMinutes > 120
+    ) {
+      setSaveError("El intervalo entre turnos debe estar entre 5 y 120 minutos.");
+      return;
+    }
+
     setIsSaving(true);
     setSaveError(null);
     setSaveSuccess(false);
@@ -123,6 +135,7 @@ export default function LocalProfilePage() {
         province: formData.province,
         notifyNewAppointmentWhatsapp: formData.notifyNewAppointmentWhatsapp,
         instagram: formData.instagram,
+        slotIntervalMinutes: Math.round(slotIntervalMinutes),
       });
 
       if (formData.name !== user.name) {
@@ -312,7 +325,7 @@ export default function LocalProfilePage() {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <div className="border border-white/12 bg-[linear-gradient(180deg,rgba(22,22,22,0.96),rgba(12,12,12,0.95))] rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.34)] p-6 space-y-5">
           <h3 className="text-lg font-semibold text-white">
             Informacion del negocio
@@ -420,6 +433,31 @@ export default function LocalProfilePage() {
               <p className="text-sm text-muted-foreground mt-1">
                 Solo el usuario, sin el enlace completo. Los clientes lo ven
                 como un botón en tu perfil.
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="local-slot-interval-input"
+                className="block text-sm font-medium text-foreground mb-2"
+              >
+                Intervalo entre turnos (minutos)
+              </label>
+              <input
+                id="local-slot-interval-input"
+                type="number"
+                inputMode="numeric"
+                min={5}
+                max={120}
+                step={1}
+                value={formData.slotIntervalMinutes}
+                onChange={(e) => handleChange("slotIntervalMinutes", e.target.value)}
+                placeholder="Ej: 30"
+                className="w-32 px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Cada cuánto se muestran los horarios disponibles a tus
+                clientes al reservar.
               </p>
             </div>
           </div>

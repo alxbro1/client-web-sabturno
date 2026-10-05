@@ -43,11 +43,13 @@ function localFixture(overrides: Record<string, unknown> = {}) {
     isActive: true,
     notifyNewAppointmentWhatsapp: false,
     instagram: null,
+    slotIntervalMinutes: 30,
     ...overrides,
   };
 }
 
 const INSTAGRAM_LABEL = "Instagram";
+const SLOT_INTERVAL_LABEL = "Intervalo entre turnos (minutos)";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -179,5 +181,48 @@ describe("LocalProfilePage Instagram field", () => {
     expect(
       await screen.findByText(/instagram must be a valid handle/),
     ).toBeInTheDocument();
+  });
+});
+
+describe("LocalProfilePage slot interval field", () => {
+  it("prefills the loaded value", async () => {
+    mockGetLocal.mockResolvedValue(localFixture({ slotIntervalMinutes: 45 }));
+
+    render(<LocalProfilePage />);
+
+    const input = await screen.findByLabelText(SLOT_INTERVAL_LABEL);
+    expect(input).toHaveValue(45);
+  });
+
+  it("blocks submit with a visible error when the value is out of bounds", async () => {
+    mockGetLocal.mockResolvedValue(localFixture());
+
+    render(<LocalProfilePage />);
+
+    const input = await screen.findByLabelText(SLOT_INTERVAL_LABEL);
+    fireEvent.change(input, { target: { value: "200" } });
+    fireEvent.click(screen.getByRole("button", { name: /Guardar cambios/ }));
+
+    expect(
+      await screen.findByText(/entre 5 y 120/),
+    ).toBeInTheDocument();
+    expect(mockUpdateLocal).not.toHaveBeenCalled();
+  });
+
+  it("sends the valid value in the PATCH payload", async () => {
+    mockGetLocal.mockResolvedValue(localFixture());
+
+    render(<LocalProfilePage />);
+
+    const input = await screen.findByLabelText(SLOT_INTERVAL_LABEL);
+    fireEvent.change(input, { target: { value: "45" } });
+    fireEvent.click(screen.getByRole("button", { name: /Guardar cambios/ }));
+
+    await waitFor(() => {
+      expect(mockUpdateLocal).toHaveBeenCalledWith(
+        "local-1",
+        expect.objectContaining({ slotIntervalMinutes: 45 }),
+      );
+    });
   });
 });
