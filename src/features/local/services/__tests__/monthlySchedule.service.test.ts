@@ -289,6 +289,12 @@ describe("findMonthlyScheduleMonth", () => {
     );
   });
 
+  it("matches the whole-local template when the scope is an empty string (select without selection)", () => {
+    expect(findMonthlyScheduleMonth(templates, 2026, 1, "")?.id).toBe(
+      "local-jan",
+    );
+  });
+
   it("returns null when the month is not configured for that scope", () => {
     expect(findMonthlyScheduleMonth(templates, 2026, 5, EMPLOYEE_ID)).toBeNull();
   });

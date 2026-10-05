@@ -6,8 +6,16 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLocalQuery } from "@/hooks/queries/useLocalQuery";
 import {
   monthlyScheduleService,
+  type MonthlyScheduleTemplate,
   type SaveMonthlyScheduleRequest,
 } from "@/features/local/services/monthlySchedule.service";
+
+/**
+ * Constante a propósito: `listQuery.data ?? []` devolvería un array NUEVO en
+ * cada render, y cualquier `useMemo`/`useEffect` que dependa de él cambiaría
+ * de identidad siempre. Es la trampa 2 de `AGENTS.md`.
+ */
+const EMPTY_TEMPLATES: MonthlyScheduleTemplate[] = [];
 
 /**
  * Meses configurados + mutaciones de la plantilla mensual de horarios.
@@ -66,9 +74,12 @@ export function useMonthlyScheduleQuery(employeeId?: string) {
   });
 
   return {
-    templates: listQuery.data ?? [],
+    templates: listQuery.data ?? EMPTY_TEMPLATES,
     isLoading: listQuery.isLoading,
+    /** Mensaje de error real, o `null`. Permite distinguir "no configurado" de "falló la request". */
     error: listQuery.error?.message ?? null,
+    /** Reintento manual del listado. */
+    refetch: listQuery.refetch,
     saveMonth: (data: SaveMonthlyScheduleRequest) =>
       saveMutation.mutateAsync(data),
     removeMonth: (year: number, month: number) =>

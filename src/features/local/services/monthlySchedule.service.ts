@@ -169,7 +169,11 @@ export function findMonthlyScheduleMonth(
   month: number,
   employeeScope?: string | null,
 ): MonthlyScheduleTemplate | null {
-  const wantedEmployee = employeeScope ?? null;
+  // `||` y no `??`: un `<select>` sin selección devuelve `""`, que NO es
+  // nullish. Con `??` el alcance "todo el local" buscaba `employeeId === ""`,
+  // no encontraba el template del local y la pantalla decía que el mes no
+  // estaba configurado cuando sí lo estaba.
+  const wantedEmployee = employeeScope || null;
   return (
     templates.find(
       (template) =>
