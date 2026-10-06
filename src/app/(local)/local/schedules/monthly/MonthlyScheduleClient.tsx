@@ -414,17 +414,6 @@ export function MonthlyScheduleClient() {
         </p>
       )}
 
-      <div className="grid gap-2">
-        <p className="text-sm text-muted-foreground">
-          {monthTemplate
-            ? `${MONTH_NAMES[month - 1]} tiene un horario propio para ${scopeLabel}.`
-            : `${MONTH_NAMES[month - 1]} todavía no tiene horario propio para ${scopeLabel}: al guardarlo se define día por día y todos arrancan cerrados.`}
-        </p>
-        <p className="text-sm font-medium text-foreground">
-          {summary.open} días abiertos · {summary.closed} cerrados
-        </p>
-      </div>
-
       {isLoading || !mounted ? (
         <div className="flex h-[420px] items-center justify-center">
           <p className="text-muted-foreground">Cargando calendario...</p>
