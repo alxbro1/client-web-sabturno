@@ -365,7 +365,7 @@ export function MonthlyScheduleClient() {
               label="Empleado"
               value={scopeEmployeeId}
               onChange={(event) => setScopeEmployeeId(event.target.value)}
-              hint="Cada empleado tiene su propio horario mensual. Si no tiene mes configurado, usa el horario semanal."
+              hint=" "
             >
               <option value="">Todo el local</option>
               {employees.map((employee) => (
