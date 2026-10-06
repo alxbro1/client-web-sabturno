@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { dateFnsLocalizer, type SlotInfo, type View, Views } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay } from "date-fns";
+import { format, parse, startOfWeek, getDay, addDays } from "date-fns";
 import { es } from "date-fns/locale/es";
 import { Button } from "@/components/Button";
 import { SelectField } from "@/components/Field";
@@ -292,6 +292,13 @@ export default function LocalBlockingsPage() {
             culture="es"
             selectable
             onSelectSlot={handleSelectSlot}
+            onDrillDown={(date) =>
+              handleSelectSlot({
+                start: date,
+                end: addDays(date, 1),
+                action: "click",
+              } as SlotInfo)
+            }
             onSelectEvent={handleSelectEvent}
             eventPropGetter={eventPropGetter}
             style={{ height: 650 }}

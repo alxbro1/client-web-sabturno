@@ -875,3 +875,12 @@ button.rbc-input::-moz-focus-inner {
 .rbc-event.event-variant-completed:hover {
   --event-bg: color-mix(in oklab, hsl(142 71% 45%) 85%, transparent);
 }
+
+/* Tap táctil en el mes: evitar menú contextual de iOS y selección de texto al
+   tocar el espacio de una celda (el día se abre por onSelectSlot). */
+.rbc-month-view .rbc-day-bg,
+.rbc-month-view .rbc-date-cell {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
