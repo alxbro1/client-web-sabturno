@@ -1,14 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { dateFnsLocalizer, Views } from "react-big-calendar";
 import { format, getDay, parse, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale/es";
-import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import ShadcnBigCalendar from "@/components/shadcn-big-calendar/shadcn-big-calendar";
 import "@/components/shadcn-big-calendar/shadcn-big-calendar.css";
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { SelectField } from "@/components/Field";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmployeesQuery } from "@/hooks/queries/useEmployeesQuery";
@@ -326,6 +333,11 @@ export function MonthlyScheduleClient() {
   return (
     <section className="grid gap-6" data-testid="monthly-schedule">
       <header className="grid gap-2">
+        <Link href="/local/schedules" className="w-fit">
+          <Button variant="secondary" className="w-fit">
+            <ArrowLeft className="size-4" /> Volver a horarios
+          </Button>
+        </Link>
         <h1 className="text-2xl font-bold text-foreground">Horario por mes</h1>
         <p className="text-sm text-muted-foreground">
           Elegí un mes y marcá día por día si el local atiende y en qué franjas
@@ -450,118 +462,131 @@ export function MonthlyScheduleClient() {
       </p>
 
       {selectedDate && (
-        <div className="grid gap-4 rounded-xl border border-border bg-muted/30 p-4">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-base font-semibold capitalize text-foreground">
-              {readableDate(selectedDate)}
-            </h2>
-            <Button
-              variant="ghost"
-              onClick={() => setSelectedDate(null)}
-              aria-label="Cerrar editor del día"
-              className="shrink-0 px-2"
-            >
-              <X className="size-4" />
-            </Button>
-          </div>
-
-          <fieldset className="grid gap-2">
-            <legend className="text-sm font-medium text-foreground">
-              Estado del día
-            </legend>
-            <div className="flex flex-wrap gap-2">
+        <Dialog
+          open={!!selectedDate}
+          onOpenChange={(open) => {
+            if (!open) setSelectedDate(null);
+          }}
+        >
+          <DialogContent
+            showCloseButton={false}
+            className="max-h-[min(85vh,640px)] overflow-y-auto sm:max-w-lg"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <DialogTitle className="text-base capitalize text-foreground">
+                {readableDate(selectedDate)}
+              </DialogTitle>
               <Button
-                variant={selected.isClosed ? "secondary" : "primary"}
-                aria-pressed={!selected.isClosed}
-                onClick={() =>
-                  updateSelectedDay({
-                    isClosed: false,
-                    slots: selected.slots.length
-                      ? selected.slots
-                      : [{ start: "09:00", end: "13:00" }],
-                  })
-                }
+                variant="ghost"
+                onClick={() => setSelectedDate(null)}
+                aria-label="Cerrar editor del día"
+                className="shrink-0 px-2"
               >
-                Abierto
-              </Button>
-              <Button
-                variant={selected.isClosed ? "primary" : "secondary"}
-                aria-pressed={selected.isClosed}
-                onClick={() => updateSelectedDay({ isClosed: true, slots: [] })}
-              >
-                Cerrado
+                <X className="size-4" />
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Marcar el día como cerrado no cancela los turnos ya reservados: los
-              clientes los ven igual y hay que coordinarlos a mano.
-            </p>
-          </fieldset>
+            <DialogDescription className="sr-only">
+              Editá el estado del día y sus franjas horarias.
+            </DialogDescription>
 
-          {!selected.isClosed && (
-            <div className="grid gap-3">
-              {selected.slots.map((slot, index) => (
-                <div key={index} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]">
-                  <div className="grid gap-1.5">
-                    <label
-                      htmlFor={`slot-${selectedDate}-${index}-start`}
-                      className="text-sm text-muted-foreground"
+            <fieldset className="grid gap-2">
+              <legend className="text-sm font-medium text-foreground">
+                Estado del día
+              </legend>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={selected.isClosed ? "secondary" : "primary"}
+                  aria-pressed={!selected.isClosed}
+                  onClick={() =>
+                    updateSelectedDay({
+                      isClosed: false,
+                      slots: selected.slots.length
+                        ? selected.slots
+                        : [{ start: "09:00", end: "13:00" }],
+                    })
+                  }
+                >
+                  Abierto
+                </Button>
+                <Button
+                  variant={selected.isClosed ? "primary" : "secondary"}
+                  aria-pressed={selected.isClosed}
+                  onClick={() => updateSelectedDay({ isClosed: true, slots: [] })}
+                >
+                  Cerrado
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Marcar el día como cerrado no cancela los turnos ya reservados: los
+                clientes los ven igual y hay que coordinarlos a mano.
+              </p>
+            </fieldset>
+
+            {!selected.isClosed && (
+              <div className="grid gap-3">
+                {selected.slots.map((slot, index) => (
+                  <div key={index} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                    <div className="grid gap-1.5">
+                      <label
+                        htmlFor={`slot-${selectedDate}-${index}-start`}
+                        className="text-sm text-muted-foreground"
+                      >
+                        Desde (franja {index + 1})
+                      </label>
+                      <input
+                        id={`slot-${selectedDate}-${index}-start`}
+                        type="time"
+                        value={slot.start}
+                        onChange={(event) =>
+                          updateSlot(index, { start: event.target.value })
+                        }
+                        className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                      />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <label
+                        htmlFor={`slot-${selectedDate}-${index}-end`}
+                        className="text-sm text-muted-foreground"
+                      >
+                        Hasta (franja {index + 1})
+                      </label>
+                      <input
+                        id={`slot-${selectedDate}-${index}-end`}
+                        type="time"
+                        value={slot.end}
+                        onChange={(event) =>
+                          updateSlot(index, { end: event.target.value })
+                        }
+                        className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                      />
+                    </div>
+                    <Button
+                      variant="ghost"
+                      onClick={() => removeSlot(index)}
+                      aria-label={`Quitar franja ${index + 1}`}
+                      className="h-11 self-end border border-destructive/30 text-destructive"
                     >
-                      Desde (franja {index + 1})
-                    </label>
-                    <input
-                      id={`slot-${selectedDate}-${index}-start`}
-                      type="time"
-                      value={slot.start}
-                      onChange={(event) =>
-                        updateSlot(index, { start: event.target.value })
-                      }
-                      className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-                    />
+                      <X className="size-4" />
+                    </Button>
                   </div>
-                  <div className="grid gap-1.5">
-                    <label
-                      htmlFor={`slot-${selectedDate}-${index}-end`}
-                      className="text-sm text-muted-foreground"
-                    >
-                      Hasta (franja {index + 1})
-                    </label>
-                    <input
-                      id={`slot-${selectedDate}-${index}-end`}
-                      type="time"
-                      value={slot.end}
-                      onChange={(event) =>
-                        updateSlot(index, { end: event.target.value })
-                      }
-                      className="h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-                    />
-                  </div>
-                  <Button
-                    variant="ghost"
-                    onClick={() => removeSlot(index)}
-                    aria-label={`Quitar franja ${index + 1}`}
-                    className="h-11 self-end border border-destructive/30 text-destructive"
-                  >
-                    <X className="size-4" />
-                  </Button>
-                </div>
-              ))}
+                ))}
 
-              <Button variant="secondary" onClick={addSlot} className="w-fit">
-                <Plus className="size-4" />
-                Agregar franja
-              </Button>
-            </div>
-          )}
+                <Button variant="secondary" onClick={addSlot} className="w-fit">
+                  <Plus className="size-4" />
+                  Agregar franja
+                </Button>
+              </div>
+            )}
 
-          {dayErrors.length > 0 && (
-            <div role="alert" className="grid gap-1 text-sm text-destructive">
-              {dayErrors.map((message) => (
-                <p key={message}>{message}</p>
-              ))}
-            </div>
-          )}
-        </div>
+            {dayErrors.length > 0 && (
+              <div role="alert" className="grid gap-1 text-sm text-destructive">
+                {dayErrors.map((message) => (
+                  <p key={message}>{message}</p>
+                ))}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       )}
 
       <div className="flex flex-wrap gap-2">

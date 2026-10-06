@@ -13,7 +13,6 @@ import {
   CreditCard,
   Crown,
   Gift,
-  CalendarRange,
 } from "lucide-react";
 import { AppShell, type NavItem } from "@/components/AppShell";
 import { PlanBadge, TrialCountdown } from "@/components/premium";
@@ -24,11 +23,6 @@ const navItems: NavItem[] = [
   { to: "/local/dashboard", label: "Panel", icon: <LayoutDashboard className="size-5" /> },
   { to: "/local/calendar", label: "Turnos", icon: <CalendarDays className="size-5" /> },
   { to: "/local/schedules", label: "Horarios", icon: <CalendarDays className="size-5" /> },
-  {
-    to: "/local/schedules/monthly",
-    label: "Horario mensual",
-    icon: <CalendarRange className="size-5" />,
-  },
   { to: "/local/employees", label: "Empleados", icon: <Users className="size-5" /> },
   { to: "/local/services", label: "Servicios", icon: <Wrench className="size-5" /> },
   { to: "/local/blockings", label: "Bloqueos", icon: <Ban className="size-5" /> },

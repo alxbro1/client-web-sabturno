@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CalendarDays, Pencil, Plus, Trash2 } from "lucide-react";
+import { CalendarDays, CalendarRange, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Switch } from "@/components/ui/switch";
 import { useScheduleTemplatesQuery } from "@/hooks/queries/useScheduleTemplatesQuery";
@@ -53,7 +53,7 @@ export default function LocalSchedulesPage() {
 
   return (
     <section className="grid gap-6">
-      <header className="flex justify-between items-center">
+      <header className="flex flex-wrap justify-between items-center gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-primary">
             Configuración
@@ -62,13 +62,20 @@ export default function LocalSchedulesPage() {
             Plantillas de Horarios
           </h2>
         </div>
-        <Link href="/local/schedules/edit/new">
-          <Button>
-            <span className="flex items-center gap-2">
-              <Plus className="w-5 h-5" /> Nueva plantilla
-            </span>
-          </Button>
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/local/schedules/monthly">
+            <Button variant="secondary">
+              <CalendarRange className="w-5 h-5" /> Horario del mes
+            </Button>
+          </Link>
+          <Link href="/local/schedules/edit/new">
+            <Button>
+              <span className="flex items-center gap-2">
+                <Plus className="w-5 h-5" /> Nueva plantilla
+              </span>
+            </Button>
+          </Link>
+        </div>
       </header>
 
       {error && (

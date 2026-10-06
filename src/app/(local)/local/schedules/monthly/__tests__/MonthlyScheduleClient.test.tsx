@@ -114,6 +114,16 @@ async function openDayEditor() {
   await screen.findByRole("button", { name: "Abierto" });
 }
 
+/**
+ * El editor del día es un MODAL: mientras está abierto, Radix marca el resto de
+ * la página con `aria-hidden="true"` y su overlay tapa los botones de fondo
+ * (getByRole no los encuentra). El flujo real cierra el modal con la X antes de
+ * tocar "Guardar horario del mes" / "Desactivar el mes".
+ */
+function closeDayEditor() {
+  fireEvent.click(screen.getByRole("button", { name: "Cerrar editor del día" }));
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.useFakeTimers({ shouldAdvanceTime: true });
@@ -180,6 +190,8 @@ describe("MonthlyScheduleClient - editor del día", () => {
     expect(
       screen.getByText("Un día abierto necesita al menos una franja horaria."),
     ).toBeInTheDocument();
+
+    closeDayEditor();
     expect(screen.getByRole("button", { name: /Guardar horario del mes/ })).toBeDisabled();
   });
 
@@ -241,6 +253,7 @@ describe("MonthlyScheduleClient - guardado", () => {
     await openDayEditor();
 
     fireEvent.click(screen.getByRole("button", { name: "Abierto" }));
+    closeDayEditor();
     fireEvent.click(screen.getByRole("button", { name: /Guardar horario del mes/ }));
     fireEvent.click(
       await screen.findByRole("button", { name: "Guardar horario" }),
@@ -272,6 +285,7 @@ describe("MonthlyScheduleClient - guardado", () => {
     renderClient();
     await openDayEditor();
     fireEvent.click(screen.getByRole("button", { name: "Abierto" }));
+    closeDayEditor();
     fireEvent.click(screen.getByRole("button", { name: /Guardar horario del mes/ }));
 
     const dialog = await screen.findByText(/Se reemplazan los 31 días/);
@@ -294,6 +308,7 @@ describe("MonthlyScheduleClient - guardado", () => {
     renderClient();
     await openDayEditor();
     fireEvent.click(screen.getByRole("button", { name: "Abierto" }));
+    closeDayEditor();
     fireEvent.click(screen.getByRole("button", { name: /Guardar horario del mes/ }));
 
     // El diálogo es el de reemplazo, no el destructivo.
@@ -311,6 +326,7 @@ describe("MonthlyScheduleClient - guardado", () => {
 
     renderClient();
     await openDayEditor();
+    closeDayEditor();
     fireEvent.click(screen.getByRole("button", { name: "Desactivar el mes" }));
 
     expect(
@@ -343,6 +359,7 @@ describe("MonthlyScheduleClient - guardado", () => {
     fireEvent.click(screen.getByText("stub-dia-15"));
     await screen.findByRole("button", { name: "Abierto" });
 
+    closeDayEditor();
     expect(screen.getByRole("button", { name: /Guardar horario del mes/ })).toBeDisabled();
   });
 
@@ -352,6 +369,7 @@ describe("MonthlyScheduleClient - guardado", () => {
 
     renderClient();
     await openDayEditor();
+    closeDayEditor();
     fireEvent.click(screen.getByRole("button", { name: /Guardar horario del mes/ }));
     fireEvent.click(await screen.findByRole("button", { name: "Guardar horario" }));
 

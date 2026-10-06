@@ -94,6 +94,13 @@ test.describe("local schedules monthly - 390px audit", () => {
     await page.getByRole("button", { name: "Abierto" }).click();
     await expect(page.getByLabel("Hasta (franja 1)")).toBeVisible();
 
+    // El editor del día es un modal: mientras esté abierto, su overlay tapa el
+    // botón "Guardar horario del mes" (Playwright fallaría con "element
+    // intercepts pointer events"). Se cierra con la X del modal y recién
+    // después se guarda.
+    await page.getByRole("button", { name: "Cerrar editor del día" }).click();
+    await expect(page.getByRole("button", { name: "Abierto" })).toBeHidden();
+
     await page.getByRole("button", { name: /Guardar horario del mes/ }).click();
     await page.getByRole("button", { name: "Guardar horario" }).click();
 
