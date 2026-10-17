@@ -43,4 +43,38 @@ describe("filterFutureTimeSlots", () => {
     expect(filterFutureTimeSlots(slots, "2026-09-28", TZ, now)).toEqual([]);
     expect(filterFutureTimeSlots([], "2026-09-29", TZ, now)).toEqual([]);
   });
+
+  it("handles off-grid times (elastic slots) against now", () => {
+    const offGrid = [
+      { time: "10:40", available: true },
+      { time: "13:15", available: true },
+    ];
+    // 10:30 BA: both are still ahead
+    expect(
+      filterFutureTimeSlots(
+        offGrid,
+        "2026-09-29",
+        TZ,
+        new Date("2026-09-29T13:30:00.000Z"),
+      ).map((s) => s.time),
+    ).toEqual(["10:40", "13:15"]);
+    // 10:41 BA: 10:40 just passed, 13:15 stays
+    expect(
+      filterFutureTimeSlots(
+        offGrid,
+        "2026-09-29",
+        TZ,
+        new Date("2026-09-29T13:41:00.000Z"),
+      ).map((s) => s.time),
+    ).toEqual(["13:15"]);
+    // exactly 13:15 BA: dropped, as with grid times
+    expect(
+      filterFutureTimeSlots(
+        offGrid,
+        "2026-09-29",
+        TZ,
+        new Date("2026-09-29T16:15:00.000Z"),
+      ),
+    ).toEqual([]);
+  });
 });
