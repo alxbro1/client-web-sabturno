@@ -1,3 +1,5 @@
+export type SlotMode = "FIXED" | "UNION" | "ELASTIC";
+
 export interface Local {
   id: string;
   name: string;
@@ -39,6 +41,11 @@ export interface Local {
    * `30`, validated server-side with `@IsInt() @Min(5) @Max(120)`.
    */
   slotIntervalMinutes?: number | null;
+  /**
+   * How booking times are offered: `FIXED` grid (default), `UNION` (grid plus
+   * the exact moment each gap opens) or `ELASTIC` (gap-anchored times only).
+   */
+  slotMode?: SlotMode | null;
   /**
    * Only present on `GET /local/available` items (`findAvailableLocals`).
    * Already filtered server-side to active templates with an active

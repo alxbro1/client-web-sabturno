@@ -230,3 +230,66 @@ describe("LocalProfilePage slot interval field", () => {
     });
   });
 });
+
+describe("LocalProfilePage slot mode select", () => {
+  const SLOT_MODE_LABEL = "Cómo se ofrecen los horarios";
+
+  it.each([
+    ["absent", {}],
+    ["null", { slotMode: null }],
+  ])("defaults to fixed slots when slotMode is %s", async (_name, overrides) => {
+    mockGetLocal.mockResolvedValue(localFixture(overrides));
+
+    render(<LocalProfilePage />);
+
+    const select = (await screen.findByLabelText(
+      SLOT_MODE_LABEL,
+    )) as HTMLSelectElement;
+    expect(select.value).toBe("FIXED");
+    expect(select.selectedOptions[0]).toHaveTextContent(
+      "Horarios fijos (recomendado)",
+    );
+  });
+
+  it("hydrates the loaded mode", async () => {
+    mockGetLocal.mockResolvedValue(localFixture({ slotMode: "ELASTIC" }));
+
+    render(<LocalProfilePage />);
+
+    const select = (await screen.findByLabelText(
+      SLOT_MODE_LABEL,
+    )) as HTMLSelectElement;
+    expect(select.value).toBe("ELASTIC");
+    expect(select.selectedOptions[0]).toHaveTextContent("Agenda compacta");
+  });
+
+  it("explains the selected mode with a concrete example", async () => {
+    mockGetLocal.mockResolvedValue(localFixture());
+
+    render(<LocalProfilePage />);
+
+    const select = await screen.findByLabelText(SLOT_MODE_LABEL);
+    expect(screen.getByText(/el próximo horario libre es 13:30/)).toBeInTheDocument();
+    fireEvent.change(select, { target: { value: "UNION" } });
+    expect(screen.getByText(/agrega ese horario, sin sacar 13:30/)).toBeInTheDocument();
+    fireEvent.change(select, { target: { value: "ELASTIC" } });
+    expect(screen.getByText(/13:15, 13:45, 14:15/)).toBeInTheDocument();
+  });
+
+  it("sends the chosen mode in the PATCH payload", async () => {
+    mockGetLocal.mockResolvedValue(localFixture());
+
+    render(<LocalProfilePage />);
+
+    const select = await screen.findByLabelText(SLOT_MODE_LABEL);
+    fireEvent.change(select, { target: { value: "UNION" } });
+    fireEvent.submit(select.closest("form")!);
+
+    await waitFor(() => {
+      expect(mockUpdateLocal).toHaveBeenCalledWith(
+        "local-1",
+        expect.objectContaining({ slotMode: "UNION" }),
+      );
+    });
+  });
+});

@@ -10,6 +10,25 @@ import { localService } from "@/features/local/services/local.service";
 import { localImagesService } from "@/features/local/services/localImages.service";
 import { useImageUpload } from "@/features/local/hooks/useImageUpload";
 import { queryKeys } from "@/lib/queryKeys";
+import type { SlotMode } from "@/lib/types/local";
+
+const SLOT_MODE_OPTIONS: { value: SlotMode; label: string; help: string }[] = [
+  {
+    value: "FIXED",
+    label: "Horarios fijos (recomendado)",
+    help: "Siempre según el intervalo, desde que abrís. Si un turno termina 13:15, el próximo horario libre es 13:30.",
+  },
+  {
+    value: "UNION",
+    label: "Fijos + huecos",
+    help: "Los horarios fijos, más el momento exacto en que se libera un hueco. Un turno que termina 13:15 agrega ese horario, sin sacar 13:30.",
+  },
+  {
+    value: "ELASTIC",
+    label: "Agenda compacta",
+    help: "Cada horario arranca cuando termina el anterior: 13:15, 13:45, 14:15… No quedan huecos, pero se pierden las horas redondas.",
+  },
+];
 
 export default function LocalProfilePage() {
   const { user, updateUserProfile } = useAuth();
@@ -25,6 +44,7 @@ export default function LocalProfilePage() {
     notifyNewAppointmentWhatsapp: false,
     instagram: "",
     slotIntervalMinutes: "30",
+    slotMode: "FIXED" as SlotMode,
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -74,6 +94,7 @@ export default function LocalProfilePage() {
           ),
           instagram: local.instagram || "",
           slotIntervalMinutes: String(local.slotIntervalMinutes ?? 30),
+          slotMode: local.slotMode ?? "FIXED",
         });
         resetLogo(local.imageProfile ?? user.imageProfile ?? null);
       }
@@ -136,6 +157,7 @@ export default function LocalProfilePage() {
         notifyNewAppointmentWhatsapp: formData.notifyNewAppointmentWhatsapp,
         instagram: formData.instagram,
         slotIntervalMinutes: Math.round(slotIntervalMinutes),
+        slotMode: formData.slotMode,
       });
 
       if (formData.name !== user.name) {
@@ -458,6 +480,37 @@ export default function LocalProfilePage() {
               <p className="text-sm text-muted-foreground mt-1">
                 Cada cuánto se muestran los horarios disponibles a tus
                 clientes al reservar.
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="local-slot-mode-select"
+                className="block text-sm font-medium text-foreground mb-2"
+              >
+                Cómo se ofrecen los horarios
+              </label>
+              <select
+                id="local-slot-mode-select"
+                value={formData.slotMode}
+                onChange={(e) => handleChange("slotMode", e.target.value)}
+                className="w-full max-w-xs px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
+              >
+                {SLOT_MODE_OPTIONS.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                    className="bg-background text-foreground"
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-sm text-muted-foreground mt-1">
+                {
+                  SLOT_MODE_OPTIONS.find((o) => o.value === formData.slotMode)
+                    ?.help
+                }
               </p>
             </div>
           </div>
