@@ -49,24 +49,39 @@ export function useTimelineActions({ localId, onSuccess, onError }: UseTimelineA
     [onSuccess, handleError],
   );
 
+  /**
+   * Crea un turno manual (walk-in o pedido por teléfono).
+   *
+   * `startDateTime` llega ya como ISO UTC: la conversión desde la hora de pared
+   * necesita la timezone del local, que la vive el formulario (ver
+   * `NewAppointmentDialog`). Convertirla acá con la zona del runtime corría el
+   * turno cuando el navegador no está en la zona del local.
+   *
+   * El error se re-lanza además de notificarse por `onError`, porque el
+   * formulario necesita distinguir éxito de fallo para no cerrarse como si
+   * hubiera guardado.
+   */
   const createAppointment = useCallback(
     async (params: {
       serviceId: number;
-      startDateTime: Date;
+      startDateTime: string;
       userName: string;
       timezone?: string;
+      employeeId?: string;
     }) => {
       try {
         await timelineService.createManualAppointment({
           localId,
           serviceId: params.serviceId,
-          startDateTime: params.startDateTime.toISOString(),
+          startDateTime: params.startDateTime,
           userName: params.userName,
           timezone: params.timezone,
+          employeeId: params.employeeId,
         });
         onSuccess?.();
       } catch (err) {
         handleError(err, 'Error al crear el turno');
+        throw err;
       }
     },
     [localId, onSuccess, handleError],
