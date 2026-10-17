@@ -70,6 +70,26 @@ vi.mock('@/components/local/AppointmentDetailsDialog', () => ({
     ) : null,
 }));
 
+const { mockInvalidateQueries } = vi.hoisted(() => ({
+  mockInvalidateQueries: vi.fn(),
+}));
+
+vi.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+}));
+
+vi.mock('@/components/local/NewAppointmentDialog', () => ({
+  NewAppointmentDialog: ({ open, onOpenChange, localId, employees, onCreated }: any) =>
+    open ? (
+      <div data-testid="new-appointment-dialog">
+        <span data-testid="new-dialog-local">{localId}</span>
+        <span data-testid="new-dialog-employees">{employees?.length ?? 0}</span>
+        <button onClick={() => onCreated()}>Crear desde dialogo</button>
+        <button onClick={() => onOpenChange(false)}>Cerrar nuevo turno</button>
+      </div>
+    ) : null,
+}));
+
 vi.mock('@/components/EmployeeSidebar', () => ({
   EmployeeSidebar: ({ resources, selectedId, onSelect, appointmentCounts }: any) => (
     <div data-testid="mock-sidebar">
@@ -132,6 +152,7 @@ function makeBlock(overrides: Partial<Block> = {}): Block {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockInvalidateQueries.mockClear();
   mockConfirmAppointment.mockResolvedValue({});
   mockCancelAppointment.mockResolvedValue({});
   mockUseAuth.mockReturnValue({ user: { id: LOCAL_ID, isLocal: true }, hasHydrated: true } as any);
@@ -420,5 +441,64 @@ describe('LocalCalendarPage', () => {
     const counts = JSON.parse(screen.getByTestId('appointment-counts').textContent!);
     expect(counts['emp-1']).toBe(2);
     expect(counts['emp-2']).toBe(1);
+  });
+});
+
+describe('LocalCalendarPage — turno manual', () => {
+  it('renderiza el botón "Nuevo turno" en el header', () => {
+    render(<LocalCalendarPage />);
+    expect(screen.getByRole('button', { name: 'Nuevo turno' })).toBeTruthy();
+  });
+
+  it('no ofrece "Nuevo turno" sin sesión', () => {
+    mockUseAuth.mockReturnValue({ user: null, hasHydrated: true } as any);
+    render(<LocalCalendarPage />);
+    expect(screen.queryByRole('button', { name: 'Nuevo turno' })).toBeNull();
+  });
+
+  it('abre el diálogo al tocar el botón y lo cierra con onOpenChange', () => {
+    mockUseEmployees.mockReturnValue({
+      employees: [{ id: 'emp-1', name: 'Lucía', isActive: true } as any],
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    render(<LocalCalendarPage />);
+
+    expect(screen.queryByTestId('new-appointment-dialog')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Nuevo turno' }));
+    expect(screen.getByTestId('new-appointment-dialog')).toBeTruthy();
+    expect(screen.getByTestId('new-dialog-local').textContent).toBe(LOCAL_ID);
+    expect(screen.getByTestId('new-dialog-employees').textContent).toBe('1');
+
+    fireEvent.click(screen.getByText('Cerrar nuevo turno'));
+    expect(screen.queryByTestId('new-appointment-dialog')).toBeNull();
+  });
+
+  it('refresca la agenda e invalida la caché de disponibilidad al crear', async () => {
+    const refetch = vi.fn().mockResolvedValue(undefined);
+    mockUseTimelineData.mockReturnValue({
+      appointments: [],
+      blocks: [],
+      resources: [makeResource({ id: LOCAL_ID, name: 'Mi Local' })],
+      isLoading: false,
+      error: null,
+      refetch,
+    });
+    render(<LocalCalendarPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Nuevo turno' }));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Crear desde dialogo'));
+    });
+
+    expect(refetch).toHaveBeenCalledTimes(1);
+    const invalidatedKeys = mockInvalidateQueries.mock.calls.map(
+      ([arg]: any) => JSON.stringify(arg.queryKey),
+    );
+    expect(invalidatedKeys).toContain(JSON.stringify(['time-slots']));
+    expect(invalidatedKeys).toContain(JSON.stringify(['available-days']));
+    expect(invalidatedKeys).toContain(JSON.stringify(['local-home', LOCAL_ID]));
   });
 });

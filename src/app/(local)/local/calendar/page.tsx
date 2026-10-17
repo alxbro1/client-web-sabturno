@@ -8,7 +8,8 @@ import {
 } from "react-big-calendar";
 import { format, parse, startOfWeek, endOfWeek, getDay } from "date-fns";
 import { es } from "date-fns/locale/es";
-import { CalendarDays, Ban, CalendarRange, List } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { CalendarDays, Ban, CalendarRange, List, Plus } from "lucide-react";
 import { Button } from "@/components/Button";
 import { LocalNavCard } from "@/components/local/LocalNavCard";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,7 +22,9 @@ import { EmployeeSidebar } from "@/components/EmployeeSidebar";
 import { CalendarEventComponent } from "@/components/CalendarEventComponent";
 import { AppointmentList } from "@/components/local/AppointmentList";
 import { AppointmentDetailsDialog } from "@/components/local/AppointmentDetailsDialog";
+import { NewAppointmentDialog } from "@/components/local/NewAppointmentDialog";
 import { timelineService } from "@/services/timeline";
+import { queryKeys } from "@/lib/queryKeys";
 
 const locales = { es };
 
@@ -73,7 +76,9 @@ export default function LocalCalendarPage() {
   const [isMutating, setIsMutating] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [listRefreshKey, setListRefreshKey] = useState(0);
+  const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
 
+  const queryClient = useQueryClient();
   const entityId = user?.id ?? "";
 
   const dateRange = useMemo(() => {
@@ -211,6 +216,18 @@ export default function LocalCalendarPage() {
     setListRefreshKey((key) => key + 1);
   }, [refetch]);
 
+  /**
+   * Un turno creado a mano ocupa un hueco que el flujo público y el dashboard
+   * ya tienen cacheado: sin invalidar, el cliente seguiría viendo el slot libre
+   * y el contador de hoy quedaría corto hasta el próximo refetch.
+   */
+  const handleAppointmentCreated = useCallback(async () => {
+    await refreshAllAppointments();
+    queryClient.invalidateQueries({ queryKey: ["time-slots"] });
+    queryClient.invalidateQueries({ queryKey: ["available-days"] });
+    queryClient.invalidateQueries({ queryKey: queryKeys.localHome(entityId) });
+  }, [refreshAllAppointments, queryClient, entityId]);
+
   const handleConfirmAppointment = useCallback(
     async (appointment: Appointment) => {
       if (isMutating) return;
@@ -271,11 +288,18 @@ export default function LocalCalendarPage() {
           </p>
           <h2 className="text-2xl font-bold text-white">Turnos del local</h2>
         </div>
-        <div
-          className="grid grid-cols-2 gap-1 rounded-2xl border border-white/10 bg-white/[0.035] p-1"
-          role="tablist"
-          aria-label="Modo de visualización"
-        >
+        <div className="flex flex-wrap items-center gap-2">
+          {user ? (
+            <Button onClick={() => setIsNewAppointmentOpen(true)}>
+              <Plus className="size-4" />
+              Nuevo turno
+            </Button>
+          ) : null}
+          <div
+            className="grid grid-cols-2 gap-1 rounded-2xl border border-white/10 bg-white/[0.035] p-1"
+            role="tablist"
+            aria-label="Modo de visualización"
+          >
           <button
             type="button"
             role="tab"
@@ -304,6 +328,7 @@ export default function LocalCalendarPage() {
             <List className="size-4" />
             Lista
           </button>
+          </div>
         </div>
       </header>
 
@@ -396,6 +421,14 @@ export default function LocalCalendarPage() {
         }}
         onConfirm={handleConfirmAppointment}
         onCancel={handleCancelAppointment}
+      />
+
+      <NewAppointmentDialog
+        open={isNewAppointmentOpen}
+        onOpenChange={setIsNewAppointmentOpen}
+        localId={entityId}
+        employees={employees}
+        onCreated={handleAppointmentCreated}
       />
     </section>
   );
