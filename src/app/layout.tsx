@@ -3,6 +3,7 @@ import { Space_Grotesk, Manrope } from "next/font/google";
 import { Toaster } from "sonner";
 import { SessionProvider } from "next-auth/react";
 import { QueryProvider } from "@/components/QueryProvider";
+import { SiteFooter } from "@/components/SiteFooter";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "@/styles.css";
 
@@ -52,6 +53,7 @@ export default function RootLayout({
           <SessionProvider>
             <TooltipProvider delayDuration={0}>
               {children}
+              <SiteFooter />
               <Toaster
                 position="top-right"
                 richColors
