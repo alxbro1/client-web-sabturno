@@ -16,6 +16,8 @@ type BookingStoreState = {
   taloPaymentData: TaloPaymentData | null;
   loyaltyRewardId: string | null;
   loyaltyCouponCode: string;
+  /** Beneficio que viene de un deep link; ningún setter de paso lo toca. */
+  pendingLoyaltyRewardId: string | null;
   setLocal: (local: Local | null) => void;
   setService: (service: Service | null) => void;
   setEmployee: (employee: PublicEmployee | "any" | null) => void;
@@ -26,6 +28,7 @@ type BookingStoreState = {
   setTaloPaymentData: (data: TaloPaymentData | null) => void;
   setLoyaltyRewardId: (rewardId: string | null) => void;
   setLoyaltyCouponCode: (code: string) => void;
+  setPendingLoyaltyRewardId: (id: string | null) => void;
   bumpAvailability: () => void;
   resetBooking: () => void;
 };
@@ -41,6 +44,7 @@ export const useBookingStore = create<BookingStoreState>((set) => ({
   taloPaymentData: null,
   loyaltyRewardId: null,
   loyaltyCouponCode: "",
+  pendingLoyaltyRewardId: null,
   availabilityRefreshToken: 0,
   setLocal: (local) =>
     set({ local, service: null, employee: null, date: null, time: null, phoneNumber: "", paymentMethod: null, taloPaymentData: null, loyaltyRewardId: null }),
@@ -53,8 +57,9 @@ export const useBookingStore = create<BookingStoreState>((set) => ({
   setTaloPaymentData: (data) => set({ taloPaymentData: data }),
   setLoyaltyRewardId: (loyaltyRewardId) => set({ loyaltyRewardId }),
   setLoyaltyCouponCode: (loyaltyCouponCode) => set({ loyaltyCouponCode }),
+  setPendingLoyaltyRewardId: (pendingLoyaltyRewardId) => set({ pendingLoyaltyRewardId }),
   bumpAvailability: () =>
     set((state) => ({ availabilityRefreshToken: state.availabilityRefreshToken + 1 })),
   resetBooking: () =>
-    set({ local: null, service: null, employee: null, date: null, time: null, phoneNumber: "", paymentMethod: null, taloPaymentData: null, loyaltyRewardId: null, loyaltyCouponCode: "", availabilityRefreshToken: 0 }),
+    set({ local: null, service: null, employee: null, date: null, time: null, phoneNumber: "", paymentMethod: null, taloPaymentData: null, loyaltyRewardId: null, loyaltyCouponCode: "", pendingLoyaltyRewardId: null, availabilityRefreshToken: 0 }),
 }));

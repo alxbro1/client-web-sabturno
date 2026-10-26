@@ -35,3 +35,24 @@ export function benefitSentence(
     stamps === 1 ? "sello" : "sellos"
   }, ganás ${rewardLabel(type, value)}.`;
 }
+
+/** Descuento que aplica un beneficio sobre el costo del servicio. */
+export function calculateRewardDiscount(
+  serviceCost: number,
+  reward: LoyaltyReward,
+): number {
+  if (reward.type === "FREE_SERVICE") return serviceCost;
+  if (reward.type === "PERCENTAGE_DISCOUNT") {
+    return serviceCost * (Math.min(100, Math.max(0, Number(reward.value || 0))) / 100);
+  }
+  return Math.min(serviceCost, Number(reward.value || 0));
+}
+
+/**
+ * El backend vence los beneficios de forma perezosa, así que una fila
+ * AVAILABLE puede estar ya pasada de `expiresAt`.
+ */
+export function isRewardUsable(reward: LoyaltyReward, now: Date = new Date()): boolean {
+  if (reward.status !== "AVAILABLE") return false;
+  return !reward.expiresAt || new Date(reward.expiresAt) > now;
+}
