@@ -1,7 +1,10 @@
+import type { LoyaltyReward } from "@/lib/types/loyalty";
+
 type BookingQueryPayload = {
   localId?: string | null;
   serviceId?: number | null;
   coupon?: string | null;
+  rewardId?: string | null;
 };
 
 function toBase64Url(value: string) {
@@ -42,6 +45,7 @@ export function parseBookingQuery(searchParams: URLSearchParams) {
         localId,
         serviceId,
         coupon: searchParams.get("coupon")?.trim() || null,
+        rewardId: searchParams.get("reward")?.trim() || null,
       };
     } catch {
       // Fall back to legacy params when token is malformed.
@@ -52,6 +56,7 @@ export function parseBookingQuery(searchParams: URLSearchParams) {
     localId: searchParams.get("localId")?.trim() || null,
     serviceId: parseServiceId(searchParams.get("serviceId")),
     coupon: searchParams.get("coupon")?.trim() || null,
+    rewardId: searchParams.get("reward")?.trim() || null,
   };
 }
 
@@ -62,8 +67,9 @@ export function buildBookingSearch(payload: BookingQueryPayload) {
       ? payload.serviceId
       : null;
   const coupon = payload.coupon?.trim() || null;
+  const rewardId = payload.rewardId?.trim() || null;
 
-  if (!localId && !serviceId && !coupon) {
+  if (!localId && !serviceId && !coupon && !rewardId) {
     return "";
   }
 
@@ -77,6 +83,7 @@ export function buildBookingSearch(payload: BookingQueryPayload) {
   const params = new URLSearchParams();
   params.set("bk", encoded);
   if (coupon) params.set("coupon", coupon);
+  if (rewardId) params.set("reward", rewardId);
   return params.toString();
 }
 
@@ -88,5 +95,34 @@ const SELECT_SERVICE_PATH = "/booking/select-service";
  */
 export function buildLocalBookingPath(localId: string) {
   const query = buildBookingSearch({ localId });
+  return query ? `${SELECT_SERVICE_PATH}?${query}` : SELECT_SERVICE_PATH;
+}
+
+/**
+ * Logged-in client deep link: opens the booking flow on one local (and the
+ * reward's service when it has one) carrying the reward id to apply at payment.
+ */
+export function buildUserRewardBookingPath(
+  reward: Pick<LoyaltyReward, "id" | "serviceId">,
+  localId: string,
+) {
+  const query = buildBookingSearch({
+    localId,
+    serviceId: reward.serviceId ?? null,
+    rewardId: reward.id,
+  });
+  return query ? `${SELECT_SERVICE_PATH}?${query}` : SELECT_SERVICE_PATH;
+}
+
+/** Guest deep link: same shape, but carries the reward code as a coupon. */
+export function buildGuestRewardBookingPath(
+  reward: Pick<LoyaltyReward, "code" | "serviceId">,
+  localId: string,
+) {
+  const query = buildBookingSearch({
+    localId,
+    serviceId: reward.serviceId ?? null,
+    coupon: reward.code,
+  });
   return query ? `${SELECT_SERVICE_PATH}?${query}` : SELECT_SERVICE_PATH;
 }

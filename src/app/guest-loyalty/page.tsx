@@ -17,7 +17,12 @@ import {
 import { Button } from "@/components/Button";
 import { Card } from "@/components/ui/card";
 import { StampCard } from "@/components/loyalty/StampCard";
-import { buildLocalBookingPath } from "@/lib/utils/bookingQuery";
+import type { LoyaltyCard } from "@/lib/types/loyalty";
+import {
+  buildGuestRewardBookingPath,
+  buildLocalBookingPath,
+} from "@/lib/utils/bookingQuery";
+import { isRewardUsable } from "@/lib/utils/loyalty";
 import { loyaltyService } from "@/services/loyalty";
 
 function PageIntro() {
@@ -36,6 +41,15 @@ function PageIntro() {
       </p>
     </header>
   );
+}
+
+// El beneficio que conviene usar primero es el que vence antes; sin vencimiento va último.
+function pickRewardToUse(card: LoyaltyCard) {
+  const expiry = (expiresAt?: string | null) =>
+    expiresAt ? new Date(expiresAt).getTime() : Number.POSITIVE_INFINITY;
+  return card.rewards
+    .filter((reward) => isRewardUsable(reward))
+    .sort((a, b) => expiry(a.expiresAt) - expiry(b.expiresAt))[0];
 }
 
 export default function GuestLoyaltyPage() {
@@ -111,24 +125,35 @@ export default function GuestLoyaltyPage() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 gap-6">
-              {cards.map((card) => (
-                <StampCard
-                  key={card.id}
-                  card={card}
-                  footer={
-                    // El objetivo entero de la tarjeta es que el cliente vuelva:
-                    // sin este CTA le decimos "te faltan N sellos" y lo dejamos
-                    // sin forma de sacar el proximo turno.
-                    <Link
-                      href={buildLocalBookingPath(card.local?.id || card.localId)}
-                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 font-semibold text-primary-foreground transition-colors outline-none hover:bg-primary/90 focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                    >
-                      <CalendarPlus className="size-4" aria-hidden="true" />
-                      Reservar mi próximo turno
-                    </Link>
-                  }
-                />
-              ))}
+              {cards.map((card) => {
+                const localId = card.local?.id || card.localId;
+                const reward = pickRewardToUse(card);
+                return (
+                  <StampCard
+                    key={card.id}
+                    card={card}
+                    footer={
+                      // El objetivo entero de la tarjeta es que el cliente vuelva:
+                      // sin este CTA le decimos "te faltan N sellos" y lo dejamos
+                      // sin forma de sacar el proximo turno. Con un beneficio
+                      // usable, el cupón viaja en el enlace.
+                      <Link
+                        href={
+                          reward
+                            ? buildGuestRewardBookingPath(reward, localId)
+                            : buildLocalBookingPath(localId)
+                        }
+                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 font-semibold text-primary-foreground transition-colors outline-none hover:bg-primary/90 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                      >
+                        <CalendarPlus className="size-4" aria-hidden="true" />
+                        {reward
+                          ? "Reservar usando mi beneficio"
+                          : "Reservar mi próximo turno"}
+                      </Link>
+                    }
+                  />
+                );
+              })}
             </div>
           )}
         </section>

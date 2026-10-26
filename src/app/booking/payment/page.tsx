@@ -14,6 +14,7 @@ import { useBookingStore } from "@/stores/booking";
 import { PaymentMethod } from "@/lib/types/booking";
 import { queryKeys } from "@/lib/queryKeys";
 import { loyaltyService } from "@/services/loyalty";
+import { calculateRewardDiscount } from "@/lib/utils/loyalty";
 import type { LoyaltyReward } from "@/lib/types/loyalty";
 import { DEFAULT_TIMEZONE } from "@/lib/constants/countries";
 import { convertLocalToUTC, formatDateOnlyLocal } from "@/lib/utils/date";
@@ -50,9 +51,11 @@ export default function SelectPaymentPage() {
   const paymentMethod = useBookingStore((s) => s.paymentMethod);
   const loyaltyRewardId = useBookingStore((s) => s.loyaltyRewardId);
   const loyaltyCouponCode = useBookingStore((s) => s.loyaltyCouponCode);
+  const pendingLoyaltyRewardId = useBookingStore((s) => s.pendingLoyaltyRewardId);
   const setPaymentMethod = useBookingStore((s) => s.setPaymentMethod);
   const setLoyaltyRewardId = useBookingStore((s) => s.setLoyaltyRewardId);
   const setLoyaltyCouponCode = useBookingStore((s) => s.setLoyaltyCouponCode);
+  const setPendingLoyaltyRewardId = useBookingStore((s) => s.setPendingLoyaltyRewardId);
   const setPhoneNumber = useBookingStore((s) => s.setPhoneNumber);
 
   const [email, setEmail] = useState("");
@@ -87,7 +90,7 @@ export default function SelectPaymentPage() {
     : contactChannel === "whatsapp"
       ? !isPhoneValid
       : !isEmailValid;
-  const { data: loyaltyRewards = [] } = useQuery({
+  const { data: loyaltyRewardsData, isSuccess: isRewardsSettled } = useQuery({
     queryKey: queryKeys.loyaltyBookingRewards(
       local?.id || "",
       service?.id || 0,
@@ -100,6 +103,32 @@ export default function SelectPaymentPage() {
       }),
     enabled: !!local?.id && !!service?.id && !!user?.id,
   });
+  const loyaltyRewards = useMemo(() => loyaltyRewardsData ?? [], [loyaltyRewardsData]);
+
+  // Beneficio que llegó por deep link: se aplica recién cuando la consulta se
+  // resolvió, y `pending` se conserva para reaplicarlo si el cliente vuelve y
+  // cambia el horario (eso deja `loyaltyRewardId` en null).
+  const pendingRewardMatches =
+    !!pendingLoyaltyRewardId &&
+    loyaltyRewards.some((reward) => reward.id === pendingLoyaltyRewardId);
+  useEffect(() => {
+    if (
+      isRewardsSettled &&
+      pendingLoyaltyRewardId &&
+      pendingRewardMatches &&
+      loyaltyRewardId === null
+    ) {
+      setLoyaltyRewardId(pendingLoyaltyRewardId);
+    }
+  }, [
+    isRewardsSettled,
+    pendingLoyaltyRewardId,
+    pendingRewardMatches,
+    loyaltyRewardId,
+    setLoyaltyRewardId,
+  ]);
+  const showPendingRewardNotice =
+    isRewardsSettled && !!pendingLoyaltyRewardId && !pendingRewardMatches;
 
   const normalizedCouponCode = loyaltyCouponCode.trim().toLowerCase();
   const hasCompleteCouponCode =
@@ -336,6 +365,25 @@ export default function SelectPaymentPage() {
         </p>
       </header>
 
+      {showPendingRewardNotice ? (
+        <div
+          role="status"
+          className="w-full rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm"
+        >
+          <p className="text-destructive">
+            Tu beneficio no aplica a este turno. Puede estar vencido, ya usado o
+            corresponder a otro servicio. Podés volver y elegir el servicio indicado.
+          </p>
+          <button
+            type="button"
+            onClick={() => setPendingLoyaltyRewardId(null)}
+            className="mt-2 min-h-12 rounded-lg border border-input px-4 font-semibold text-foreground"
+          >
+            Entendido
+          </button>
+        </div>
+      ) : null}
+
       <BookingSummary discount={loyaltyDiscount} />
 
       {isFullyDiscounted ? (
@@ -469,7 +517,10 @@ export default function SelectPaymentPage() {
           <div className="grid gap-2 md:grid-cols-2">
             <button
               type="button"
-              onClick={() => setLoyaltyRewardId(null)}
+              onClick={() => {
+                setLoyaltyRewardId(null);
+                setPendingLoyaltyRewardId(null);
+              }}
               className={`rounded-lg border p-3 text-left text-sm ${
                 !loyaltyRewardId
                   ? "border-primary bg-primary/10 text-primary"
@@ -482,7 +533,10 @@ export default function SelectPaymentPage() {
               <button
                 key={reward.id}
                 type="button"
-                onClick={() => setLoyaltyRewardId(reward.id)}
+                onClick={() => {
+                  setLoyaltyRewardId(reward.id);
+                  setPendingLoyaltyRewardId(null);
+                }}
                 className={`rounded-lg border p-3 text-left text-sm ${
                   loyaltyRewardId === reward.id
                     ? "border-primary bg-primary/10 text-primary"
@@ -696,14 +750,6 @@ function rewardLabel(reward: LoyaltyReward) {
   if (reward.type === "FREE_SERVICE") return "Servicio gratis";
   if (reward.type === "PERCENTAGE_DISCOUNT") return `${Number(reward.value || 0)}% de descuento`;
   return `$${Number(reward.value || 0).toFixed(2)} de descuento`;
-}
-
-function calculateRewardDiscount(serviceCost: number, reward: LoyaltyReward) {
-  if (reward.type === "FREE_SERVICE") return serviceCost;
-  if (reward.type === "PERCENTAGE_DISCOUNT") {
-    return serviceCost * (Math.min(100, Math.max(0, Number(reward.value || 0))) / 100);
-  }
-  return Math.min(serviceCost, Number(reward.value || 0));
 }
 
 function couponErrorLabel(

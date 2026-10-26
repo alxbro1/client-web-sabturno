@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { StampCard } from "../StampCard";
 import type { LoyaltyCard } from "@/lib/types/loyalty";
 
@@ -101,5 +101,88 @@ describe("StampCard", () => {
     expect(
       screen.getByRole("link", { name: "Reservar mi próximo turno" }),
     ).toHaveAttribute("href", "/booking/select-service");
+  });
+
+  describe("beneficios usables", () => {
+    const reward = (id: string, overrides = {}) => ({
+      id,
+      code: `CODE-${id}`,
+      type: "FREE_SERVICE" as const,
+      value: null,
+      serviceId: 10,
+      status: "AVAILABLE" as const,
+      expiresAt: null,
+      service: { id: 10, name: "Corte" },
+      ...overrides,
+    });
+
+    it("llama a renderRewardAction una vez por beneficio usable", () => {
+      const renderRewardAction = vi.fn((r: { id: string }) => (
+        <button>Usar {r.id}</button>
+      ));
+      render(
+        <StampCard
+          card={cardFixture({ rewards: [reward("r1"), reward("r2")] })}
+          renderRewardAction={renderRewardAction}
+        />,
+      );
+
+      expect(renderRewardAction).toHaveBeenCalledTimes(2);
+      expect(screen.getByRole("button", { name: "Usar r1" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Usar r2" })).toBeInTheDocument();
+      expect(
+        screen.getByText("Tenés 2 beneficios listos para usar"),
+      ).toBeInTheDocument();
+    });
+
+    it("excluye un beneficio AVAILABLE ya vencido del conteo y de las tarjetas", () => {
+      const renderRewardAction = vi.fn(() => <span>accion</span>);
+      render(
+        <StampCard
+          card={cardFixture({
+            rewards: [
+              reward("vivo"),
+              reward("vencido", { expiresAt: "2020-01-01T12:00:00.000Z" }),
+            ],
+          })}
+          renderRewardAction={renderRewardAction}
+        />,
+      );
+
+      expect(renderRewardAction).toHaveBeenCalledTimes(1);
+      expect(
+        screen.getByText("Tenés un beneficio listo para usar"),
+      ).toBeInTheDocument();
+      expect(screen.getAllByText("Corte gratis")).toHaveLength(1);
+    });
+
+    it("no muestra la sección si el único beneficio está vencido", () => {
+      render(
+        <StampCard
+          card={cardFixture({
+            rewards: [reward("vencido", { expiresAt: "2020-01-01T12:00:00.000Z" })],
+          })}
+        />,
+      );
+
+      expect(screen.queryByText(/listo para usar|listos para usar/)).toBeNull();
+    });
+
+    it("sin renderRewardAction el render no cambia", () => {
+      const withoutProp = render(
+        <StampCard card={cardFixture({ rewards: [reward("r1")] })} />,
+      );
+      const html = withoutProp.container.innerHTML;
+      withoutProp.unmount();
+      const withUndefined = render(
+        <StampCard
+          card={cardFixture({ rewards: [reward("r1")] })}
+          renderRewardAction={undefined}
+        />,
+      );
+
+      expect(withUndefined.container.innerHTML).toBe(html);
+      expect(screen.queryByRole("button")).toBeNull();
+    });
   });
 });

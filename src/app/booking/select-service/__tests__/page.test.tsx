@@ -174,3 +174,57 @@ describe("SelectServicePage: renders the local profile and services", () => {
     );
   });
 });
+
+describe("SelectServicePage: reward deep link", () => {
+  const OTHER_LOCAL: Local = { ...LOCAL, id: "local-2", name: "Barberia Norte" };
+
+  it("stores the reward id from the query as pending", () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams("localId=local-1&reward=r1"));
+    useBookingStore.setState({ local: LOCAL });
+
+    render(<SelectServicePage />);
+
+    expect(useBookingStore.getState().pendingLoyaltyRewardId).toBe("r1");
+  });
+
+  it("does not propagate reward in the select-professional url", () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams("localId=local-1&reward=r1"));
+    useBookingStore.setState({ local: LOCAL });
+
+    render(<SelectServicePage />);
+    fireEvent.click(screen.getByRole("button", { name: /Corte clásico/ }));
+
+    expect(mockPush.mock.calls[0][0]).not.toContain("reward=");
+  });
+
+  it("lets the deep link local win over a leftover local from an abandoned flow", () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams("localId=local-1&reward=r1"));
+    mockUseLocalsQuery.mockReturnValue({ locals: [LOCAL, OTHER_LOCAL], isLoading: false });
+    useBookingStore.setState({ local: OTHER_LOCAL });
+
+    render(<SelectServicePage />);
+
+    expect(useBookingStore.getState().local?.id).toBe("local-1");
+  });
+
+  it("lets the deep link service win over a stored service", () => {
+    mockUseSearchParams.mockReturnValue(
+      new URLSearchParams("localId=local-1&serviceId=11&reward=r1"),
+    );
+    useBookingStore.setState({ local: LOCAL, service: SERVICE_1 });
+
+    render(<SelectServicePage />);
+
+    expect(useBookingStore.getState().service?.id).toBe(11);
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the stored service when it already matches the query", () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams("localId=local-1&serviceId=10"));
+    useBookingStore.setState({ local: LOCAL, service: SERVICE_1 });
+
+    render(<SelectServicePage />);
+
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+});

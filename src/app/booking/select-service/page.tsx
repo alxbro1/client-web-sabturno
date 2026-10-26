@@ -41,15 +41,21 @@ export default function SelectServicePage() {
   const setLocal = useBookingStore((s) => s.setLocal);
   const setService = useBookingStore((s) => s.setService);
   const setLoyaltyCouponCode = useBookingStore((s) => s.setLoyaltyCouponCode);
+  const setPendingLoyaltyRewardId = useBookingStore((s) => s.setPendingLoyaltyRewardId);
   const hasHandledServiceDeepLinkRef = useRef(false);
 
-  const { localId: localIdQuery, serviceId: serviceIdQuery, coupon } =
-    parseBookingQuery(searchParams);
+  const {
+    localId: localIdQuery,
+    serviceId: serviceIdQuery,
+    coupon,
+    rewardId,
+  } = parseBookingQuery(searchParams);
 
   const { locals, isLoading: isLoadingLocals } = useLocalsQuery();
 
   useEffect(() => {
-    if (!localIdQuery || local?.id) return;
+    // The deep link wins over a leftover local from an abandoned flow.
+    if (!localIdQuery || String(local?.id) === localIdQuery) return;
 
     const matchedLocal = locals.find((item) => String(item.id) === localIdQuery);
     if (matchedLocal) {
@@ -60,6 +66,10 @@ export default function SelectServicePage() {
   useEffect(() => {
     if (coupon) setLoyaltyCouponCode(coupon.toUpperCase());
   }, [coupon, setLoyaltyCouponCode]);
+
+  useEffect(() => {
+    if (rewardId) setPendingLoyaltyRewardId(rewardId);
+  }, [rewardId, setPendingLoyaltyRewardId]);
 
   const localId = local?.id ? String(local.id) : localIdQuery;
 
@@ -83,7 +93,7 @@ export default function SelectServicePage() {
       !serviceIdQuery ||
       !services?.length ||
       hasHandledServiceDeepLinkRef.current ||
-      service?.id // ya hay un servicio en el store (back navigation)
+      Number(service?.id) === serviceIdQuery // el store ya tiene ese servicio (back navigation)
     ) {
       return;
     }
