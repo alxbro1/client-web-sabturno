@@ -2,8 +2,12 @@
 
 import type { ReactNode } from "react";
 import { Check, CalendarClock, Gift, PartyPopper, Sparkles, Stamp, Ticket } from "lucide-react";
-import type { LoyaltyCard } from "@/lib/types/loyalty";
-import { availableRewardLabel, benefitSentence } from "@/lib/utils/loyalty";
+import type { LoyaltyCard, LoyaltyReward } from "@/lib/types/loyalty";
+import {
+  availableRewardLabel,
+  benefitSentence,
+  isRewardUsable,
+} from "@/lib/utils/loyalty";
 import { formatLocalDate } from "@/lib/utils/date";
 
 /**
@@ -18,17 +22,20 @@ export function StampCard({
   card,
   footer,
   timezone,
+  renderRewardAction,
 }: {
   card: LoyaltyCard;
   /** Slot para el CTA de reserva; el preview del dueño lo deja vacío. */
   footer?: ReactNode;
   timezone?: string;
+  /** Acción por beneficio (ej. "Usar este beneficio"): cada uno puede tener su propio servicio. */
+  renderRewardAction?: (reward: LoyaltyReward) => ReactNode;
 }) {
   const required = Math.max(card.revision.stampsRequired, 1);
   const completed = Math.min(card.stampsBalance, required);
   const remaining = Math.max(required - completed, 0);
-  const availableRewards = card.rewards.filter(
-    (reward) => reward.status === "AVAILABLE",
+  const availableRewards = card.rewards.filter((reward) =>
+    isRewardUsable(reward),
   );
   const localName = card.local?.name || card.program.name;
   // El nombre por defecto del programa es literalmente "Tarjeta de fidelidad",
@@ -184,6 +191,7 @@ export function StampCard({
                       )}
                     </span>
                   ) : null}
+                  {renderRewardAction?.(reward)}
                 </div>
               ))}
             </div>
