@@ -179,6 +179,49 @@ describe("NewAppointmentDialog", () => {
     await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
   });
 
+  it("renderiza el teléfono del cliente como campo opcional de tipo tel", () => {
+    renderDialog();
+    const phone = screen.getByLabelText(/Teléfono del cliente/);
+    expect(phone).toHaveAttribute("type", "tel");
+    expect(phone).toHaveAttribute("inputmode", "tel");
+    expect(phone).not.toBeRequired();
+    expect(screen.getByText(/recordatorio por WhatsApp 2 h antes/)).toBeInTheDocument();
+  });
+
+  it("permite crear el turno sin teléfono", async () => {
+    const { onCreated } = renderDialog();
+    fillForm();
+    const submit = screen.getByRole("button", { name: "Crear turno" });
+    expect(submit).toBeEnabled();
+    fireEvent.click(submit);
+    await waitFor(() => expect(onCreated).toHaveBeenCalledTimes(1));
+    expect(createManualAppointment.mock.calls[0][0].phoneNumber).toBeUndefined();
+  });
+
+  it("envía el teléfono recortado como phoneNumber", async () => {
+    renderDialog();
+    fillForm();
+    fireEvent.change(screen.getByLabelText(/Teléfono del cliente/), {
+      target: { value: "  +54 9 11 5555-1234 " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Crear turno" }));
+    await waitFor(() => expect(createManualAppointment).toHaveBeenCalledTimes(1));
+    expect(createManualAppointment.mock.calls[0][0].phoneNumber).toBe(
+      "+54 9 11 5555-1234",
+    );
+  });
+
+  it("no envía phoneNumber si el teléfono es solo espacios", async () => {
+    renderDialog();
+    fillForm();
+    fireEvent.change(screen.getByLabelText(/Teléfono del cliente/), {
+      target: { value: "   " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Crear turno" }));
+    await waitFor(() => expect(createManualAppointment).toHaveBeenCalledTimes(1));
+    expect(createManualAppointment.mock.calls[0][0].phoneNumber).toBeUndefined();
+  });
+
   it("muestra la hora de fin calculada con la duración del servicio", () => {
     renderDialog();
     expect(screen.queryByText(/Turno de/)).not.toBeInTheDocument();

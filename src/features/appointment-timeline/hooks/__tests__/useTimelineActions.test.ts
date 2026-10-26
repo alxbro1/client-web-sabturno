@@ -66,6 +66,37 @@ describe('useTimelineActions.createAppointment', () => {
     expect(mockCreate.mock.calls[0][0].employeeId).toBeUndefined();
   });
 
+  it('envía phoneNumber al payload cuando se informa', async () => {
+    mockCreate.mockResolvedValue({});
+    const { result } = renderHook(() =>
+      useTimelineActions({ localId: LOCAL_ID }),
+    );
+
+    await result.current.createAppointment({
+      serviceId: 7,
+      startDateTime: START,
+      userName: 'Juan Pérez',
+      phoneNumber: '+5491155551234',
+    });
+
+    expect(mockCreate.mock.calls[0][0].phoneNumber).toBe('+5491155551234');
+  });
+
+  it('no envía phoneNumber cuando no se informa', async () => {
+    mockCreate.mockResolvedValue({});
+    const { result } = renderHook(() =>
+      useTimelineActions({ localId: LOCAL_ID }),
+    );
+
+    await result.current.createAppointment({
+      serviceId: 7,
+      startDateTime: START,
+      userName: 'Juan Pérez',
+    });
+
+    expect(mockCreate.mock.calls[0][0].phoneNumber).toBeUndefined();
+  });
+
   it('pasa el startDateTime ISO tal cual, sin reconvertirlo', async () => {
     mockCreate.mockResolvedValue({});
     const { result } = renderHook(() =>

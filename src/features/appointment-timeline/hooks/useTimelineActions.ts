@@ -68,6 +68,7 @@ export function useTimelineActions({ localId, onSuccess, onError }: UseTimelineA
       userName: string;
       timezone?: string;
       employeeId?: string;
+      phoneNumber?: string;
     }) => {
       try {
         await timelineService.createManualAppointment({
@@ -77,6 +78,8 @@ export function useTimelineActions({ localId, onSuccess, onError }: UseTimelineA
           userName: params.userName,
           timezone: params.timezone,
           employeeId: params.employeeId,
+          // Never send an empty string: the backend field is optional.
+          phoneNumber: params.phoneNumber?.trim() || undefined,
         });
         onSuccess?.();
       } catch (err) {

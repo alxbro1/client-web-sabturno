@@ -171,6 +171,7 @@ export const timelineService = {
     timezone?: string;
     userName: string;
     employeeId?: string;
+    phoneNumber?: string;
   }) {
     const response = await apiService.post('/appointments/manual', payload);
     return response.data;

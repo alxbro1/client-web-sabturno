@@ -89,6 +89,7 @@ export function NewAppointmentDialog({
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [userName, setUserName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [touched, setTouched] = useState({ date: false, time: false, name: false });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -119,6 +120,7 @@ export function NewAppointmentDialog({
     setDate("");
     setTime("");
     setUserName("");
+    setPhoneNumber("");
     setTouched({ date: false, time: false, name: false });
     setError(null);
     setIsSubmitting(false);
@@ -156,6 +158,7 @@ export function NewAppointmentDialog({
         userName: userName.trim(),
         timezone,
         employeeId: employeeId || undefined,
+        phoneNumber: phoneNumber.trim() || undefined,
       });
     } catch (err: unknown) {
       setError(resolveManualAppointmentError(err));
@@ -262,6 +265,17 @@ export function NewAppointmentDialog({
               </p>
             ))}
           </div>
+
+          <InputField
+            label="Teléfono del cliente (opcional)"
+            type="tel"
+            inputMode="tel"
+            autoComplete="off"
+            className="h-11"
+            hint="Con el teléfono, el cliente recibe el recordatorio por WhatsApp 2 h antes."
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+          />
 
           {outcome ? (
             <p className="text-sm text-muted-foreground">{outcome}</p>
