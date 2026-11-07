@@ -16,7 +16,6 @@ import { Button } from "@/components/Button";
 import {
   PlanBadge,
   TrialCountdown,
-  CashUsageBar,
   CancelSubscriptionDialog,
 } from "@/components/premium";
 import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
@@ -243,13 +242,6 @@ export default function PremiumManagePage() {
               </div>
             </div>
           </div>
-
-          {status.tier === "pro" && (
-            <CashUsageBar
-              used={status.cashTurnsUsed}
-              limit={500}
-            />
-          )}
         </CardContent>
       </Card>
 

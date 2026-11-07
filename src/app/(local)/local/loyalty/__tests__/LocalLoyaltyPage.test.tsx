@@ -31,7 +31,7 @@ vi.mock("@/hooks/useAuth", () => ({
 }));
 
 vi.mock("@/hooks/queries/usePremiumStatusQuery", () => ({
-  usePremiumStatusQuery: () => ({ data: { tier: "enterprise" } }),
+  usePremiumStatusQuery: () => ({ data: { tier: "basic" } }),
 }));
 
 vi.mock("@/hooks/queries/useServicesQuery", () => ({

@@ -24,8 +24,6 @@ import {
   TaloStatusIndicator,
   usePaymentMethods,
 } from "@/features/payment-methods";
-import { FeatureLockedOverlay } from "@/components/premium";
-import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
 import { useAuth } from "@/hooks/useAuth";
 import iconMercadoPago from "@/assets/payment-methods/mercado_pago.png";
 import iconTalo from "@/assets/payment-methods/talo.png";
@@ -46,13 +44,7 @@ function MethodIcon({ src, alt }: { src: string; alt: string }) {
 export default function PaymentMethodsPage() {
   const { user, hasHydrated } = useAuth();
   const pm = usePaymentMethods();
-  const { data: premiumStatus } = usePremiumStatusQuery();
   const [saveSuccess, setSaveSuccess] = useState(false);
-
-  // After a downgrade cash can still be on: the backend only rejects
-  // enabling it, so the owner must be able to turn it off.
-  const isCashLocked =
-    premiumStatus?.tier === "basic" && !pm.form.payWithCashInFront;
 
   // Auto-clear del banner de éxito después de 3s (paridad con
   // `local/profile/page.tsx:89`).
@@ -136,24 +128,14 @@ export default function PaymentMethodsPage() {
           icon={<MethodIcon src={iconReserved.src} alt="Reserva" />}
         />
 
-        {/* The upgrade prompt sits below the card, not inside it: its link
-            cannot be nested in the card's <button>. */}
         <div className="grid gap-2">
           <PaymentMethodCard
             title="Efectivo en el local"
             description="El cliente paga presencialmente al momento del turno."
             selected={pm.form.payWithCashInFront}
-            onClick={() => !isCashLocked && pm.toggle("payWithCashInFront")}
+            onClick={() => pm.toggle("payWithCashInFront")}
             icon={<MethodIcon src={iconCash.src} alt="Efectivo" />}
-            disabled={isCashLocked}
           />
-          {isCashLocked ? (
-            <FeatureLockedOverlay
-              featureName="Efectivo"
-              requiredTier="pro"
-              variant="inline"
-            />
-          ) : null}
         </div>
       </div>
 
