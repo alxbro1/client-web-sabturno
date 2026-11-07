@@ -49,6 +49,15 @@ gsap.registerPlugin(useGSAP);
  *   late hydration — it stands down. Starting the timeline then would blank an
  *   on-screen logo and replay it, which reads as a glitch.
  *
+ * ## Why the timeline can be compressed
+ *
+ * GSAP only runs once React hydrates, which on a cold load is hundreds of ms
+ * after first paint — while the host overlay is already counting down to its
+ * own exit. A timeline that always ran at its designed length would therefore
+ * overrun the fade and animate the logo while it disappears. So the caller
+ * passes a `deadlineMs` and a late start plays the same choreography faster
+ * (see {@link introTimeScale}) rather than being truncated.
+ *
  * Note the deliberate departure from the starter pack under
  * `~/Downloads/anomal-gsap-starter`: it hardcodes `r="0"` / `width="0"` and
  * only reveals from inside `useGSAP`, which would leave this splash showing an
@@ -95,33 +104,67 @@ const EMBLEM_CENTER_Y = 251;
 const EMBLEM_RADIUS = 235;
 
 /**
- * When the CSS fallback finishes revealing the logo on its own, in ms.
- * Must match the `animation-delay` of `.anomal-intro` in `src/styles.css`.
+ * When the CSS fallback starts revealing the logo on its own, in ms from first
+ * paint. Must match the `animation-delay` of `.anomal-intro` in
+ * `src/styles.css`. Past this point GSAP stands down.
  */
-const REVEAL_FALLBACK_DELAY_MS = 750;
+const REVEAL_FALLBACK_DELAY_MS = 1100;
+
+/**
+ * Below this much remaining time the intro is not worth playing: it would read
+ * as a flicker rather than as an animation.
+ */
+const MIN_PLAYABLE_MS = 900;
 
 /** Holds the logo hidden and fades it in on its own. See `src/styles.css`. */
 const FALLBACK_CLASS = "anomal-intro";
 
 /** Total length of the GSAP timeline, in ms. Keep in sync with the tweens. */
-export const ANOMAL_INTRO_DURATION_MS = 1650;
+export const ANOMAL_INTRO_DURATION_MS = 2000;
 
 /**
- * Has the CSS fallback already put the logo on screen?
+ * Earliest `deadlineMs` a host can set while still guaranteeing that everyone
+ * who hydrates before the CSS fallback gets a playable intro. Below it there
+ * is a band of hydration times that arrive in time to animate but are refused
+ * for want of room, so the intro silently never runs for them.
+ */
+export const ANOMAL_INTRO_MIN_DEADLINE_MS =
+  REVEAL_FALLBACK_DELAY_MS + MIN_PLAYABLE_MS;
+
+/**
+ * How long the logo has been mounted, in ms from first paint.
  *
- * Read from the fallback animation's own progress rather than from
+ * Read from the CSS fallback animation's own progress rather than from
  * `performance.now()`: the latter counts from navigation start, while the CSS
  * animation starts at first paint, so only the animation knows how long the
- * logo has actually been visible. Absent Web Animations support the answer is
- * "no", which keeps the animated path as the default.
+ * logo has actually been on screen. Absent Web Animations support the answer
+ * is 0, which keeps the full-speed animated path as the default.
  */
-function cssFallbackAlreadyRevealed(svg: SVGSVGElement): boolean {
-  if (typeof svg.getAnimations !== "function") return false;
+function elapsedSincePaint(svg: SVGSVGElement): number {
+  if (typeof svg.getAnimations !== "function") return 0;
 
   const [fallback] = svg.getAnimations();
   const elapsed = fallback?.currentTime;
 
-  return typeof elapsed === "number" && elapsed >= REVEAL_FALLBACK_DELAY_MS;
+  return typeof elapsed === "number" ? elapsed : 0;
+}
+
+/**
+ * Playback rate that still lands the intro on `deadlineMs`.
+ *
+ * Returns 1 — the designed speed — when there is no deadline or enough room
+ * left; otherwise the factor that squeezes {@link ANOMAL_INTRO_DURATION_MS}
+ * into what remains. Never slower than designed: a deadline is a ceiling, not
+ * a target to stretch into.
+ */
+export function introTimeScale(elapsedMs: number, deadlineMs?: number): number {
+  if (deadlineMs === undefined) return 1;
+
+  const available = deadlineMs - elapsedMs;
+
+  return available >= ANOMAL_INTRO_DURATION_MS
+    ? 1
+    : ANOMAL_INTRO_DURATION_MS / available;
 }
 
 type AnomalLogoIntroProps = {
@@ -129,11 +172,18 @@ type AnomalLogoIntroProps = {
   className?: string;
   /** Runs once the logo is fully on screen, however it got there. */
   onComplete?: () => void;
+  /**
+   * Moment, in ms from first paint, by which the intro must be over — normally
+   * when the host starts hiding it. A late start is compressed to fit instead
+   * of overrunning it. Omitted, the intro always runs at its designed length.
+   */
+  deadlineMs?: number;
 };
 
 export function AnomalLogoIntro({
   className,
   onComplete,
+  deadlineMs,
 }: AnomalLogoIntroProps) {
   const root = useRef<HTMLDivElement>(null);
   // A typed ref rather than a selector: the <svg> is the one node the timeline
@@ -175,9 +225,17 @@ export function AnomalLogoIntro({
       });
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        // Checked before the class is removed: removing it would end the
+        // Read before the class is removed: removing it would end the
         // animation this reads from.
-        if (cssFallbackAlreadyRevealed(svg)) {
+        const elapsed = elapsedSincePaint(svg);
+        const available =
+          deadlineMs === undefined
+            ? ANOMAL_INTRO_DURATION_MS
+            : deadlineMs - elapsed;
+
+        // Either the fallback already put the logo on screen, or too little
+        // time is left for the intro to read as one. Both mean: leave it be.
+        if (elapsed >= REVEAL_FALLBACK_DELAY_MS || available < MIN_PLAYABLE_MS) {
           onCompleteRef.current?.();
           return;
         }
@@ -202,7 +260,7 @@ export function AnomalLogoIntro({
           // 1. The emblem irises open.
           .to(
             emblemReveal,
-            { attr: { r: EMBLEM_RADIUS }, duration: 0.7, ease: "power2.out" },
+            { attr: { r: EMBLEM_RADIUS }, duration: 0.85, ease: "power2.out" },
             0,
           )
           // 2. The leaves sprout from their bases with a restrained overshoot.
@@ -210,24 +268,26 @@ export function AnomalLogoIntro({
             [...leafLeft, ...leafRight],
             {
               scale: 1,
-              duration: 0.55,
-              stagger: 0.12,
+              duration: 0.65,
+              stagger: 0.15,
               ease: "back.out(1.6)",
             },
-            0.3,
+            0.35,
           )
           // 3. The lettering wipes in, left to right.
           .to(
             wordReveal,
             {
               attr: { width: VIEW_BOX_WIDTH },
-              duration: 0.85,
+              duration: 1.05,
               ease: "power2.inOut",
             },
-            0.55,
+            0.65,
           )
-          // 4. The whole mark settles to its final size. Ends at 1.65s.
-          .to(svg, { scale: 1, duration: 0.35, ease: "power2.out" }, 1.3);
+          // 4. The whole mark settles to its final size. Ends at 2.00s.
+          .to(svg, { scale: 1, duration: 0.4, ease: "power2.out" }, 1.6);
+
+        timeline.timeScale(introTimeScale(elapsed, deadlineMs));
 
         return () => {
           timeline.kill();
@@ -237,7 +297,7 @@ export function AnomalLogoIntro({
 
       return () => mm.revert();
     },
-    { scope: root },
+    { scope: root, dependencies: [deadlineMs], revertOnUpdate: true },
   );
 
   return (

@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { AnomalLogoIntro } from "@/components/AnomalLogoIntro";
+import {
+  ANOMAL_INTRO_DURATION_MS,
+  AnomalLogoIntro,
+  introTimeScale,
+} from "@/components/AnomalLogoIntro";
 import {
   ANOMAL_LEAF_LEFT_D,
   ANOMAL_LEAF_RIGHT_D,
@@ -135,7 +139,7 @@ describe("AnomalLogoIntro", () => {
     expect(onComplete).toHaveBeenCalledTimes(1);
   });
 
-  // The CSS fallback reveals the logo at 750ms for viewers whose JS never
+  // The CSS fallback reveals the logo at 1100ms for viewers whose JS never
   // arrives. If hydration lands after that the logo is already on screen, so
   // starting the timeline then would blank it and replay it: a visible glitch.
   // GSAP has to stand down instead.
@@ -148,7 +152,7 @@ describe("AnomalLogoIntro", () => {
       getAnimations?: () => Animation[];
     };
     const original = proto.getAnimations;
-    proto.getAnimations = () => [{ currentTime: 900 } as unknown as Animation];
+    proto.getAnimations = () => [{ currentTime: 1500 } as unknown as Animation];
     restores.push(() => {
       if (original) proto.getAnimations = original;
       else delete proto.getAnimations;
@@ -160,6 +164,32 @@ describe("AnomalLogoIntro", () => {
       container.querySelector('[data-part="emblem-reveal"]'),
     ).toHaveAttribute("r", "235");
     expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+
+  // Hydration that lands late but before the fallback still gets the whole
+  // choreography — compressed, not truncated. Without this the timeline would
+  // overrun the splash fade and the logo would animate while disappearing.
+  describe("introTimeScale", () => {
+    it("runs at the designed speed when there is room to spare", () => {
+      expect(introTimeScale(0, 2300)).toBe(1);
+      expect(introTimeScale(300, 2300)).toBe(1);
+    });
+
+    it("never runs slower than designed", () => {
+      expect(introTimeScale(0, 99999)).toBe(1);
+    });
+
+    it("compresses just enough to land on the deadline", () => {
+      // 2300 - 1100 leaves 1200ms for a 2000ms timeline.
+      expect(introTimeScale(1100, 2300)).toBeCloseTo(
+        ANOMAL_INTRO_DURATION_MS / 1200,
+        5,
+      );
+    });
+
+    it("stays at the designed speed with no deadline", () => {
+      expect(introTimeScale(1500)).toBe(1);
+    });
   });
 
   it("does not trap the screen reader and exposes the brand name", () => {

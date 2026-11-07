@@ -28,7 +28,7 @@
   --radius-sm: calc(var(--radius) - 4px);
   --font-display: "Space Grotesk", "Manrope", "Segoe UI", sans-serif;
   --font-body: "Manrope", "Segoe UI", sans-serif;
-  --animate-splash-out: sabturno-splash-out 2s ease-out forwards;
+  --animate-splash-out: sabturno-splash-out 2.6s ease-out forwards;
 }
 
 /**
@@ -41,14 +41,15 @@
  * falle. Si la salida dependiera del JS, un fallo de hidratacion dejaria la
  * app tapada sin salida.
  *
- * El 85% es 1700ms de 2000ms: debe coincidir con SPLASH_FADE_START_MS y
- * SPLASH_TOTAL_MS. La animacion del logo (ANOMAL_INTRO_DURATION_MS, 1650ms)
- * tiene que terminar antes de ese 85%, o el logo sigue animandose mientras el
- * overlay ya se esta yendo.
+ * El 88.46% es 2300ms de 2600ms: debe coincidir con SPLASH_FADE_START_MS y
+ * SPLASH_TOTAL_MS. El reparto es 2000ms de animacion del logo
+ * (ANOMAL_INTRO_DURATION_MS) + 300ms de pausa + 300ms de fade. Si el logo
+ * siguiera animandose pasado ese 88.46%, lo haria mientras el overlay ya se
+ * esta yendo.
  */
 @keyframes sabturno-splash-out {
   0%,
-  85% {
+  88.46% {
     opacity: 1;
     visibility: visible;
   }
@@ -68,6 +69,10 @@
   }
 }
 
+/* El splash dura 2.6s para darle lugar a la animacion del logo. Con
+   reduced-motion no hay animacion que esperar, asi que se queda en 1.7s: el
+   usuario ve el logo estatico ~1.5s (88.46% de 1.7s) y se va. */
+
 /**
  * Revelado de respaldo del logo ANOMAL (`src/components/AnomalLogoIntro.tsx`).
  *
@@ -75,24 +80,25 @@
  * El markup ya trae el logo completo, pero mostrarlo desde el primer paint
  * haria que GSAP lo borre y lo vuelva a dibujar cuando por fin arranca: un
  * salto visible. Asi que el logo nace invisible y este keyframe lo revela a los
- * 750ms.
+ * 1100ms.
  *
  * Las tres situaciones quedan cubiertas:
  *
- * - Hidratacion normal (antes de 750ms): GSAP saca esta clase y anima.
- * - Hidratacion lenta (despues de 750ms): el logo ya esta en pantalla, GSAP se
+ * - Hidratacion normal (antes de 1100ms): GSAP saca esta clase y anima. Si le
+ *   quedan menos de 2000ms hasta el fade, comprime el timeline para entrar.
+ * - Hidratacion lenta (despues de 1100ms): el logo ya esta en pantalla, GSAP se
  *   abstiene y no hay salto.
  * - Sin JS o con la hidratacion fallada: este keyframe es la unica animacion y
  *   el logo aparece igual.
  *
- * El delay de 750ms debe coincidir con REVEAL_FALLBACK_DELAY_MS, y el total
- * (750 + 450 = 1200ms) tiene que caer antes del 85% del splash.
+ * El delay de 1100ms debe coincidir con REVEAL_FALLBACK_DELAY_MS, y el total
+ * (1100 + 450 = 1550ms) tiene que caer antes del 88.46% del splash.
  *
  * Sin layer a proposito, igual que el bloque de arriba.
  */
 .anomal-intro {
   opacity: 0;
-  animation: sabturno-anomal-intro-reveal 0.45s 0.75s ease-out forwards;
+  animation: sabturno-anomal-intro-reveal 0.45s 1.1s ease-out forwards;
 }
 
 @keyframes sabturno-anomal-intro-reveal {

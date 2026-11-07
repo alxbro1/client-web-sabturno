@@ -6,7 +6,10 @@ import {
   SPLASH_TOTAL_MS,
   SplashScreen,
 } from "@/components/SplashScreen";
-import { ANOMAL_INTRO_DURATION_MS } from "@/components/AnomalLogoIntro";
+import {
+  ANOMAL_INTRO_DURATION_MS,
+  ANOMAL_INTRO_MIN_DEADLINE_MS,
+} from "@/components/AnomalLogoIntro";
 
 describe("SplashScreen", () => {
   beforeEach(() => {
@@ -88,6 +91,15 @@ describe("SplashScreen", () => {
   it("termina la animacion del logo antes de que arranque el fade", () => {
     expect(ANOMAL_INTRO_DURATION_MS).toBeLessThanOrEqual(SPLASH_FADE_START_MS);
     expect(SPLASH_FADE_START_MS).toBeLessThan(SPLASH_TOTAL_MS);
+  });
+
+  // Si el fade arrancara demasiado pronto habria una franja de hidrataciones
+  // que llegan antes del fallback CSS pero sin tiempo suficiente para animar:
+  // el intro no se veria nunca y nadie se enteraria.
+  it("deja margen para que una hidratacion tardia igual alcance a animar", () => {
+    expect(SPLASH_FADE_START_MS).toBeGreaterThanOrEqual(
+      ANOMAL_INTRO_MIN_DEADLINE_MS,
+    );
   });
 
   it("no atrapa al lector de pantalla", () => {
