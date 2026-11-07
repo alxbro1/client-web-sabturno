@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
 
 /**
  * Pantalla de entrada con la atribucion de marca del estudio.
@@ -9,66 +8,63 @@ import { cn } from "@/lib/utils";
  * Se monta en el layout raiz (`src/app/layout.tsx`), igual criterio que
  * `SiteFooter`: asi cubre todas las rutas de `client-web` — y en particular el
  * flujo `/booking/*`, que es el que ven los clientes finales del local — sin
- * duplicar el componente en `BookingShell` ni en cada route group.
+ * duplicarlo en `BookingShell` ni en cada route group.
  *
- * Es client-side only a proposito: devuelve `null` en el servidor **y** en el
- * primer render de cliente, y decide recien en el `useEffect`. Si el valor
- * inicial dependiera de `window`, servidor y cliente diferirian y React tiraria
- * un hydration mismatch. El costo es un frame de contenido debajo antes de que
- * entre el overlay; el flash inverso (splash parpadeando) seria peor.
+ * ## Por que se renderiza en el servidor
  *
- * El layout raiz persiste entre navegaciones client-side, asi que el componente
- * no se remonta: el splash aparece una vez por carga completa de pagina y no
- * reaparece al moverse por el flujo de reserva.
+ * Tiene que aparecer antes que cualquier otro contenido, incluido el
+ * "Cargando..." de `src/app/loading.tsx` y de `src/app/page.tsx`. Eso obliga a
+ * que el overlay venga en el HTML del servidor: si se decidiera en un
+ * `useEffect`, el primer paint seria la app y el splash entraria un frame
+ * despues, tapando algo que el usuario ya vio.
+ *
+ * No hay hydration mismatch porque el estado inicial no depende de `window`:
+ * servidor y primer render de cliente producen exactamente el mismo markup.
+ *
+ * ## Por que la salida la maneja CSS
+ *
+ * La animacion `animate-splash-out` (definida en `src/styles.css`) arranca en
+ * el primer paint, antes de que React hidrate. Si la salida dependiera de un
+ * timer de JS y la hidratacion tardara o fallara, el overlay quedaria pegado
+ * tapando la app sin forma de cerrarlo. Con CSS el splash se va igual.
+ *
+ * El JS solo desmonta el nodo una vez que ya es invisible, y permite
+ * descartarlo con un click.
+ *
+ * ## Frecuencia
+ *
+ * El layout raiz persiste entre navegaciones client-side, asi que el
+ * componente no se remonta: el splash aparece una vez por carga completa de
+ * pagina y no reaparece al moverse por el flujo de reserva.
  */
 
-const VISIBLE_MS = 1600;
-/** Debe coincidir con `duration-300` del overlay: Tailwind no lee esta constante. */
-const FADE_MS = 300;
-
-type Phase = "pending" | "visible" | "leaving" | "done";
-
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
+/**
+ * Duracion total de la animacion de salida.
+ * Debe coincidir con `--animate-splash-out` en `src/styles.css`.
+ */
+const SPLASH_TOTAL_MS = 1900;
 
 export function SplashScreen() {
-  const [phase, setPhase] = useState<Phase>("pending");
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
-    const reduced = prefersReducedMotion();
-    setReduceMotion(reduced);
-    setPhase("visible");
-
-    const toLeaving = window.setTimeout(() => setPhase("leaving"), VISIBLE_MS);
-    const toDone = window.setTimeout(
-      () => setPhase("done"),
-      VISIBLE_MS + FADE_MS,
-    );
-
-    return () => {
-      window.clearTimeout(toLeaving);
-      window.clearTimeout(toDone);
-    };
+    // Backstop de `onAnimationEnd`: si la hidratacion llega despues de que la
+    // animacion termino, el evento ya paso y nadie lo escucho. El nodo ya es
+    // invisible e inerte (`visibility: hidden`), esto solo lo saca del DOM.
+    const timer = window.setTimeout(() => setDone(true), SPLASH_TOTAL_MS);
+    return () => window.clearTimeout(timer);
   }, []);
 
-  if (phase === "pending" || phase === "done") return null;
+  if (done) return null;
 
   return (
     <div
       data-testid="splash-screen"
       aria-hidden="true"
-      onClick={() => setPhase("done")}
-      className={cn(
-        // z-[100] queda por encima del header sticky de BookingShell (z-30).
-        "fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 bg-background px-4",
-        !reduceMotion && "transition-opacity duration-300",
-        phase === "leaving" && "opacity-0",
-      )}
+      onClick={() => setDone(true)}
+      onAnimationEnd={() => setDone(true)}
+      // z-[100] queda por encima del header sticky de BookingShell (z-30).
+      className="animate-splash-out fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 bg-background px-4"
     >
       <p className="font-body text-xs tracking-[0.3em] text-muted-foreground">
         POWERED BY
