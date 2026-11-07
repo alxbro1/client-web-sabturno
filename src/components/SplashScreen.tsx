@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { AnomalLogoIntro } from "@/components/AnomalLogoIntro";
+
 /**
  * Pantalla de entrada con la atribucion de marca del estudio.
  *
@@ -31,6 +33,16 @@ import { useEffect, useState } from "react";
  * El JS solo desmonta el nodo una vez que ya es invisible, y permite
  * descartarlo con un click.
  *
+ * ## El logo
+ *
+ * `AnomalLogoIntro` lo anima con GSAP, lo que obliga a que el SVG sea inline:
+ * un `<img>` nunca expone sus nodos internos al DOM. Ese componente respeta el
+ * mismo contrato que este overlay — su markup trae el logo completo y un
+ * keyframe CSS lo revela solo — asi que un fallo de hidratacion deja el logo
+ * estatico y correcto, nunca en blanco. La animacion dura
+ * `ANOMAL_INTRO_DURATION_MS` y tiene que terminar antes de
+ * `SPLASH_FADE_START_MS`; hay un test que lo verifica.
+ *
  * ## Frecuencia
  *
  * El layout raiz persiste entre navegaciones client-side, asi que el
@@ -42,7 +54,14 @@ import { useEffect, useState } from "react";
  * Duracion total de la animacion de salida.
  * Debe coincidir con `--animate-splash-out` en `src/styles.css`.
  */
-const SPLASH_TOTAL_MS = 1900;
+export const SPLASH_TOTAL_MS = 2000;
+
+/**
+ * Momento en el que el overlay empieza a desvanecerse, es decir el 85% de
+ * {@link SPLASH_TOTAL_MS}. Debe coincidir con el ultimo stop opaco del keyframe
+ * `sabturno-splash-out` en `src/styles.css`.
+ */
+export const SPLASH_FADE_START_MS = 1700;
 
 export function SplashScreen() {
   const [done, setDone] = useState(false);
@@ -70,13 +89,8 @@ export function SplashScreen() {
         POWERED BY
       </p>
 
-      {/* <img> y ruta absoluta por consistencia con `src/components/Logo.tsx`.
-          El SVG es ~3:1; el ancho relativo al viewport evita el desborde a 390px. */}
-      <img
-        src="/anomal-logo-white.svg"
-        alt="ANØMAL"
-        className="h-auto w-[min(72vw,340px)]"
-      />
+      {/* El SVG es ~3:1; el ancho relativo al viewport evita el desborde a 390px. */}
+      <AnomalLogoIntro className="w-[min(72vw,340px)]" />
 
       <p className="font-display text-sm tracking-[0.25em] text-foreground">
         SOFTWARE A MEDIDA

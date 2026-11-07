@@ -28,7 +28,7 @@
   --radius-sm: calc(var(--radius) - 4px);
   --font-display: "Space Grotesk", "Manrope", "Segoe UI", sans-serif;
   --font-body: "Manrope", "Segoe UI", sans-serif;
-  --animate-splash-out: sabturno-splash-out 1.9s ease-out forwards;
+  --animate-splash-out: sabturno-splash-out 2s ease-out forwards;
 }
 
 /**
@@ -41,11 +41,14 @@
  * falle. Si la salida dependiera del JS, un fallo de hidratacion dejaria la
  * app tapada sin salida.
  *
- * El 84.21% es 1600ms de 1900ms: debe coincidir con SPLASH_TOTAL_MS.
+ * El 85% es 1700ms de 2000ms: debe coincidir con SPLASH_FADE_START_MS y
+ * SPLASH_TOTAL_MS. La animacion del logo (ANOMAL_INTRO_DURATION_MS, 1650ms)
+ * tiene que terminar antes de ese 85%, o el logo sigue animandose mientras el
+ * overlay ya se esta yendo.
  */
 @keyframes sabturno-splash-out {
   0%,
-  84.21% {
+  85% {
     opacity: 1;
     visibility: visible;
   }
@@ -60,8 +63,50 @@
    desaparece de golpe. */
 @media (prefers-reduced-motion: reduce) {
   .animate-splash-out {
-    animation-duration: 1.6s;
+    animation-duration: 1.7s;
     animation-timing-function: step-end;
+  }
+}
+
+/**
+ * Revelado de respaldo del logo ANOMAL (`src/components/AnomalLogoIntro.tsx`).
+ *
+ * Ese componente anima el logo con GSAP, que solo corre despues de hidratar.
+ * El markup ya trae el logo completo, pero mostrarlo desde el primer paint
+ * haria que GSAP lo borre y lo vuelva a dibujar cuando por fin arranca: un
+ * salto visible. Asi que el logo nace invisible y este keyframe lo revela a los
+ * 750ms.
+ *
+ * Las tres situaciones quedan cubiertas:
+ *
+ * - Hidratacion normal (antes de 750ms): GSAP saca esta clase y anima.
+ * - Hidratacion lenta (despues de 750ms): el logo ya esta en pantalla, GSAP se
+ *   abstiene y no hay salto.
+ * - Sin JS o con la hidratacion fallada: este keyframe es la unica animacion y
+ *   el logo aparece igual.
+ *
+ * El delay de 750ms debe coincidir con REVEAL_FALLBACK_DELAY_MS, y el total
+ * (750 + 450 = 1200ms) tiene que caer antes del 85% del splash.
+ *
+ * Sin layer a proposito, igual que el bloque de arriba.
+ */
+.anomal-intro {
+  opacity: 0;
+  animation: sabturno-anomal-intro-reveal 0.45s 0.75s ease-out forwards;
+}
+
+@keyframes sabturno-anomal-intro-reveal {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Con reduced-motion el logo aparece completo de entrada: GSAP no anima nada en
+   esa rama, asi que esta clase no puede dejarlo invisible. */
+@media (prefers-reduced-motion: reduce) {
+  .anomal-intro {
+    animation-delay: 0s;
+    animation-duration: 1ms;
   }
 }
 
