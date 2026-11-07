@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { SessionProvider } from "next-auth/react";
 import { QueryProvider } from "@/components/QueryProvider";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SplashScreen } from "@/components/SplashScreen";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "@/styles.css";
 
@@ -52,6 +53,7 @@ export default function RootLayout({
         <QueryProvider>
           <SessionProvider>
             <TooltipProvider delayDuration={0}>
+              <SplashScreen />
               {children}
               <SiteFooter />
               <Toaster
