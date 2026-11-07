@@ -21,7 +21,7 @@ test.describe("Payment methods", () => {
     await expect(page.getByRole("heading", { name: "Efectivo en el local" })).toBeVisible();
   });
 
-  test("shows locked overlay for cash on basic tier", async ({ page }) => {
+  test("cash toggle is usable on basic tier without a locked overlay", async ({ page }) => {
     await page.route(/premium\/status/, async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ...mockPremiumStatus, tier: "basic" }) });
     });
@@ -31,7 +31,8 @@ test.describe("Payment methods", () => {
 
     await page.goto("/local/payment-methods");
     await expect(page.getByRole("heading", { name: "Métodos de cobro" })).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText(/pro/i).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: "Upgrade" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Efectivo en el local" })).toBeEnabled();
   });
 
   test("configures reservation percentage", async ({ page }) => {

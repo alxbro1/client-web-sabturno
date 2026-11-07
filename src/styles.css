@@ -28,6 +28,41 @@
   --radius-sm: calc(var(--radius) - 4px);
   --font-display: "Space Grotesk", "Manrope", "Segoe UI", sans-serif;
   --font-body: "Manrope", "Segoe UI", sans-serif;
+  --animate-splash-out: sabturno-splash-out 1.9s ease-out forwards;
+}
+
+/**
+ * Salida del splash de marca (`src/components/SplashScreen.tsx`).
+ *
+ * Vive en CSS y no en JS a proposito: el overlay se renderiza en el HTML del
+ * servidor para aparecer antes que cualquier otro contenido, incluido el
+ * "Cargando...". Una animacion CSS arranca en el primer paint, antes de que
+ * React hidrate, asi que el splash se va solo aunque la hidratacion tarde o
+ * falle. Si la salida dependiera del JS, un fallo de hidratacion dejaria la
+ * app tapada sin salida.
+ *
+ * El 84.21% es 1600ms de 1900ms: debe coincidir con SPLASH_TOTAL_MS.
+ */
+@keyframes sabturno-splash-out {
+  0%,
+  84.21% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Sin layer a proposito: asi le gana a la utility de Tailwind, que si esta
+   en @layer utilities. Con reduced-motion no hay fade; el splash aguanta y
+   desaparece de golpe. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-splash-out {
+    animation-duration: 1.6s;
+    animation-timing-function: step-end;
+  }
 }
 
 :root {

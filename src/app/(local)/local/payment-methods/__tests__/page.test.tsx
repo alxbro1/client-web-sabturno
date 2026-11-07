@@ -47,7 +47,7 @@ function cashCard() {
   return screen.getByRole("button", { name: "Efectivo en el local" });
 }
 
-describe("PaymentMethodsPage — cash on a basic plan", () => {
+describe("PaymentMethodsPage — cash is available on every plan", () => {
   beforeEach(() => {
     pmState.toggle.mockClear();
     premiumState.tier = "basic";
@@ -62,20 +62,13 @@ describe("PaymentMethodsPage — cash on a basic plan", () => {
     expect(pmState.toggle).toHaveBeenCalledWith("payWithCashInFront");
   });
 
-  it("keeps cash locked when it is off", () => {
+  it("shows no upgrade prompt and keeps cash usable when it is off", () => {
     pmState.form.payWithCashInFront = false;
     render(<PaymentMethodsPage />);
 
-    expect(cashCard()).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Upgrade" })).toBeNull();
+    expect(cashCard()).not.toBeDisabled();
     fireEvent.click(cashCard());
-    expect(pmState.toggle).not.toHaveBeenCalled();
-  });
-
-  it("renders the upgrade prompt outside the card button", () => {
-    pmState.form.payWithCashInFront = false;
-    render(<PaymentMethodsPage />);
-
-    const upgrade = screen.getByRole("button", { name: "Upgrade" });
-    expect(cashCard().contains(upgrade)).toBe(false);
+    expect(pmState.toggle).toHaveBeenCalledWith("payWithCashInFront");
   });
 });
