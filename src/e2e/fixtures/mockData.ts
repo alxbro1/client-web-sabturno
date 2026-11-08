@@ -124,3 +124,38 @@ export const mockLocalProfile = {
   city: "CABA",
   address: "Av. Corrientes 1234",
 };
+
+/**
+ * Wallet returned by `GET /whatsapp/billing/wallet`. Mirrors the shape of
+ * `WhatsappWalletSummary` in `src/services/whatsappBilling.ts`. Defaults to a
+ * brand-new local: 5 welcome credits, prepaid-only, nothing purchased yet.
+ */
+export const mockWhatsappWallet = {
+  unitPriceArs: 15,
+  creditsBalance: 5,
+  prepaidCredits: 5,
+  postpaidUsed: 0,
+  postpaidAmountArs: 0,
+  totalPurchasedArs: 0,
+  postpaidUnlockThresholdArs: 2000,
+  postpaidUnlocked: false,
+  remainingToUnlockPostpaidArs: 2000,
+  postpaidLimit: 200,
+  billingBlocked: false,
+  currentMonthSentCount: 0,
+  pendingInvoice: null,
+  recentTransactions: [],
+};
+
+/** Same local after exhausting its credits and running on postpaid. */
+export const mockWhatsappWalletPostpaid = {
+  ...mockWhatsappWallet,
+  creditsBalance: -20,
+  prepaidCredits: 0,
+  postpaidUsed: 20,
+  postpaidAmountArs: 300,
+  totalPurchasedArs: 2250,
+  postpaidUnlocked: true,
+  remainingToUnlockPostpaidArs: 0,
+  currentMonthSentCount: 20,
+};
