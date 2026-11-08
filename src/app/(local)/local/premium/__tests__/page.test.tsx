@@ -144,6 +144,19 @@ describe("WhatsappCreditsPage", () => {
     );
   });
 
+  it("deriva el precio de los packs del unitPriceArs que devuelve la billetera", () => {
+    mockWalletData = { ...mockWalletData, unitPriceArs: 20 };
+
+    render(<WhatsappCreditsPage />);
+
+    // 150 * 20 = 3000, no 150 * 15 = 2250.
+    expect(screen.getAllByText(/\$\s*3[.,]000/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/\$\s*2[.,]250/)).not.toBeInTheDocument();
+    // 50 * 20 = 1000 y 500 * 20 = 10000.
+    expect(screen.getAllByText(/\$\s*1[.,]000/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/\$\s*10[.,]000/).length).toBeGreaterThan(0);
+  });
+
   it("muestra el botón para liquidar consumo acumulado cuando postpaidUsed > 0", async () => {
     mockWalletData = {
       ...mockWalletData,

@@ -34,31 +34,29 @@ const MAX_CUSTOM_CREDITS = 10000;
 
 interface CreditPackPreset {
   credits: number;
-  priceArs: number;
   badge?: string;
   description: string;
 }
 
+// Pack prices are derived at render from the wallet's `unitPriceArs`, never
+// precomputed here: the backend exposes the price through
+// WHATSAPP_MESSAGE_PRICE_ARS, so a baked-in total silently lies when it changes.
 const CREDIT_PACK_PRESETS: CreditPackPreset[] = [
   {
     credits: 50,
-    priceArs: 50 * UNIT_PRICE_ARS,
     description: "Ideal para probar o cubrir semanas tranquilas",
   },
   {
     credits: 150,
-    priceArs: 150 * UNIT_PRICE_ARS,
     badge: "Habilita pago a mes vencido",
     description: "Supera los $2.000 acumulados en un único pago",
   },
   {
     credits: 300,
-    priceArs: 300 * UNIT_PRICE_ARS,
     description: "Para locales con flujo constante de turnos",
   },
   {
     credits: 500,
-    priceArs: 500 * UNIT_PRICE_ARS,
     description: "Para equipos con múltiples profesionales",
   },
 ];
@@ -589,7 +587,7 @@ export default function WhatsappCreditsPage() {
                 </div>
                 <div className="pt-2 border-t border-border/60 flex items-baseline justify-between gap-2">
                   <span className="text-xl font-bold text-primary">
-                    {formatCurrency(pack.priceArs)}
+                    {formatCurrency(pack.credits * unitPriceArs)}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {formatCurrency(unitPriceArs)} c/u
