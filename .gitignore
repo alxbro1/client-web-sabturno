@@ -31,3 +31,11 @@ node_modules
 *.keystore
 .env.production
 .next
+# Next.js generated files (managed by Next, regenerated on dev/build/typegen).
+# Official guidance: https://nextjs.org/docs/app/api-reference/config/typescript
+next-env.d.ts
+*.tsbuildinfo
+
+# Playwright run artifacts.
+test-results/
+playwright-report/

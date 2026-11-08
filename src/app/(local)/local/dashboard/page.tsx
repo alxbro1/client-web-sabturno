@@ -3,11 +3,10 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarDays, Clock, Users, DollarSign, Ban, Image as ImageIcon, Crown } from "lucide-react";
+import { CalendarDays, Clock, Users, DollarSign, Ban, Image as ImageIcon, MessageSquare } from "lucide-react";
 import { BookingLinkCard } from "@/components/local/BookingLinkCard";
 import { LocalStatsCard } from "@/components/local/LocalStatsCard";
 import { LocalNavCard } from "@/components/local/LocalNavCard";
-import { PlanBadge, TrialCountdown } from "@/components/premium";
 import { useLocalHomeQuery } from "@/hooks/queries/useLocalHomeQuery";
 import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
 import { useAuth } from "@/hooks/useAuth";
@@ -108,14 +107,7 @@ export default function LocalDashboardPage() {
             <h2 className="text-2xl font-bold text-foreground">
               {user?.localName || user?.name}
             </h2>
-            {premiumStatus && <PlanBadge tier={premiumStatus.tier} />}
           </div>
-          {premiumStatus?.status === "trial" && premiumStatus.trialEndDate && (
-            <TrialCountdown
-              trialEndDate={premiumStatus.trialEndDate}
-              className="mb-2"
-            />
-          )}
           <p className="text-muted-foreground mt-1">
             Desde aqui puedes gestionar turnos, horarios y mas.
           </p>
@@ -331,9 +323,9 @@ export default function LocalDashboardPage() {
         />
         <LocalNavCard
           to="/local/premium"
-          title="Planes"
-          description="Gestiona tu suscripción y desbloquea features"
-          icon={<Crown className="size-5" />}
+          title="Créditos WhatsApp"
+          description="Cargá créditos o pagá tus mensajes a mes vencido ($15 c/u)"
+          icon={<MessageSquare className="size-5" />}
         />
       </section>
     </section>

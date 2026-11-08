@@ -43,6 +43,7 @@ export const queryKeys = {
   myReports: () => ["my-reports"] as const,
   premiumPlans: () => ["premium", "plans", "v2"] as const,
   premiumStatus: () => ["premium", "status", "v2"] as const,
+  whatsappWallet: () => ["whatsapp", "wallet"] as const,
   loyaltyOwner: (localId: string) => ["loyalty", "owner", localId] as const,
   loyaltyLocalCards: (localId: string) => ["loyalty", "local-cards", localId] as const,
   loyaltyDevelopmentAppointments: (localId: string) =>

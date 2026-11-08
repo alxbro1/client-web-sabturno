@@ -19,7 +19,6 @@ import {
   CancelSubscriptionDialog,
 } from "@/components/premium";
 import { usePremiumStatusQuery } from "@/hooks/queries/usePremiumStatusQuery";
-import { usePremiumPlansQuery, FALLBACK_PLANS } from "@/hooks/queries/usePremiumPlansQuery";
 import { premiumService } from "@/services/premium";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -35,14 +34,10 @@ export default function PremiumManagePage() {
   const searchParams = useSearchParams();
   const { hasHydrated, user } = useAuth();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [isChangingPlan, setIsChangingPlan] = useState(false);
   const [isReconciling, setIsReconciling] = useState(false);
   const reconciledPreapprovalRef = useRef<string | null>(null);
 
   const { data: status, isLoading: statusLoading, refetch } = usePremiumStatusQuery();
-  const { data: plans } = usePremiumPlansQuery();
-
-  const displayPlans = plans ?? FALLBACK_PLANS;
 
   useEffect(() => {
     const preapprovalId = searchParams.get("preapproval_id");
@@ -89,26 +84,6 @@ export default function PremiumManagePage() {
     }
   }
 
-  async function handleChangePlan(newPlanId: string) {
-    setIsChangingPlan(true);
-    try {
-      const result = await premiumService.changePlan({
-        plan: newPlanId.toUpperCase() as "BASIC" | "PRO" | "ENTERPRISE",
-      });
-      if (result.checkoutUrl) {
-        window.location.href = result.checkoutUrl;
-      } else {
-        toast.success(result.message || "Plan cambiado correctamente");
-        refetch();
-      }
-    } catch (error) {
-      console.error("Error al cambiar plan:", error);
-      toast.error("No se pudo cambiar el plan. Intentá de nuevo.");
-    } finally {
-      setIsChangingPlan(false);
-    }
-  }
-
   if (!hasHydrated || statusLoading || isReconciling) {
     return (
       <div className="min-h-[400px] grid place-items-center">
@@ -135,22 +110,16 @@ export default function PremiumManagePage() {
             No tenés una suscripción activa
           </h1>
           <p className="text-muted-foreground mb-6">
-            Elegí un plan para desbloquear todas las funcionalidades.
+            No hace falta: todas las herramientas de SabTurno están incluidas
+            gratis. Sólo se cobran los mensajes de WhatsApp que enviás.
           </p>
           <Link href="/local/premium">
-            <Button>Ver planes</Button>
+            <Button>Ver mis créditos de WhatsApp</Button>
           </Link>
         </div>
       </section>
     );
   }
-
-  const availableUpgrades = displayPlans.filter(
-    (p) =>
-      p.tier !== "basic" &&
-      p.tier !== status.tier &&
-      (p.tier === "enterprise" || (p.tier === "pro" && status.tier === "basic")),
-  );
 
   const formattedNextBilling = status.nextBillingDate
     ? new Date(status.nextBillingDate).toLocaleDateString("es-AR", {
@@ -245,43 +214,6 @@ export default function PremiumManagePage() {
         </CardContent>
       </Card>
 
-      {/* Cambiar plan */}
-      {availableUpgrades.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Cambiar plan</CardTitle>
-            <CardDescription>
-              Upgradeá tu plan para desbloquear más funcionalidades.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3">
-              {availableUpgrades.map((plan) => (
-                <div
-                  key={plan.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/20 hover:bg-muted/40 transition-colors"
-                >
-                  <div>
-                    <p className="font-medium text-foreground">{plan.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {plan.monthlyPrice > 0
-                        ? `$${plan.monthlyPrice.toLocaleString("es-AR")}/mes`
-                        : "Gratis"}
-                    </p>
-                  </div>
-                  <Button
-                    variant="secondary"
-                    onClick={() => handleChangePlan(plan.id)}
-                    disabled={isChangingPlan}
-                  >
-                    {isChangingPlan ? "Cambiando..." : "Cambiar"}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Cancelar */}
       {status.autoRenew && (

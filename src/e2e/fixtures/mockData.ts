@@ -71,37 +71,6 @@ export const mockLocalImages = [
   { id: 2, url: "https://via.placeholder.com/300", image: "https://via.placeholder.com/300", description: "Foto 2", localId: "1", uploadedAt: new Date().toISOString() },
 ];
 
-export const mockPremiumPlans = [
-  {
-    id: "plan-basic",
-    tier: "basic",
-    name: "Básico",
-    description: "Para empezar",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    features: { mercadopago: true, talo: true, cashTurnsLimit: 0, loyalty: false, prioritySupport: false, advancedStats: false, unlimitedEmployees: false },
-  },
-  {
-    id: "plan-pro",
-    tier: "pro",
-    name: "Pro",
-    description: "Para negocios en crecimiento",
-    monthlyPrice: 8000,
-    yearlyPrice: 80000,
-    isPopular: true,
-    features: { mercadopago: true, talo: true, cashTurnsLimit: 500, loyalty: false, prioritySupport: true, advancedStats: true, unlimitedEmployees: false },
-  },
-  {
-    id: "plan-enterprise",
-    tier: "enterprise",
-    name: "Enterprise",
-    description: "Para cadenas",
-    monthlyPrice: 15000,
-    yearlyPrice: 150000,
-    features: { mercadopago: true, talo: true, cashTurnsLimit: null, loyalty: true, prioritySupport: true, advancedStats: true, unlimitedEmployees: true },
-  },
-];
-
 export const mockPremiumStatus = {
   currentPlanId: "plan-basic",
   tier: "basic",
@@ -123,4 +92,39 @@ export const mockLocalProfile = {
   province: "Buenos Aires",
   city: "CABA",
   address: "Av. Corrientes 1234",
+};
+
+/**
+ * Wallet returned by `GET /whatsapp/billing/wallet`. Mirrors the shape of
+ * `WhatsappWalletSummary` in `src/services/whatsappBilling.ts`. Defaults to a
+ * brand-new local: 5 welcome credits, prepaid-only, nothing purchased yet.
+ */
+export const mockWhatsappWallet = {
+  unitPriceArs: 15,
+  creditsBalance: 5,
+  prepaidCredits: 5,
+  postpaidUsed: 0,
+  postpaidAmountArs: 0,
+  totalPurchasedArs: 0,
+  postpaidUnlockThresholdArs: 2000,
+  postpaidUnlocked: false,
+  remainingToUnlockPostpaidArs: 2000,
+  postpaidLimit: 200,
+  billingBlocked: false,
+  currentMonthSentCount: 0,
+  pendingInvoice: null,
+  recentTransactions: [],
+};
+
+/** Same local after exhausting its credits and running on postpaid. */
+export const mockWhatsappWalletPostpaid = {
+  ...mockWhatsappWallet,
+  creditsBalance: -20,
+  prepaidCredits: 0,
+  postpaidUsed: 20,
+  postpaidAmountArs: 300,
+  totalPurchasedArs: 2250,
+  postpaidUnlocked: true,
+  remainingToUnlockPostpaidArs: 0,
+  currentMonthSentCount: 20,
 };
