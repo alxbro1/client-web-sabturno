@@ -1,71 +1,177 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const subscribe = vi.fn();
+const mutateCreditCheckout = vi.fn();
+const mutateSettleCheckout = vi.fn();
+const mutateReconcile = vi.fn();
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+let mockWalletData = {
+  unitPriceArs: 15,
+  creditsBalance: 5,
+  prepaidCredits: 5,
+  postpaidUsed: 0,
+  postpaidAmountArs: 0,
+  totalPurchasedArs: 0,
+  postpaidUnlockThresholdArs: 2000,
+  postpaidUnlocked: false,
+  remainingToUnlockPostpaidArs: 2000,
+  postpaidLimit: 200,
+  billingBlocked: false,
+  currentMonthSentCount: 0,
+  pendingInvoice: null,
+  recentTransactions: [],
+};
+
+let mockPremiumStatus = {
+  currentPlanId: "basic",
+  tier: "basic",
+  autoRenew: false,
+};
+
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
+
 vi.mock("@/hooks/useAuth", () => ({
   useAuth: () => ({
     hasHydrated: true,
-    user: { id: "u1", isLocal: true, email: "dueno@local.com" },
+    user: { id: "local-1", isLocal: true, email: "dueno@local.com" },
   }),
 }));
+
 vi.mock("@/hooks/queries/usePremiumStatusQuery", () => ({
   usePremiumStatusQuery: () => ({
-    data: { currentPlanId: "basic", tier: "basic" },
+    data: mockPremiumStatus,
     isLoading: false,
   }),
 }));
-vi.mock("@/hooks/queries/usePremiumPlansQuery", async () => {
-  const actual = await vi.importActual<
-    typeof import("@/hooks/queries/usePremiumPlansQuery")
-  >("@/hooks/queries/usePremiumPlansQuery");
-  return { ...actual, usePremiumPlansQuery: () => ({ data: undefined }) };
-});
-vi.mock("@/services/premium", () => ({
-  premiumService: { subscribe: (...args: unknown[]) => subscribe(...args) },
+
+vi.mock("@/hooks/queries/useWhatsappWalletQuery", () => ({
+  useWhatsappWalletQuery: () => ({
+    data: mockWalletData,
+    isLoading: false,
+    error: null,
+    refetch: vi.fn(),
+  }),
+  useCreateCreditPackCheckoutMutation: () => ({
+    mutateAsync: (...args: unknown[]) => mutateCreditCheckout(...args),
+    isPending: false,
+  }),
+  useCreatePostpaidSettlementCheckoutMutation: () => ({
+    mutateAsync: (...args: unknown[]) => mutateSettleCheckout(...args),
+    isPending: false,
+  }),
+  useReconcileWhatsappOrderMutation: () => ({
+    mutateAsync: (...args: unknown[]) => mutateReconcile(...args),
+    isPending: false,
+  }),
 }));
 
-import PremiumPage from "../page";
+import WhatsappCreditsPage from "../page";
 
-const LABEL = "Email de tu cuenta de Mercado Pago";
-
-function proButton() {
-  // Basic is the current plan, so the first "Elegir plan" belongs to Pro.
-  return screen.getAllByRole("button", { name: "Elegir plan" })[0];
-}
-
-describe("PremiumPage — Mercado Pago email", () => {
+describe("WhatsappCreditsPage", () => {
   beforeEach(() => {
-    subscribe.mockReset();
-    subscribe.mockResolvedValue({ checkoutUrl: null, subscriptionId: "s" });
+    mutateCreditCheckout.mockReset();
+    mutateSettleCheckout.mockReset();
+    mutateReconcile.mockReset();
+    mockWalletData = {
+      unitPriceArs: 15,
+      creditsBalance: 5,
+      prepaidCredits: 5,
+      postpaidUsed: 0,
+      postpaidAmountArs: 0,
+      totalPurchasedArs: 0,
+      postpaidUnlockThresholdArs: 2000,
+      postpaidUnlocked: false,
+      remainingToUnlockPostpaidArs: 2000,
+      postpaidLimit: 200,
+      billingBlocked: false,
+      currentMonthSentCount: 0,
+      pendingInvoice: null,
+      recentTransactions: [],
+    };
+    mockPremiumStatus = {
+      currentPlanId: "basic",
+      tier: "basic",
+      autoRenew: false,
+    };
   });
 
-  it("prefills the field with the session email", () => {
-    render(<PremiumPage />);
-    expect(screen.getByLabelText(LABEL)).toHaveValue("dueno@local.com");
+  it("muestra los 5 créditos de bienvenida y el progreso hacia el desbloqueo de pago a mes vencido ($2.000)", () => {
+    render(<WhatsappCreditsPage />);
+
+    expect(
+      screen.getByText(/Incluye tus 5 mensajes de bienvenida gratis/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Modo prepago inicial/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Habilita pago a mes vencido/i),
+    ).toBeInTheDocument();
   });
 
-  it("blocks subscribe and shows an error when the email is invalid", async () => {
-    render(<PremiumPage />);
-    fireEvent.change(screen.getByLabelText(LABEL), {
-      target: { value: "roto" },
+  it("valida la cantidad personalizada mínima (20 mensajes) antes de iniciar el checkout", async () => {
+    render(<WhatsappCreditsPage />);
+
+    const customInput = screen.getByLabelText(/O ingresá otra cantidad/i);
+    fireEvent.change(customInput, { target: { value: "10" } });
+
+    const buyButton = screen.getByRole("button", {
+      name: /Comprar .* créditos con Mercado Pago/i,
     });
-    fireEvent.click(proButton());
-    expect(await screen.findByRole("alert")).toHaveTextContent(/email válido/i);
-    expect(subscribe).not.toHaveBeenCalled();
+    fireEvent.click(buyButton);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/entre 20 y/i);
+    expect(mutateCreditCheckout).not.toHaveBeenCalled();
   });
 
-  it("sends the trimmed edited email as payerEmail", async () => {
-    render(<PremiumPage />);
-    fireEvent.change(screen.getByLabelText(LABEL), {
-      target: { value: "  mp@cuenta.com " },
+  it("inicia la compra del pack seleccionado de 150 mensajes ($2.250)", async () => {
+    mutateCreditCheckout.mockResolvedValue({
+      orderId: "order-150",
+      preferenceId: "pref-150",
+      checkoutUrl: "",
+      creditsCount: 150,
+      unitPriceArs: 15,
+      totalAmountArs: 2250,
     });
-    fireEvent.click(proButton());
-    await waitFor(() => expect(subscribe).toHaveBeenCalledTimes(1));
-    expect(subscribe).toHaveBeenCalledWith(
-      expect.objectContaining({ payerEmail: "mp@cuenta.com" }),
+
+    render(<WhatsappCreditsPage />);
+
+    const buyButton = screen.getByRole("button", {
+      name: /Comprar 150 créditos con Mercado Pago/i,
+    });
+    fireEvent.click(buyButton);
+
+    await waitFor(() =>
+      expect(mutateCreditCheckout).toHaveBeenCalledWith(150),
     );
+  });
+
+  it("muestra el botón para liquidar consumo acumulado cuando postpaidUsed > 0", async () => {
+    mockWalletData = {
+      ...mockWalletData,
+      creditsBalance: -20,
+      prepaidCredits: 0,
+      postpaidUsed: 20,
+      postpaidAmountArs: 300,
+      totalPurchasedArs: 2250,
+      postpaidUnlocked: true,
+      remainingToUnlockPostpaidArs: 0,
+    };
+    mutateSettleCheckout.mockResolvedValue({
+      orderId: "order-settle",
+      preferenceId: "pref-settle",
+      checkoutUrl: "",
+      creditsCount: 20,
+      unitPriceArs: 15,
+      totalAmountArs: 300,
+    });
+
+    render(<WhatsappCreditsPage />);
+
+    expect(screen.getByText("Habilitado")).toBeInTheDocument();
+    const settleBtn = screen.getByRole("button", {
+      name: /Pagar consumo acumulado/i,
+    });
+    fireEvent.click(settleBtn);
+
+    await waitFor(() => expect(mutateSettleCheckout).toHaveBeenCalledTimes(1));
   });
 });
