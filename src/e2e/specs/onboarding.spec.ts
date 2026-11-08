@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { setupLocalOwner, mockApiRoute } from "../fixtures/helpers";
-import { mockPremiumPlans, mockPremiumStatus } from "../fixtures/mockData";
+import { mockPremiumStatus } from "../fixtures/mockData";
 
 test.describe("Onboarding wizard", () => {
   test.beforeEach(async ({ page }) => {
@@ -10,7 +10,6 @@ test.describe("Onboarding wizard", () => {
   test("completes full onboarding: skip logo, keep plan, set hours", async ({ page }) => {
     // Mock premium status with no plan (triggers onboarding)
     await mockApiRoute(page, "**/premium/status", { ...mockPremiumStatus, currentPlanId: null });
-    await mockApiRoute(page, "**/premium/plans", mockPremiumPlans);
     // Mock empty templates (no schedule yet)
     await page.route(/time-stock-template/, async (route) => {
       if (route.request().method() === "POST") {
@@ -26,9 +25,9 @@ test.describe("Onboarding wizard", () => {
     await expect(page).toHaveURL(/\/local\/onboarding\/logo/, { timeout: 10000 });
     await page.getByRole("button", { name: "Saltar por ahora" }).click();
 
-    // Step 2: Subscription - keep BASIC trial
+    // Step 2: Credits info step - continue
     await expect(page).toHaveURL(/\/local\/onboarding\/subscription/, { timeout: 10000 });
-    await page.getByRole("button", { name: /Mantener BASIC/ }).click();
+    await page.getByRole("button", { name: "Continuar" }).click();
 
     // Step 3: Hours - default Mon-Fri 09-18
     await expect(page).toHaveURL(/\/local\/onboarding\/hours/, { timeout: 10000 });
@@ -37,14 +36,18 @@ test.describe("Onboarding wizard", () => {
     await expect(page).toHaveURL(/\/local\/dashboard/, { timeout: 15000 });
   });
 
-  test("subscription step shows plan cards", async ({ page }) => {
+  test("subscription step shows the credits info and no plans", async ({ page }) => {
     await mockApiRoute(page, "**/premium/status", mockPremiumStatus);
-    await mockApiRoute(page, "**/premium/plans", mockPremiumPlans);
 
     await page.goto("/local/onboarding/subscription");
-    await expect(page.getByText("Básico")).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText("Pro")).toBeVisible();
-    await expect(page.getByText("Enterprise")).toBeVisible();
+    await expect(page.getByText("Todo SabTurno es gratis")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("5 créditos de bienvenida")).toBeVisible();
+    await expect(page.getByText("$15 por mensaje")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Ver mi billetera/ })).toHaveAttribute(
+      "href",
+      "/local/premium",
+    );
+    await expect(page.getByText("Enterprise")).toHaveCount(0);
   });
 
   test("hours step validates time ranges", async ({ page }) => {

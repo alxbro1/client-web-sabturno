@@ -35,3 +35,7 @@ node_modules
 # Official guidance: https://nextjs.org/docs/app/api-reference/config/typescript
 next-env.d.ts
 *.tsbuildinfo
+
+# Playwright run artifacts.
+test-results/
+playwright-report/
